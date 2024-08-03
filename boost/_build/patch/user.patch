@@ -1,0 +1,9 @@
+diff --git a/boost/config/user.hpp b/boost/config/user.hpp
+index 4d323c370..f4aa8329a 100644
+--- a/boost/config/user.hpp
++++ b/boost/config/user.hpp
+@@ -131,3 +131,4 @@
+ // to ensure the correct libraries are selected at link time.
+ // #define BOOST_LIB_BUILDID amd64
+ 
++#define BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE

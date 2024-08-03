@@ -1,0 +1,469 @@
+
+#include <iterator>
+
+#include <boost/spirit/include/qi.hpp>
+#include <boost/phoenix.hpp>
+
+#include <boost/lexical_cast.hpp>
+
+#include <cmn/error/exception.h>
+#include <cmn/enum/manip.h>
+#include <cmn/util/util.h>   // overloaded
+#include <cmn/util/lexical_cast.h>
+
+#include "read.h"
+
+#pragma warning (push)
+#pragma warning(disable: 4459)
+
+namespace cmn::enum_::io::detail
+{
+
+namespace qi = boost::spirit::qi;  // NOLINT(misc-unused-alias-decls)
+
+template <typename Char, typename CharTraits>
+auto check_stream_state(std::basic_ios<Char, CharTraits> const &istr) noexcept -> bool
+{
+    return istr.rdstate() == std::ios_base::goodbit;
+}
+
+template auto check_stream_state(std::ios const &) noexcept -> bool;
+template auto check_stream_state(std::wios const &) noexcept -> bool;
+
+template <typename Char, typename CharTraits>
+auto get_open(std::basic_istream<Char, CharTraits>& istr)
+{
+    return basic_open_manip<Char, CharTraits>::value(istr);
+}
+
+template <typename Char, typename CharTraits>
+auto get_close(std::basic_istream<Char, CharTraits>& istr)
+{
+    return basic_close_manip<Char, CharTraits>::value(istr);
+}
+
+template <typename Char, typename CharTraits>
+constexpr auto class_prefix(std::basic_string_view<Char, CharTraits> enum_name) noexcept
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+
+    string_type pfx{ enum_name };
+    pfx += symbols<Char, CharTraits>::scope_resolution.c_str();
+    return pfx;
+}
+
+// NOTE: transfer istream iterators by reference
+// because they don't meet iterator requirements
+template <typename Char, typename CharTraits>
+constexpr auto check_errors
+(
+      bool parse_result
+    , boost::spirit::basic_istream_iterator<Char, CharTraits> const &begin
+    , boost::spirit::basic_istream_iterator<Char, CharTraits> const &last
+    , boost::spirit::basic_istream_iterator<Char, CharTraits> const &end
+)noexcept -> bool
+{
+    return parse_result && last == end;
+}
+
+// NOTE: transfer istream iterators by reference
+// because they don't meet iterator requirements
+template <typename Char, typename CharTraits>
+auto raise_errors
+(
+      bool parse_result
+    , boost::spirit::basic_istream_iterator<Char, CharTraits> const &begin
+    , boost::spirit::basic_istream_iterator<Char, CharTraits> const &last
+    , boost::spirit::basic_istream_iterator<Char, CharTraits> const &end
+)
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+
+    constexpr auto to_string = overloaded
+    {
+        [](std::string const &str) { return str; },
+        [](std::wstring const &wstr) { return boost::lexical_cast<std::string>(wstr); }
+    };
+
+    if (!parse_result)
+    {
+        // begin, end aren't contiguous iterators, so they couldn't be used directly
+        string_type text;
+        std::copy(begin, end, std::back_inserter(text));
+
+        BOOST_THROW_EXCEPTION((io_error{ "Parsing failed for \xB2%1%\xB1", to_string(text) }));
+    }
+
+    if (last != end)
+    {
+        // begin, end aren't contiguous iterators, so they couldn't be used directly
+        string_type text;
+        std::copy(begin, end, std::back_inserter(text));
+
+        BOOST_THROW_EXCEPTION
+        ((
+            io_error{ "Text is not parsed" }
+            << error::errinfo_msg
+              {
+                {
+                        .m_msg = to_string(text),
+                        .m_open = static_cast<std::size_t>(std::distance(begin, last))
+                    }
+                }
+        ));
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+template <typename Char, typename CharTraits> auto parse_enum
+(
+      std::basic_istream<Char, CharTraits> &istr
+    , qi::symbols<Char, std::ptrdiff_t> const &item
+    , std::basic_string_view<Char, CharTraits> enum_name
+    , bool is_scoped
+)
+    -> std::ptrdiff_t
+{
+    using namespace qi;
+    using iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
+
+    auto const open = get_open(istr);
+    auto const close = get_close(istr);
+
+    std::ptrdiff_t items = 0;
+    auto const begin = iterator_type{ istr };
+    auto last = begin;
+    auto const end = iterator_type{};
+
+    if (is_scoped)
+    {
+        auto const class_prefix_ = class_prefix(enum_name);
+
+        raise_errors
+        (
+            phrase_parse
+            (
+                  last
+                , end
+                , lit(open) >> lit(class_prefix_) >> item >> lit(close)
+                , space
+                , items
+            ),
+            begin, last, end
+        );
+    }
+    else
+    {
+        raise_errors
+        (
+            phrase_parse
+            (
+                  last
+                , end
+                , lit(open) >> item >> lit(close)
+                , space
+                , items
+            ),
+            begin, last, end
+        );
+    }
+
+    return items;
+}
+
+template auto parse_enum(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, std::string_view enum_name, bool) -> std::ptrdiff_t;
+template auto parse_enum(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, std::wstring_view, bool) -> std::ptrdiff_t;
+
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits>
+auto try_parse_enum
+(
+    std::basic_istream<Char, CharTraits>& istr
+    , qi::symbols<Char, std::ptrdiff_t> const& item
+    , std::basic_string_view<Char, CharTraits> enum_name
+    , bool is_scoped
+) noexcept
+ -> boost::optional<std::ptrdiff_t>
+{
+    using namespace qi;
+    using iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
+
+    auto const open = get_open(istr);
+    auto const close = get_close(istr);
+
+    std::ptrdiff_t items = 0;
+    auto const begin = iterator_type{ istr };
+    auto last = begin;
+    auto const end = iterator_type{};
+
+    if (is_scoped)
+    {
+        auto const class_prefix_ = class_prefix(enum_name);
+        if
+        ( 
+            check_errors
+            (
+                phrase_parse
+                (
+                      last
+                    , end
+                    , lit(open) >> lit(class_prefix_) >> item >> lit(close)
+                    , space
+                    , items
+                ),
+                begin, last, end
+            )
+        )
+            return items;
+        else
+            return {};
+    }
+    else
+    {
+        if
+        (
+            check_errors
+            (
+                phrase_parse
+                (
+                      last
+                    , end
+                    , lit(open) >> item >> lit(close)
+                    , space
+                    , items
+                ),
+                begin, last, end
+            )
+        )
+            return items;
+        else
+            return {};
+    }
+}
+
+template auto try_parse_enum(std::istream& istr, qi::symbols<char, std::ptrdiff_t> const &item, 
+    std::string_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
+template auto try_parse_enum(std::wistream& istr, qi::symbols<wchar_t, std::ptrdiff_t> const &item, 
+    std::wstring_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
+
+///////////////////////////////////////////////////////////////////////////////
+template <typename Char, typename CharTraits>
+auto parse_combo
+(
+      std::basic_istream<Char, CharTraits>& istr
+    , qi::symbols<Char, std::ptrdiff_t> const &item
+    , std::basic_string_view<Char, CharTraits> enum_name
+    , bool is_scoped
+)
+    ->std::ptrdiff_t
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+    using string_view_type = std::basic_string_view<Char, CharTraits>;
+    using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
+    using iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
+
+    auto const open = get_open(istr);
+    auto const close = get_close(istr);
+    auto const delim = basic_bitfield_delim_manip<Char, CharTraits>::value(istr);
+
+    std::ptrdiff_t items = 0;
+    auto const begin = iterator_type{ istr };
+    auto last = begin;
+    auto const end = iterator_type{};
+    if (is_scoped)
+    {
+        auto const pfx = class_prefix(enum_name);
+
+        struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
+        {
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     items;
+
+            parser
+            (
+                  enum_item_type const &item 
+                , string_type const &open
+                , string_type const &close
+                , string_type const &delim
+                , string_type const &pfx 
+            ): parser::base_type { items }
+            {
+                using namespace qi;
+
+                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(delim)];
+                items    = lit(open) >> value >> lit(close);
+
+                //BOOST_SPIRIT_DEBUG_NODES
+                //(
+                //    (value)
+                //)
+            }
+        }
+
+        const parser{ item, open, close, delim, pfx };
+        raise_errors
+        (
+            qi::phrase_parse(last, end, parser, qi::space, items),
+            begin, last, end
+        );
+    }
+    else
+    {
+        struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
+        {
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     items;
+
+            parser
+            (
+                  enum_item_type const &item 
+                , string_type const & open
+                , string_type const & close
+                , string_type const & delim
+            ): parser::base_type { items }
+            {
+                using namespace qi;
+
+                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(delim)];
+                items       = lit(open) >> value >> lit(close);
+
+                //BOOST_SPIRIT_DEBUG_NODES
+                //(
+                //    (value)
+                //    (items)
+                //)
+            }
+        }
+
+        const parser { item, open, close, delim };
+        raise_errors
+        (
+            qi::phrase_parse(last, end, parser, qi::space, items),
+            begin, last, end
+        );
+    }
+
+    return items;
+}
+
+template auto parse_combo(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, std::string_view, bool)->std::ptrdiff_t;
+template auto parse_combo(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, std::wstring_view, bool)->std::ptrdiff_t;
+
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits>
+auto try_parse_combo
+(
+    std::basic_istream<Char, CharTraits>& istr
+    , qi::symbols<Char, std::ptrdiff_t> const& item
+    , std::basic_string_view<Char, CharTraits> enum_name
+    , bool is_scoped
+) noexcept
+ -> boost::optional<std::ptrdiff_t>
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+    using string_view_type = std::basic_string_view<Char, CharTraits>;
+    using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
+    using iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
+
+    auto const open = get_open(istr);
+    auto const close = get_close(istr);
+    auto const delim = basic_bitfield_delim_manip<Char, CharTraits>::value(istr);
+
+    std::ptrdiff_t items = 0;
+    auto const begin = iterator_type{ istr };
+    auto last = begin;
+    auto const end = iterator_type{};
+    if (is_scoped)
+    {
+        auto const pfx = class_prefix(enum_name);
+
+        struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
+        {
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     items;
+
+            parser
+            (
+                  enum_item_type const &item 
+                , string_type const &open
+                , string_type const &close
+                , string_type const &delim
+                , string_type const &pfx 
+            ): parser::base_type { items }
+            {
+                using namespace qi;
+
+                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(delim)];
+                items    = lit(open) >> value >> lit(close);
+
+                //BOOST_SPIRIT_DEBUG_NODES
+                //(
+                //    (value)
+                //)
+            }
+        }
+
+        const parser{ item, open, close, delim, pfx };
+        if
+        (
+            check_errors
+            (
+                qi::phrase_parse(last, end, parser, qi::space, items),
+                begin, last, end
+            )
+        )
+            return items;
+        else
+            return {};
+    }
+    else
+    {
+        struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
+        {
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
+            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     items;
+
+            parser
+            (
+                  enum_item_type const &item 
+                , string_type const & open
+                , string_type const & close
+                , string_type const & delim
+            ): parser::base_type { items }
+            {
+                using namespace qi;
+
+                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(delim)];
+                items       = lit(open) >> value >> lit(close);
+
+                //BOOST_SPIRIT_DEBUG_NODES
+                //(
+                //    (value)
+                //    (items)
+                //)
+            }
+        }
+
+        const parser { item, open, close, delim };
+        if
+        (
+            check_errors
+            (
+                qi::phrase_parse(last, end, parser, qi::space, items),
+                begin, last, end
+            )
+        )
+            return items;
+        else
+            return {};
+    }
+}
+
+template auto try_parse_combo(std::istream& istr, qi::symbols<char, std::ptrdiff_t> const& item,
+    std::string_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
+template auto try_parse_combo(std::wistream& istr, qi::symbols<wchar_t, std::ptrdiff_t> const& item,
+    std::wstring_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
+
+}
+
+#pragma warning(pop)
