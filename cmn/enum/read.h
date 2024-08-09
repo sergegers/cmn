@@ -344,7 +344,7 @@ struct reader<Enum, kind_t::combo>: op::fwd<Enum &>
 };
 
 ///////////////////////////////////////////////////////////////////////////////
-template <c::ext_any_enum Enum, typename Char, typename CharTraits>
+template <c::e_any_enum Enum, typename Char, typename CharTraits>
 [[nodiscard]] auto try_read(std::basic_istream<Char, CharTraits> &istr) noexcept -> boost::optional<Enum>
 {
     return detail::try_read_(istr, op::fwd<Enum>{ Enum{} }, kkind_t<kind_v<Enum>>{});

@@ -110,17 +110,17 @@ concept bitfield =
 namespace enum_
 {
 
-template <typename Enum, bool = std::is_enum_v<Enum>>
-struct traits;
-
-//-----------------------------------------------------------------------------
 enum class kind_t
 {
-    simple,
+    naive,  // enum w/o adaptation
     enum_,
     bitfield,
     combo
 };
+
+//-----------------------------------------------------------------------------
+template <c::enum_ Enum, bool = std::is_enum_v<Enum>>
+struct traits;
 
 //-----------------------------------------------------------------------------
 template <typename T>
@@ -144,16 +144,19 @@ namespace c
 {
 
 template <typename Enum>
-concept ext_enum = enum_::traits<Enum>::kind == enum_::kind_t::enum_;
+concept e_naive = enum_::traits<Enum>::kind == enum_::kind_t::naive;
 
 template <typename Enum>
-concept ext_bitfield = enum_::traits<Enum>::kind == enum_::kind_t::bitfield;
+concept e_enum = enum_::traits<Enum>::kind == enum_::kind_t::enum_;
 
 template <typename Enum>
-concept ext_combo = enum_::traits<Enum>::kind == enum_::kind_t::combo;
+concept e_bitfield = enum_::traits<Enum>::kind == enum_::kind_t::bitfield;
 
 template <typename Enum>
-concept ext_any_enum = ext_enum<Enum> || ext_bitfield<Enum> || ext_combo<Enum>;
+concept e_combo = enum_::traits<Enum>::kind == enum_::kind_t::combo;
+
+template <typename Enum>
+concept e_any_enum = e_enum<Enum> || e_bitfield<Enum> || e_combo<Enum>;
 
 }
 

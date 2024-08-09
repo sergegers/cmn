@@ -1,5 +1,4 @@
 
-#include <ranges>
 #include <array>
 
 #include <boost/lexical_cast.hpp>
@@ -7,9 +6,9 @@
 #include <boost/test/tools/output_test_stream.hpp>
 
 #include <cmn/error/exception.h>
+#include <cmn/util/lexical_cast.h>
 #include <cmn/enum/manip.h>
 #include <cmn/enum/io.h>
-#include <cmn/util/util.h>
 #include <cmn/enum/enum.h>
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/combo.h>
@@ -32,48 +31,58 @@ using boost::test_tools::per_element;
 
 using namespace io;
 
-CMN_PP_DECLARE_COMBO_CLASS
-(
-    cl_cmb_t,
-    (
-        (one,       0x0)
-        (two,       0x1)
-        (three,     0x2)
-    )
-    (
-        (red,       0x0)
-        (green,     0x4)
-        (blue,      0x8)
-    ),
+//CMN_PP_DECLARE_COMBO_CLASS
+//(
+//    cl_cmb_t,
+//    (
+//        (one,       0x0)
+//        (two,       0x1)
+//        (three,     0x2)
+//    )
+//    (
+//        (red,       0x0)
+//        (green,     0x4)
+//        (blue,      0x8)
+//    ),
+//
+//    (digit_mask,    0x3)
+//    (color_mask,    0xC)
+//)
 
-    (digit_mask,    0x3)
-    (color_mask,    0xC)
-)
+enum class cl_cmb_t
+{
+    one        = 0x0,
+    two        = 0x1,
+    three      = 0x2,
+
+    red        = 0x0,
+    green      = 0x4,
+    blue       = 0x8,
+
+    digit_mask = 0x3,
+    color_mask = 0xC
+};
+
+consteval auto adapt_enum_info(cl_cmb_t)
+{
+    using enum cl_cmb_t;
+    return adapt_combo_info_helper(make_group<one, two, three>(), make_group<red, green, blue>());
+}
 
 BOOST_AUTO_TEST_CASE(masks)
 {
     using traits_type = traits<cl_cmb_t>;
     using enum cl_cmb_t;
 
-    constexpr decltype(auto) groups = traits_type::groups;
-    static_assert(std::tuple_size_v<decltype(groups)> == 2, "Enum group count mismatch");
+    constexpr decltype(auto) enum_info = traits_type::enum_info;
+    static_assert(std::tuple_size_v<decltype(enum_info)> == 2, "Enum group count mismatch");
 
-    BOOST_TEST(traits_type::get_str<char>(std::get<1>(groups), green) == "green");
+    BOOST_TEST(boost::lexical_cast<std::string>(std::get<1>(std::get<1>(enum_info))) == "green");
 
-    BOOST_TEST
-    (
-        (std::get<0>(groups) | std::views::transform([](auto const &rec) { return rec.m_val; })) ==
-        (std::array { one, two, three }),
-        per_element{}
-    );
-    BOOST_TEST
-    (
-        (std::get<1>(groups) | std::views::transform([](auto const &rec) { return rec.m_val; })) ==
-        (std::array { red, green, blue }),
-        per_element{}
-    );
+    static_assert(group_::get_enum_values(std::get<0>(enum_info)) == std::array { one, two, three });
+    static_assert(group_::get_enum_values(std::get<1>(enum_info)) == std::array { red, green, blue });
 
-    constexpr auto masks = utils<cl_cmb_t>::calc_masks(groups);
+    constexpr auto masks = calc_masks(enum_info);
     static_assert(masks.size() == 2, "size mismatch");
     static_assert(std::get<0>(masks) == digit_mask, "digit mask mismatch");
     static_assert(std::get<1>(masks) == color_mask, "color mask mismatch");
@@ -384,7 +393,7 @@ BOOST_AUTO_TEST_CASE(unsorted_enum)
     using record_type = utils<uns_en_t>::record_type;
     using enum uns_en_t;
 
-    auto const lhs = std::get<0>(traits<uns_en_t>::groups) | std::views::transform(&record_type::m_val);
+    auto const lhs = std::get<0>(traits<uns_en_t>::enum_info) | std::views::transform(&record_type::m_val);
     constexpr auto rhs = std::array{ minus_one, one, four, five, six, seventeen };
     BOOST_CHECK_EQUAL_COLLECTIONS
     (

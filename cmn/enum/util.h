@@ -4,11 +4,14 @@
 #include <array>
 #include <limits>
 #include <string_view>
+#include <tuple>
 #include <bit>
 #include <algorithm>
 #include <iosfwd>
 #include <ranges>
 
+// boost.preprocessor
+#include <boost/preprocessor/wstringize.hpp>
 // boost.fusion
 // ReSharper disable CppUnusedIncludeDirective
 #include <boost/fusion/container/vector.hpp>
@@ -24,16 +27,215 @@
 namespace cmn::enum_
 {
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// "magic get" utilities
+//
+////////////////////////////////////////////////////////////////////////////////////////////////
+consteval auto get_enum_name(c::enum_ auto) -> std::string_view
+{
+    using namespace std::string_view_literals;
+
+    std::string_view funcsig = __FUNCSIG__;
+
+    // <enum xxx>
+    constexpr auto prefix = "<enum "sv;
+    auto const l = funcsig.find_last_of('<') + prefix.size();
+
+    constexpr auto postix= ">"sv;
+    auto const r = funcsig.find_last_of(postix);
+
+    return funcsig.substr(l, r - l);
+}
+
+consteval auto get_enum_wname(c::enum_ auto) -> std::wstring_view
+{
+    using namespace std::string_view_literals;
+
+    std::wstring_view funcsig = BOOST_PP_WSTRINGIZE(__FUNCSIG__);
+
+    // <enum xxx>
+    constexpr auto prefix = L"<enum "sv;
+    auto const l = funcsig.find_last_of('<') + prefix.size();
+
+    constexpr auto postix= L">"sv;
+    auto const r = funcsig.find_last_of(postix);
+
+    return funcsig.substr(l, r - l);
+}
+
+//-----------------------------------------------------------------------------
+template <c::enum_ auto En_>
+consteval auto enum_member_name() -> std::string_view
+{
+    using namespace std::string_view_literals;
+
+    std::string_view funcsig = __FUNCSIG__;
+
+    // auto __cdecl enum_member_name<e0>(void)
+    constexpr auto prefix = "<"sv;
+    auto const l = funcsig.find_first_of(prefix) + prefix.size();
+
+    constexpr auto postix= ">"sv;
+    auto const r = funcsig.find_first_of(postix);
+
+    return funcsig.substr(l, r - l);
+}
+
+template <c::enum_ auto En_>
+consteval auto enum_member_wname() -> std::wstring_view
+{
+    using namespace std::string_view_literals;
+
+    std::wstring_view funcsig = BOOST_PP_WSTRINGIZE(__FUNCSIG__);
+
+    // auto __cdecl enum_member_wname<e0>(void)
+    constexpr auto prefix = L"<"sv;
+    auto const l = funcsig.find_first_of(prefix) + prefix.size();
+
+    constexpr auto postix= L">"sv;
+    auto const r = funcsig.find_first_of(postix);
+
+    return funcsig.substr(l, r - l);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+template <c::enum_ auto En_>
+struct record
+{
+    using enum_type = decltype(En_);
+
+    static constexpr auto enum_value = En_;
+
+    std::string_view    m_str;
+    std::wstring_view   m_wstr;
+
+    consteval record():
+        m_str { enum_member_name<En_>() },
+        m_wstr{ enum_member_wname<En_>() }
+    {
+    }
+
+    friend auto operator << (std::ostream &ostr, record const &self) -> std::ostream &
+    {
+        return ostr << self.m_str;
+    }
+
+    friend auto operator << (std::wostream &ostr, record const &self) -> std::wostream &
+    {
+        return ostr << self.m_wstr;
+    }
+};
+
+template <typename... Records> using group = std::tuple<Records...>;
+template <typename... Groups> using enum_info = std::tuple<Groups...>;
+
+////////////////////////////////////////////////////////////////////////////////
+
 template <kind_t Kind_>
 using kkind_t = std::integral_constant<kind_t, Kind_>;
 
-template <typename Enum> constexpr auto get_kind(Enum){ return kkind_t<kind_t::simple>{}; }
+////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// enum: 1 group with n records
+// bitfield: n groups with 1 record in each
+// combo: n groups with m records in each
+//
+////////////////////////////////////////////////////////////////////////////////
+template <typename... Groups> consteval auto get_kind(enum_info<Groups...> const &) -> kind_t
+{
+    using enum kind_t;
+    using enum_info_type = enum_info<Groups...>;
 
-template <typename Enum> constexpr kind_t kind_v = get_kind(Enum{}).value;
+    return std::tuple_size_v<enum_info_type> == 1?
+        enum_:
+        ((std::tuple_size_v<Groups> == 1) && ...)? bitfield: combo;
+}
 
 template <std::size_t I_> using int_ = std::integral_constant<std::size_t, I_>;
 
-template <typename Enum>
+namespace record_
+{
+
+template <typename T> using enum_type_t = typename T::enum_type;
+template <typename T> using mask_type_t = enum_::mask_type_t<enum_type_t<T>>;
+
+template <c::enum_ auto En_>
+consteval auto get_value(record<En_> const &) -> decltype(En_)
+{
+    return En_;
+}
+
+template <c::enum_ auto En_>
+consteval auto get_mask(record<En_> const &) -> enum_::mask_type_t<decltype(En_)>
+{
+    return static_cast<enum_::mask_type_t<decltype(En_)>>(En_);
+}
+
+}
+
+namespace group_
+{
+
+template <typename T> using enum_type_t = record_::enum_type_t<std::tuple_element_t<0, T>>;
+template <typename T> using mask_type_t = mask_type_t<enum_type_t<T>>;
+
+template <typename... Records>
+consteval auto calc_mask(group<Records...> const &gr) -> mask_type_t<group<Records...>>
+{
+    return (record_::get_mask(std::get<Records>(gr)) | ...);
+}
+
+template <c::enum_ auto En_, decltype(En_)... Ens_>
+consteval auto get_enum_values(group<record<En_>, record<Ens_>...> const &) ->
+    std::array<decltype(En_), sizeof... (Ens_) + 1>
+{
+    return { En_, Ens_... };
+}
+
+}
+
+template <typename Group, typename... Groups>
+consteval auto calc_masks(enum_info<Group, Groups...> const &enum_info)
+    -> std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1>
+{
+    return
+    {
+          group_::calc_mask(std::get<Group>(enum_info))
+        , group_::calc_mask(std::get<Groups>(enum_info))...
+    };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// get smallest enum value
+//
+template <typename Group, typename... Groups>
+consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_::enum_type_t<Group>
+{
+    return static_cast<group_::enum_type_t<Group>>(0);
+//    return std::min({ std::ranges::begin(std::get<Group>(enum_info))->m_val ... });
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// get largest enum value
+//
+template <typename Group, typename... Groups>
+consteval auto max_value(enum_info<Group, Groups...> const &enum_info) -> group_::enum_type_t<Group>
+{
+    return static_cast<group_::enum_type_t<Group>>(0);
+    //return []<std::size_t... Indices_>
+    //    (auto const &groups,std::index_sequence<Indices_...>)
+    //{
+    //    return std::max({ std::ranges::rbegin(std::get<Indices_>(groups))->m_val ... });
+    //}
+    //(groups, std::make_index_sequence<sizeof... (Groups)>{});
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+template <c::enum_ Enum>
 class utils
 {
 public:
@@ -207,7 +409,9 @@ public:
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    //
     // get enum constant index in group, -1 - index is not found
+    //
     template <std::size_t Size_>
     static constexpr auto get_index(group_t<Size_> const &group, Enum en) -> std::ptrdiff_t
     {
@@ -220,7 +424,9 @@ public:
     }
 
     ///////////////////////////////////////////////////////////////////////////////
+    //
     // inplace sort groups by enum value
+    //
     template <typename... Groups>
     static constexpr auto sort_groups(std::tuple<Groups...> &groups) -> void
     {
@@ -228,32 +434,6 @@ public:
             (auto &groups,std::index_sequence<Indices_...>)
         {
             (0, ..., std::ranges::sort(std::get<Indices_>(groups), std::less{}, &record_type::m_val));
-        }
-        (groups, std::make_index_sequence<sizeof... (Groups)>{});
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // get smallest enum value
-    template <typename... Groups>
-    static constexpr auto min_value(std::tuple<Groups...> const &groups) -> Enum
-    {
-        return []<std::size_t... Indices_>
-            (auto const &groups,std::index_sequence<Indices_...>)
-        {
-            return std::min({ std::ranges::begin(std::get<Indices_>(groups))->m_val ... });
-        }
-        (groups, std::make_index_sequence<sizeof... (Groups)>{});
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    // get lowest enum value
-    template <typename... Groups>
-    static constexpr auto max_value(std::tuple<Groups...> const &groups) -> Enum
-    {
-        return []<std::size_t... Indices_>
-            (auto const &groups,std::index_sequence<Indices_...>)
-        {
-            return std::max({ std::ranges::rbegin(std::get<Indices_>(groups))->m_val ... });
         }
         (groups, std::make_index_sequence<sizeof... (Groups)>{});
     }

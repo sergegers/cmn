@@ -4,7 +4,7 @@
 cmake_minimum_required (VERSION 3.8)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set(CMAKE_CXX_STANDARD 23)
+    set(CMAKE_CXX_STANDARD 23)
 endif()
 
 # Enable Hot Reload for MSVC compilers if supported.
@@ -14,11 +14,12 @@ if (POLICY CMP0141)
 endif()
 
 if (POLICY CMP0091)
-  cmake_policy(SET CMP0091 NEW)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    cmake_policy(SET CMP0091 NEW)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
 project ("cmn")
+
 
 #set(Boost_DEBUG ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -26,7 +27,10 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
 set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/boost/)
 
-find_package(Boost COMPONENTS unit_test_framework REQUIRED)
+find_package(Boost REQUIRED COMPONENTS 
+    unit_test_framework 
+    exception
+)
 
 # message(STATUS "Boost_INCLUDE_DIRS = " ${Boost_INCLUDE_DIRS})
 # message(STATUS "Boost_LIBRARY_DIRS = " ${Boost_LIBRARY_DIRS})
