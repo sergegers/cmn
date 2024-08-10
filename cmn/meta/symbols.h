@@ -62,6 +62,9 @@ struct symbols<char>
     static constexpr auto right_arrow               = "->"_fs;
     static constexpr auto tab                       = "\t"_fs;
     static constexpr auto void_                     = "void"_fs;
+    static constexpr auto class_                    = "class"_fs;
+    static constexpr auto struct_                   = "struct"_fs;
+    static constexpr auto enum_                     = "enum"_fs;
 };
 
 template <>
@@ -97,6 +100,9 @@ struct symbols<wchar_t>
     static constexpr auto right_arrow               = L"->"_wfs;
     static constexpr auto tab                       = L"\t"_wfs;
     static constexpr auto void_                     = L"void"_wfs;
+    static constexpr auto class_                    = L"class"_wfs;
+    static constexpr auto struct_                   = L"struct"_wfs;
+    static constexpr auto enum_                     = L"enum"_wfs;
 };
 
 }

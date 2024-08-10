@@ -4,18 +4,19 @@
 #include <string>
 #include <type_traits>
 #include <cstddef>
-#include <ranges>
 
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <boost/optional/optional_fwd.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include <cmn/meta/concepts.h>
 
 #include "feature.h"
 #include "traits.h"
 #include "manip.h"
+#include "util.h"
 
 namespace cmn::enum_::io
 {
@@ -26,6 +27,7 @@ namespace detail
 template <typename Char, typename CharTraits>
 auto check_stream_state(std::basic_ios<Char, CharTraits> const &istr) noexcept -> bool;
 
+// parse kind_t::enum
 template <typename Char, typename CharTraits>
 auto parse_enum
 (
@@ -36,6 +38,7 @@ auto parse_enum
 )
     ->std::ptrdiff_t;
 
+// parse kind_t::bitfield, kind_t::combo
 template <typename Char, typename CharTraits>
 auto parse_combo
 (
@@ -47,6 +50,7 @@ auto parse_combo
     ->std::ptrdiff_t;
 
 //-----------------------------------------------------------------------------
+// try parse kind_t::enum
 template <typename Char, typename CharTraits>
 [[nodiscard]] auto try_parse_enum
 (
@@ -57,6 +61,7 @@ template <typename Char, typename CharTraits>
 ) noexcept
  -> boost::optional<std::ptrdiff_t>;
 
+// try parse kind_t::bitfield, kind_t::combo
 template <typename Char, typename CharTraits>
 auto try_parse_combo
 (
@@ -72,12 +77,11 @@ template <typename Enum, typename Char, typename CharTraits>
 [[nodiscard]] auto try_read_
 (
     std::basic_istream<Char, CharTraits> &istr, 
-    op::fwd<Enum>,
+    Enum,
     kkind_t<kind_t::enum_>
 ) noexcept
     -> boost::optional<Enum>
 {
-    using utils_type = utils<Enum>;
     using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
     static_assert(std::tuple_size_v<decltype(traits<Enum>::groups)> == 1);
@@ -112,12 +116,11 @@ template <typename Enum, typename Char, typename CharTraits>
 [[nodiscard]] auto try_read_
 (
     std::basic_istream<Char, CharTraits> &istr, 
-    op::fwd<Enum>,
+    Enum,
     kkind_t<kind_t::bitfield>
 ) noexcept
     -> boost::optional<Enum>
 {
-    using utils_type = utils<Enum>;
     using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
     if (!detail::check_stream_state(istr)) return {};
@@ -154,7 +157,7 @@ template <typename Enum, typename Char, typename CharTraits>
 [[nodiscard]] auto try_read_
 (
     std::basic_istream<Char, CharTraits> &istr, 
-    op::fwd<Enum>,
+    Enum,
     kkind_t<kind_t::combo>
 ) noexcept
     -> boost::optional<Enum>
@@ -196,33 +199,33 @@ template <typename Enum, typename Char, typename CharTraits>
 
 ///////////////////////////////////////////////////////////////////////////////
 template<c::enum_ Enum>
-struct reader<Enum, kind_t::enum_>: op::fwd<Enum &>
+struct reader<Enum, kind_t::enum_>
 {
-    using inherited = op::fwd<Enum &>;
     using kkind_type = kkind_t<kind_t::enum_>;
 
+    Enum                                   &m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    reader(Enum &val, kkind_type kind): inherited { val }, m_kind{ kind } {}
+    reader(Enum &val, kkind_type kind): m_val { val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
-        using utils_type = typename inherited::utils_type;
         using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+        using string_type = std::basic_string<Char, CharTraits>;
 
-        static_assert(std::tuple_size_v<decltype(traits<Enum>::groups)> == 1);
+        static_assert(std::tuple_size_v<decltype(groups_v<Enum>)> == 1);
 
         auto const po = print_manip::value(istr);
 
-        static auto const item = std::ranges::fold_left
+        static auto const item = boost::fusion::fold
         (
-            std::get<0>(traits<Enum>::groups)
+            std::get<0>(groups_v<Enum>)
           , enum_item_type{}
           , []<typename Item>(Item &&item, auto const &rec) 
             {
-                auto const lit = rec.template get_str<Char, CharTraits>();
-                auto const val = rec.m_val;
+                auto const lit = boost::lexical_cast<string_type>(rec);
+                auto const val = rec.value;
                 item.add(lit, static_cast<std::ptrdiff_t>(val));
                 return std::forward<Item>(item);
             }
@@ -234,7 +237,7 @@ struct reader<Enum, kind_t::enum_>: op::fwd<Enum &>
             (
                   istr
                 , item
-                , traits<Enum>::template get_name<Char>()
+                , name(Enum{}, istr)
                 , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
             )
         );
@@ -244,34 +247,35 @@ struct reader<Enum, kind_t::enum_>: op::fwd<Enum &>
 };
 
 template<c::enum_ Enum>
-struct reader<Enum, kind_t::bitfield>: op::fwd<Enum &>
+struct reader<Enum, kind_t::bitfield>
 {
-    using inherited = op::fwd<Enum &>;
     using kkind_type = kkind_t<kind_t::bitfield>;
 
+    Enum                                   &m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    reader(Enum &val, kkind_type kind): inherited { val }, m_kind{ kind } {}
+    reader(Enum &val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
-        using utils_type = typename inherited::utils_type;
         using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
         auto const po = print_manip::value(istr);
 
         static auto const item = boost::fusion::fold
         (
-            traits<Enum>::groups,
+            groups_v<Enum>,
             enum_item_type{},
             []<typename Item, typename Group>(Item &&item, Group const &group)
             {
+                using string_type = std::basic_string<Char, CharTraits>;
+
                 static_assert(std::tuple_size_v<Group> == 1);
 
-                auto const& rec = group[0];
-                auto const lit = rec.template get_str<Char, CharTraits>();
-                auto const val = rec.m_val;
+                auto const &rec = boost::fusion::front(group);
+                auto const lit = boost::lexical_cast<string_type>(rec);
+                auto const val = rec.value;
                 item.add(lit, static_cast<std::ptrdiff_t>(val));
 
                 return std::forward<Item>(item);
@@ -284,7 +288,7 @@ struct reader<Enum, kind_t::bitfield>: op::fwd<Enum &>
             (
                   istr
                 , item
-                , traits<Enum>::template get_name<Char>()
+                , name(Enum{}, istr)
                 , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
             )
         );
@@ -294,37 +298,43 @@ struct reader<Enum, kind_t::bitfield>: op::fwd<Enum &>
 };
 
 template<c::enum_ Enum>
-struct reader<Enum, kind_t::combo>: op::fwd<Enum &>
+struct reader<Enum, kind_t::combo>
 {
-    using inherited = op::fwd<Enum &>;
     using kkind_type = kkind_t<kind_t::combo>;
 
+    Enum                                   &m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    reader(Enum &val, kkind_type kind): inherited { val }, m_kind{ kind } {}
+    reader(Enum &val, kkind_type kind): m_val { val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
-        using utils_type = typename inherited::utils_type;
         using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
         auto const po = print_manip::value(istr);
 
         static auto const item = boost::fusion::fold
         (
-            traits<Enum>::groups,
+            groups_v<Enum>,
             enum_item_type{},
-            []<typename Item>(Item && item, auto const& group)
+            []<typename Item>(Item &&item, auto const &group)
             {
-                for (auto const& rec : group)
-                {
-                    auto const lit = rec.template get_str<Char, CharTraits>();
-                    auto const val = rec.m_val;
-                    item.add(lit, static_cast<std::ptrdiff_t>(val));
-                }
+                return boost::fusion::fold
+                (
+                    group,
+                    std::forward<Item>(item),
+                    [](Item &&item, auto const &rec)
+                    {
+                        using string_type = std::basic_string<Char, CharTraits>;
 
-                return std::forward<Item>(item);
+                        auto const lit = boost::lexical_cast<string_type>(rec);
+                        auto const val = rec.value;
+                        item.add(lit, static_cast<std::ptrdiff_t>(val));
+
+                        return std::forward<Item>(item);
+                    }
+                );
             }
         );
 
@@ -334,7 +344,7 @@ struct reader<Enum, kind_t::combo>: op::fwd<Enum &>
             (
                   istr
                 , item
-                , traits<Enum>::template get_name<Char>()
+                , name(Enum{}, istr)
                 , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
             )
         );
@@ -347,7 +357,7 @@ struct reader<Enum, kind_t::combo>: op::fwd<Enum &>
 template <c::e_any_enum Enum, typename Char, typename CharTraits>
 [[nodiscard]] auto try_read(std::basic_istream<Char, CharTraits> &istr) noexcept -> boost::optional<Enum>
 {
-    return detail::try_read_(istr, op::fwd<Enum>{ Enum{} }, kkind_t<kind_v<Enum>>{});
+    return detail::try_read_(istr, Enum{}, kkind_t<kind_v<Enum>>{});
 }
 
 }

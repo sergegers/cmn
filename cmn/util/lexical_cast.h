@@ -2,8 +2,11 @@
 
 #include <locale>
 #include <string>
+#include <sstream>
 
 #include <boost/lexical_cast.hpp>
+
+#include <cmn/meta/concepts.h>
 
 namespace boost
 {

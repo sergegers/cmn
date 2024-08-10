@@ -3,7 +3,29 @@
 #include <concepts>
 #include <type_traits>
 
+#include <boost/mp11.hpp>
+
+#include <boost/fusion/support/is_sequence.hpp>
+#include <boost/fusion/support/category_of.hpp>
+
 #include "promote.h"
+
+namespace boost::c
+{
+
+template <typename L> concept mp11_list = mp11::mp_is_list<L>::value;
+template <typename S> concept mp11_set = mp11::mp_is_set<S>::value;
+template <typename M> concept mp11_map = mp11::mp_is_map<M>::value;
+
+///////////////////////////////////////////////////////////////////////////////
+template <typename S>
+concept fus_sequence = fusion::traits::is_sequence<S>::value;
+
+template <typename S>
+concept random_access_fus_sequence =
+       fus_sequence<S> && fusion::traits::is_random_access<S>::value;
+
+}
 
 namespace cmn
 {
@@ -46,9 +68,78 @@ struct mask_type<T> : std::make_unsigned<std::underlying_type_t<T>> {};
 template <c::enumerable T>
 using mask_type_t = typename mask_type<T>::type;
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// ext enum concepts
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace enum_
+{
+
+enum class kind_t
+{
+    naive,  // enum w/o adaptation
+    enum_,
+    bitfield,
+    combo
+};
+
+template <kind_t Kind_>
+using kkind_t = std::integral_constant<kind_t, Kind_>;
+
+//-----------------------------------------------------------------------------
+enum op_t
+{
+    op_empty           = 0x00,
+    op_bitwise         = 0x01,
+    op_steppable       = 0x02,
+    op_comparable      = 0x04,
+    op_ariphmetic      = 0x08,
+    op_io              = 0x10,
+    op_interoperable   = 0x20
+};
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Print options
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace io
+{
+
+enum class print_t
+{
+      empty         = 0x0
+    , tail          = 0x1
+    , ns            = 0x2
+    , class_prefix  = 0x4
+};
+
+}
+
+//-----------------------------------------------------------------------------
+template <c::enum_ Enum, typename = void>
+struct traits;
+
+}
 
 namespace c
 {
+
+template <typename Enum>
+concept e_naive = enum_::traits<Enum>::kind == enum_::kind_t::naive;
+
+template <typename Enum>
+concept e_enum = enum_::traits<Enum>::kind == enum_::kind_t::enum_;
+
+template <typename Enum>
+concept e_bitfield = enum_::traits<Enum>::kind == enum_::kind_t::bitfield;
+
+template <typename Enum>
+concept e_combo = enum_::traits<Enum>::kind == enum_::kind_t::combo;
+
+template <typename Enum>
+concept e_any_enum = e_enum<Enum> || e_bitfield<Enum> || e_combo<Enum>;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename Lhs, typename Rhs, typename Res>
@@ -99,64 +190,6 @@ concept bitfield =
     )  
  )
 ;
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// ext enum concepts
-//
-///////////////////////////////////////////////////////////////////////////////
-namespace enum_
-{
-
-enum class kind_t
-{
-    naive,  // enum w/o adaptation
-    enum_,
-    bitfield,
-    combo
-};
-
-//-----------------------------------------------------------------------------
-template <c::enum_ Enum, bool = std::is_enum_v<Enum>>
-struct traits;
-
-//-----------------------------------------------------------------------------
-template <typename T>
-struct mask_type : std::make_unsigned<T> {};
-
-template <typename T> requires std::integral<T>
-struct mask_type<T> : int_promotion<T> {};
-
-template <typename T> requires c::enum_<T>
-struct mask_type<T> : int_promotion<std::underlying_type_t<T>> {};
-
-template <typename T> requires c::scoped_enum<T>
-struct mask_type<T> : std::make_unsigned<std::underlying_type_t<T>> {};
-
-template <c::enumerable T>
-using mask_type_t = typename mask_type<T>::type;
-
-}
-
-namespace c
-{
-
-template <typename Enum>
-concept e_naive = enum_::traits<Enum>::kind == enum_::kind_t::naive;
-
-template <typename Enum>
-concept e_enum = enum_::traits<Enum>::kind == enum_::kind_t::enum_;
-
-template <typename Enum>
-concept e_bitfield = enum_::traits<Enum>::kind == enum_::kind_t::bitfield;
-
-template <typename Enum>
-concept e_combo = enum_::traits<Enum>::kind == enum_::kind_t::combo;
-
-template <typename Enum>
-concept e_any_enum = e_enum<Enum> || e_bitfield<Enum> || e_combo<Enum>;
 
 }
 

@@ -1,12 +1,13 @@
 #pragma once
 
 #include <cmn/meta/symbols.h>
+#include <cmn/meta/concepts.h> // print_t
 
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/util.h>
 
-#include "macro.h"    // CHT_PP_ENUM_CLASS_DECLARE_BITWISE()
+#include "op.h"
 
 namespace cmn::enum_::io
 {
@@ -108,16 +109,22 @@ constexpr cmn::io::stream_slot_manip_forwarder<basic_bitfield_delim_manip> bitfi
 // Print options manipulator
 //
 ///////////////////////////////////////////////////////////////////////////////
-enum class print_t
+
+consteval auto adapt_enum_info(print_t)
 {
-      empty         = 0x0
-    , tail          = 0x1
-    , class_prefix  = 0x2
-};
+    using enum print_t;
+    return adapt_bitfield_info_helper<empty, tail, class_prefix>(op_bitwise | op_interoperable);
+}
 
-CMN_PP_ENUM_CLASS_DECLARE_BITWISE(print_t)
-static_assert(c::bitfield<print_t>);
+using op::operator &;
+using op::operator |;
+using op::operator ^;
+using op::operator ~;
 
+//static_assert(ops_v<print_t> == (op_bitwise | op_interoperable));
+//static_assert(c::bitfield<print_t>);
+
+///////////////////////////////////////////////////////////////////////////////
 using print_manip =
     cmn::io::int_slot_manip
     <
@@ -135,9 +142,10 @@ constexpr cmn::io::slot_manip_forwarder<print_manip> eprint {};
 // Utilities
 //
 template <typename Char, typename CharTraits = std::char_traits<Char>>
+
 using basic_esaver = cmn::io::manip::iword_saver
 <
-      basic_open_manip<Char, CharTraits>
+    basic_open_manip<Char, CharTraits>
     , basic_close_manip<Char, CharTraits>
     , basic_bitfield_delim_manip<Char, CharTraits>
     , print_manip

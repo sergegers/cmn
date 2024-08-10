@@ -7,19 +7,42 @@
 #include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/enum/traits.h>
+#include <cmn/tuple/io.h>
 
 #include "manip.h"
 #include "feature.h"
+#include "util.h"
 
 #define CHT_HEX_OUT()   ::std::hex << ::std::showbase << ::std::uppercase
 
-namespace cmn::enum_::io
+namespace cmn::enum_
+{
+
+// keep print operations here to avoid circular dependencies
+template <typename Char, typename CharTraits, c::enum_ auto En_>
+auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En_> const &rec) -> decltype(ostr)
+{
+    using enum io::print_t;
+
+    auto const &name = rec.template get_name<Char, CharTraits>();
+    static auto const scope_resolution = symbols<Char, CharTraits>::scope_resolution;
+
+    auto const po = io::print_manip::value(ostr);
+    if (has_feature(po, ns)) ostr << name.m_ns << scope_resolution;
+    if (has_feature(po, class_prefix)) ostr << name.m_enum_name << scope_resolution;
+    return ostr << name.m_enum_member_name;
+}
+
+using boost::fusion::sequence::operators::operator <<;
+
+namespace io
 {
 
 namespace detail
 {
 
-template <typename Enum, typename Char, typename CharTraits>
+template <typename Char, typename CharTraits>
 class print_record
 {
 private:
@@ -34,25 +57,15 @@ public:
     ) noexcept
         : m_ostr{ ostr }, m_first_time{ first_time } {}
 
-    template <typename Record>
-    auto operator ()(Record const &rec) const -> void
+    template <c::enum_ auto En_>
+    auto operator ()(record_info<En_> const &rec) const -> void
     {
+        using enum print_t;
+
         auto const delim = basic_bitfield_delim_manip<Char>::value(m_ostr);
-        auto const po = print_manip::value(m_ostr);
         if (m_first_time) m_first_time = false; else m_ostr << delim;
 
-        using utils_type = utils<Enum>;
-
-        if constexpr (std::is_scoped_enum_v<Enum>)
-        {
-            if (has_feature(po, print_t::class_prefix))
-                m_ostr
-                    << traits<Enum>::template get_name<Char>()
-                    << symbols<Char>::scope_resolution
-                ;
-        }
-
-        m_ostr << rec.template get_str<Char, CharTraits>();
+        m_ostr << rec;
     }
 };
 
@@ -74,20 +87,19 @@ auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
 
 ///////////////////////////////////////////////////////////////////////////////
 template<c::enum_ Enum>
-struct printer<Enum, kind_t::enum_>: op::fwd<Enum>
+struct printer<Enum, kind_t::enum_>
 {
-    using inherited = op::fwd<Enum>;
     using kkind_type = kkind_t<kind_t::enum_>;
 
+    Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    printer(Enum val, kkind_type kind): inherited { val }, m_kind{ kind } {}
+    printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
     auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
     {
-        using utils_type = typename inherited::utils_type;
-        using print_record_type = detail::print_record<Enum, Char, CharTraits>;
+        using print_record_type = detail::print_record<Char, CharTraits>;
 
         // NOTE: don't make it static
         auto const open = basic_open_manip<Char, CharTraits>::value(ostr);
@@ -95,7 +107,7 @@ struct printer<Enum, kind_t::enum_>: op::fwd<Enum>
 
         ostr << open;
 
-        static auto groups = get_groups(Enum{});
+        static auto groups = groups_v<Enum>;
         static_assert
         (
             std::tuple_size_v<decltype(groups)> == 1,
@@ -107,9 +119,12 @@ struct printer<Enum, kind_t::enum_>: op::fwd<Enum>
         // ReSharper disable CppLocalVariableMayBeConst
         bool first_time = true;
         // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = utils_type::process_on_group
+        auto const remain = group_::find
         (
-            group,  this->to_mask_val(), print_record_type{ ostr, first_time }
+            group,
+            to_mask(m_val),
+            to_mask(m_val),
+            print_record_type{ ostr, first_time }
         );
         detail::print_tail(remain, ostr);
 
@@ -118,23 +133,21 @@ struct printer<Enum, kind_t::enum_>: op::fwd<Enum>
 };
 
 template<c::enum_ Enum>
-struct printer<Enum, kind_t::bitfield>: op::fwd<Enum>
+struct printer<Enum, kind_t::bitfield>
 {
-    using inherited = op::fwd<Enum>;
     using kkind_type = kkind_t<kind_t::bitfield>;
 
+    Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    printer(Enum val, kkind_type kind): inherited { val }, m_kind{ kind } {}
+    printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
     auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
     {
-        using utils_type = typename inherited::utils_type;
-        using stream_ref_type = std::basic_ostream<Char, CharTraits> &;
-        using print_record_type = detail::print_record<Enum, Char, CharTraits>;
+        using print_record_type = detail::print_record<Char, CharTraits>;
 
-        auto const mask_ = utils_type::to_mask_val(bitfield_mask_manip<Enum>::value(ostr));
+        auto const mask_ = to_mask(bitfield_mask_manip<Enum>::value(ostr));
 
         // NOTE: don't make it static
         auto const open = basic_open_manip<Char, CharTraits>::value(ostr);
@@ -142,12 +155,12 @@ struct printer<Enum, kind_t::bitfield>: op::fwd<Enum>
 
         ostr << open;
 
-        static auto groups = get_groups(Enum{});
+        static auto groups = groups_v<Enum>;
         bool first_time = true;
         auto const remain = boost::fusion::fold
         (
             groups,
-            this->to_mask_val() & mask_,
+            to_mask(m_val) & mask_,
             [&ostr, &first_time]<typename Group>(auto val, Group const &group)
             {
                 static_assert
@@ -155,15 +168,15 @@ struct printer<Enum, kind_t::bitfield>: op::fwd<Enum>
                     std::tuple_size_v<Group> == 1, 
                     "Bitfield group must contain the one and only one record"
                 );
-                decltype(auto) rec = group[0];
+                decltype(auto) rec = boost::fusion::front(group);
                 
-                if (utils_type::to_mask_val(rec.m_val) & val)
+                if (rec.value_as_mask & val)
                 {
                     print_record_type prt { ostr, first_time };
 	                prt(rec);
                 }
 
-                return val & ~utils_type::to_mask_val(rec.m_val);
+                return val & ~record_::get_value_as_mask(rec);
             }
         );
         detail::print_tail(remain, ostr);
@@ -173,40 +186,38 @@ struct printer<Enum, kind_t::bitfield>: op::fwd<Enum>
 };
 
 template<c::enum_ Enum>
-struct printer<Enum, kind_t::combo>: op::fwd<Enum>
+struct printer<Enum, kind_t::combo>
 {
-    using inherited = op::fwd<Enum>;
     using kkind_type = kkind_t<kind_t::combo>;
 
+    Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    printer(Enum val, kkind_type kind): inherited { val }, m_kind{ kind } {}
+    printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
     auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
     {
-        using utils_type = typename inherited::utils_type;
-        using print_record_type = detail::print_record<Enum, Char, CharTraits>;
-        using mask_type = typename utils_type::mask_type;
+        using print_record_type = detail::print_record<Char, CharTraits>;
 
-        auto const mask_ = utils_type::to_mask_val(bitfield_mask_manip<Enum>::value(ostr));
+        auto const mask_ = to_mask(bitfield_mask_manip<Enum>::value(ostr));
 
         auto const open = basic_open_manip<Char, CharTraits>::value(ostr);
         auto const close = basic_close_manip<Char, CharTraits>::value(ostr);
 
         ostr << open;
 
-        static auto groups = get_groups(Enum{});
-        static auto masks = utils_type::calc_masks(groups);
+        static auto groups = groups_v<Enum>;
+        static auto masks = masks_v<Enum>;
 
         // ReSharper disable CppLocalVariableMayBeConst
         bool first_time = true;
         // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = utils_type::process_on_groups
+        auto const remain = groups_::fold
         (
             groups,
             masks,
-            this->to_mask_val() & mask_,
+            to_mask(m_val) & mask_,
             print_record_type{ ostr, first_time },
             mask_
         );
@@ -219,3 +230,4 @@ struct printer<Enum, kind_t::combo>: op::fwd<Enum>
 
 }   
 
+}

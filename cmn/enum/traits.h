@@ -3,30 +3,42 @@
 #include <string_view>
 #include <tuple>
 #include <bit>
+#include <iosfwd>
 
 #include <cmn/meta/concepts.h>
 #include <cmn/util/util.h>        // for bsr()
-#include "util.h"
+#include <cmn/enum/util.h>
 
 namespace cmn::enum_
 {
 
-
-consteval auto adapt_enum_info(c::enum_ auto) -> void = delete;
-
 ////////////////////////////////////////////////////////////////////////////////
 
 // see <cmn/meta/concepts.h>
-//template <c::enum_ Enum, bool = std::is_enum_v<Enum>>
-//struct traits;
+// template <c::enum_ Enum, typename = void>
+// struct traits;
 
-template <c::enum_ Enum>
-struct traits<Enum, true>
+// naive enum
+template <c::enum_ Enum, typename /*= void*/>
+struct traits
 {
     using underlying_type = std::underlying_type_t<Enum>;
+    using mask_type = underlying_type;
 
-    static constexpr std::string_view name = get_enum_name(Enum{});
-    static constexpr std::wstring_view wname = get_enum_wname(Enum{});
+    static constexpr kind_t kind = kind_t::naive;
+    static constexpr int   ops = op_empty;
+
+    static constexpr name_info<Enum> name_info{};
+};
+
+//-----------------------------------------------------------------------------
+template <c::enum_ Enum>
+struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
+{
+    using underlying_type = std::underlying_type_t<Enum>;
+    using mask_type = underlying_type;
+
+    static constexpr name_info<Enum> name_info{};
 
     // "attempting to reference a deleted function" error here means
     // that enum definition (macros family CMN_PP_DECLARE_ENUM_...) is not included
@@ -40,6 +52,7 @@ struct traits<Enum, true>
     //
     ////////////////////////////////////////////////////////////////////////////////
     static constexpr kind_t kind = get_kind(enum_info);
+    static constexpr int    ops = enum_info.m_ops;
 
     // std::array<underlying_type, group_size>
     static constexpr auto masks = calc_masks(enum_info);
@@ -47,12 +60,6 @@ struct traits<Enum, true>
     static constexpr Enum begin = min_value(enum_info);
     static constexpr Enum last = max_value(enum_info);
     static constexpr Enum end = static_cast<Enum>(static_cast<underlying_type>(last) + 1);
-
-    template <typename Char>
-    static constexpr auto get_name() noexcept
-    {
-        if constexpr (std::is_same_v<Char, char>) return name; else return wname;
-    }
 
     //template <typename Char, std::size_t Size_>
     //static constexpr auto get_str(typename utils_type::template group_t<Size_> const &group, Enum en)
@@ -76,45 +83,39 @@ struct traits<Enum, true>
     }
 };
 
-// simple enum type stub
-template <c::enum_ Enum>
-struct traits<Enum, false>
-{
-    using underlying_type = Enum;
-    static constexpr kind_t kind = kind_t::naive;
-
-    static constexpr std::string_view name = get_enum_name(Enum{});
-    static constexpr std::wstring_view wname = get_enum_wname(Enum{});
-};
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // adapt_enum_info() helpers
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enum_ auto ... Ens_>
-consteval auto adapt_enum_info_helper()
+consteval auto adapt_enum_info_helper(unsigned int ops = default_ops(kind_t::enum_))
 {
-    return enum_info{ group { record<Ens_>{} }... };
+    return enum_info
+    {
+        .m_ops = ops,
+        .m_groups = groups_info { group_info { record_info<Ens_>{} }... }
+    };
 }
 
 template <c::enum_ auto ... Ens_>
-consteval auto adapt_bitfield_info_helper()
+consteval auto adapt_bitfield_info_helper(unsigned int ops = default_ops(kind_t::bitfield))
 {
-    return enum_info<group<record<Ens_>...>>{ group<record<Ens_>...>{ record<Ens_>{}... } };
-}
-
-//-----------------------------------------------------------------------------
-template <c::enum_ auto ... Ens_>
-consteval auto make_group()
-{
-    return group{ record<Ens_>{}... };
+    return enum_info
+    {
+        .m_ops = ops,
+        .m_groups = groups_info { group_::make<Ens_>()... }
+    };
 }
 
 template <typename... Groups>
-consteval auto adapt_combo_info_helper(Groups &&... groups)
+consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, unsigned int ops = default_ops(kind_t::combo))
 {
-    return enum_info{ std::forward<Groups>(groups)... };
+    return enum_info
+    {
+        .m_ops = ops,
+        .m_groups = std::move(groups)
+    };
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,16 +164,41 @@ constexpr auto to_basic_string_view(Enum en) -> std::string_view
     return enum_traits_type::template get_str<Char>(std::get<0>(enum_traits_type::groups), en);
 }
 
+template <std::integral Enum>
+constexpr auto to_mask(Enum en) -> mask_type_t<Enum>
+{
+    return static_cast<mask_type_t<Enum>>(en);
+}
+
+template <c::enum_ Enum>
+constexpr auto to_mask(Enum en) -> mask_type_t<Enum>
+{
+    return static_cast<mask_type_t<Enum>>(en);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Trait shortcuts
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enum_ En> constexpr kind_t kind_v = traits<En>::kind;
+template <c::enum_ En> constexpr int ops_v = traits<En>::ops;
 
 template <c::e_any_enum Enum> constexpr Enum begin_v = traits<Enum>::begin;
 template <c::e_any_enum Enum> constexpr Enum last_v = traits<Enum>::last;
 template <c::e_any_enum Enum> constexpr Enum end_v = traits<Enum>::end;
+template <c::e_any_enum Enum> constexpr auto groups_v = traits<Enum>::enum_info.m_groups;
+template <c::e_any_enum Enum, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<Enum>);
+template <c::e_any_enum Enum> constexpr auto masks_v = traits<Enum>::masks;
+
+template <c::enum_ Enum, typename Char, typename CharTraits>
+constexpr auto name(Enum, std::basic_ios<Char, CharTraits> const &) noexcept
+{
+    if constexpr (std::is_same_v<Char, char>) 
+        return traits<Enum>::name_info.m_name.m_name;
+    else 
+        return traits<Enum>::m_wname.m_name;
+}
 
 }
 

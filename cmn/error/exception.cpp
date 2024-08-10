@@ -46,4 +46,20 @@ auto operator << (std::ostream &ostr, msg_ const &msg) -> std::ostream &
     return ostr;
 }
 
+auto get_error_description(boost::exception const &ex) noexcept -> std::string
+{
+    using namespace std::string_literals;
+
+    try
+    {
+        return boost::diagnostic_information(ex, true);
+    }
+    catch (...)
+    {
+        return ""s;
+    }
+
+    // also see https://stackoverflow.com/questions/48191012/how-to-iterate-over-all-error-infos-in-boostexception
+}
+
 }

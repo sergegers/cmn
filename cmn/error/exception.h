@@ -4,26 +4,44 @@
 #include <string>
 #include <format>
 #include <exception>
+#include <string>
 
 #include <boost/exception/all.hpp>
 
 namespace cmn
 {
 
-class io_error: public virtual std::exception, public virtual boost::exception 
+template <typename Tag, typename Base = std::exception>
+class basic_error: public virtual Base, public virtual boost::exception 
 {
 private:
-    using inherited = std::exception;
-public:
-    io_error(char const *what_): inherited{ what_ } {}
+    using inherited = Base;
 
-    template <typename... Args> io_error(std::format_string<Args...> fmt, Args &&... args):
-        inherited{ std::format(fmt, std::forward<Args>(args)...).c_str() }
+    std::string m_what;
+public:
+    basic_error(): m_what{ "Unknown exception" } {}
+    basic_error(char const *what_): m_what{ what_ } {}
+
+    template <typename... Args>
+    basic_error(std::format_string<Args...> fmt, Args &&... args):
+        m_what{ std::format(fmt, std::forward<Args>(args)...) }
     {}
+
+    [[nodiscard]] auto what() const -> char const * final
+    {
+        return m_what.c_str();
+    }
 };
+
+using not_implemented = basic_error<struct not_implemented_>;
+using io_error = basic_error<struct io_error_>;
+using format_error = basic_error<struct format_error_>;
 
 namespace error
 {
+
+[[nodiscard]] auto get_error_description(boost::exception const &ex) noexcept -> std::string;
+
 
 struct msg_
 {

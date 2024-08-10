@@ -8,132 +8,20 @@
 #include <bit>
 #include <algorithm>
 #include <iosfwd>
-#include <ranges>
+#include <utility>
 
-// boost.preprocessor
-#include <boost/preprocessor/wstringize.hpp>
-// boost.fusion
-// ReSharper disable CppUnusedIncludeDirective
-#include <boost/fusion/container/vector.hpp>
-#include <boost/fusion/adapted/std_array.hpp>
-#include <boost/fusion/adapted/std_tuple.hpp>
-// ReSharper restore CppUnusedIncludeDirective
-#include <boost/fusion/algorithm/iteration/fold.hpp>
-#include <boost/fusion/view/zip_view.hpp>
-
-#include <cmn/meta/concepts.h> // kind_t
+#include <cmn/meta/concepts.h> // kind_t, op_t, print_t
 #include <cmn/meta/util.h>
+
+#include <cmn/name/types.h>
+
+#include <cmn/enum/util/name.h>
+#include <cmn/enum/util/group.h>
+#include <cmn/enum/util/groups.h>
+#include <cmn/enum/util/enum.h>
 
 namespace cmn::enum_
 {
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// "magic get" utilities
-//
-////////////////////////////////////////////////////////////////////////////////////////////////
-consteval auto get_enum_name(c::enum_ auto) -> std::string_view
-{
-    using namespace std::string_view_literals;
-
-    std::string_view funcsig = __FUNCSIG__;
-
-    // <enum xxx>
-    constexpr auto prefix = "<enum "sv;
-    auto const l = funcsig.find_last_of('<') + prefix.size();
-
-    constexpr auto postix= ">"sv;
-    auto const r = funcsig.find_last_of(postix);
-
-    return funcsig.substr(l, r - l);
-}
-
-consteval auto get_enum_wname(c::enum_ auto) -> std::wstring_view
-{
-    using namespace std::string_view_literals;
-
-    std::wstring_view funcsig = BOOST_PP_WSTRINGIZE(__FUNCSIG__);
-
-    // <enum xxx>
-    constexpr auto prefix = L"<enum "sv;
-    auto const l = funcsig.find_last_of('<') + prefix.size();
-
-    constexpr auto postix= L">"sv;
-    auto const r = funcsig.find_last_of(postix);
-
-    return funcsig.substr(l, r - l);
-}
-
-//-----------------------------------------------------------------------------
-template <c::enum_ auto En_>
-consteval auto enum_member_name() -> std::string_view
-{
-    using namespace std::string_view_literals;
-
-    std::string_view funcsig = __FUNCSIG__;
-
-    // auto __cdecl enum_member_name<e0>(void)
-    constexpr auto prefix = "<"sv;
-    auto const l = funcsig.find_first_of(prefix) + prefix.size();
-
-    constexpr auto postix= ">"sv;
-    auto const r = funcsig.find_first_of(postix);
-
-    return funcsig.substr(l, r - l);
-}
-
-template <c::enum_ auto En_>
-consteval auto enum_member_wname() -> std::wstring_view
-{
-    using namespace std::string_view_literals;
-
-    std::wstring_view funcsig = BOOST_PP_WSTRINGIZE(__FUNCSIG__);
-
-    // auto __cdecl enum_member_wname<e0>(void)
-    constexpr auto prefix = L"<"sv;
-    auto const l = funcsig.find_first_of(prefix) + prefix.size();
-
-    constexpr auto postix= L">"sv;
-    auto const r = funcsig.find_first_of(postix);
-
-    return funcsig.substr(l, r - l);
-}
-
-///////////////////////////////////////////////////////////////////////////////
-template <c::enum_ auto En_>
-struct record
-{
-    using enum_type = decltype(En_);
-
-    static constexpr auto enum_value = En_;
-
-    std::string_view    m_str;
-    std::wstring_view   m_wstr;
-
-    consteval record():
-        m_str { enum_member_name<En_>() },
-        m_wstr{ enum_member_wname<En_>() }
-    {
-    }
-
-    friend auto operator << (std::ostream &ostr, record const &self) -> std::ostream &
-    {
-        return ostr << self.m_str;
-    }
-
-    friend auto operator << (std::wostream &ostr, record const &self) -> std::wostream &
-    {
-        return ostr << self.m_wstr;
-    }
-};
-
-template <typename... Records> using group = std::tuple<Records...>;
-template <typename... Groups> using enum_info = std::tuple<Groups...>;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <kind_t Kind_>
-using kkind_t = std::integral_constant<kind_t, Kind_>;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -145,65 +33,36 @@ using kkind_t = std::integral_constant<kind_t, Kind_>;
 template <typename... Groups> consteval auto get_kind(enum_info<Groups...> const &) -> kind_t
 {
     using enum kind_t;
-    using enum_info_type = enum_info<Groups...>;
-
-    return std::tuple_size_v<enum_info_type> == 1?
+    return sizeof... (Groups) == 1?
         enum_:
         ((std::tuple_size_v<Groups> == 1) && ...)? bitfield: combo;
 }
 
 template <std::size_t I_> using int_ = std::integral_constant<std::size_t, I_>;
 
-namespace record_
-{
-
-template <typename T> using enum_type_t = typename T::enum_type;
-template <typename T> using mask_type_t = enum_::mask_type_t<enum_type_t<T>>;
-
-template <c::enum_ auto En_>
-consteval auto get_value(record<En_> const &) -> decltype(En_)
-{
-    return En_;
-}
-
-template <c::enum_ auto En_>
-consteval auto get_mask(record<En_> const &) -> enum_::mask_type_t<decltype(En_)>
-{
-    return static_cast<enum_::mask_type_t<decltype(En_)>>(En_);
-}
-
-}
-
-namespace group_
-{
-
-template <typename T> using enum_type_t = record_::enum_type_t<std::tuple_element_t<0, T>>;
-template <typename T> using mask_type_t = mask_type_t<enum_type_t<T>>;
-
-template <typename... Records>
-consteval auto calc_mask(group<Records...> const &gr) -> mask_type_t<group<Records...>>
-{
-    return (record_::get_mask(std::get<Records>(gr)) | ...);
-}
-
-template <c::enum_ auto En_, decltype(En_)... Ens_>
-consteval auto get_enum_values(group<record<En_>, record<Ens_>...> const &) ->
-    std::array<decltype(En_), sizeof... (Ens_) + 1>
-{
-    return { En_, Ens_... };
-}
-
-}
-
 template <typename Group, typename... Groups>
 consteval auto calc_masks(enum_info<Group, Groups...> const &enum_info)
     -> std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1>
 {
+    using group_::calc_mask;
+
     return
     {
-          group_::calc_mask(std::get<Group>(enum_info))
-        , group_::calc_mask(std::get<Groups>(enum_info))...
+          calc_mask(std::get<Group>(enum_info.m_groups))
+        , calc_mask(std::get<Groups>(enum_info.m_groups))...
     };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+consteval auto default_ops(kind_t kind) -> unsigned int
+{
+    using enum kind_t;
+    return 
+        kind == enum_? op_comparable | op_steppable | op_io:
+        kind == bitfield? op_bitwise | op_io:
+        kind == combo? op_comparable | op_steppable | op_bitwise | op_io:
+            op_empty
+    ;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -213,8 +72,20 @@ consteval auto calc_masks(enum_info<Group, Groups...> const &enum_info)
 template <typename Group, typename... Groups>
 consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_::enum_type_t<Group>
 {
-    return static_cast<group_::enum_type_t<Group>>(0);
-//    return std::min({ std::ranges::begin(std::get<Group>(enum_info))->m_val ... });
+    using group_::get_min_enum_value;
+
+    using enum_type = group_::enum_type_t<Group>;
+    using mask_type = group_::mask_type_t<Group>;
+    return static_cast<enum_type>
+    (
+        std::min
+        (
+            {
+                static_cast<mask_type>(get_min_enum_value(Group{})), 
+                static_cast<mask_type>(get_min_enum_value(Groups{}))...
+            }
+        )
+    );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -224,17 +95,23 @@ consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_
 template <typename Group, typename... Groups>
 consteval auto max_value(enum_info<Group, Groups...> const &enum_info) -> group_::enum_type_t<Group>
 {
-    return static_cast<group_::enum_type_t<Group>>(0);
-    //return []<std::size_t... Indices_>
-    //    (auto const &groups,std::index_sequence<Indices_...>)
-    //{
-    //    return std::max({ std::ranges::rbegin(std::get<Indices_>(groups))->m_val ... });
-    //}
-    //(groups, std::make_index_sequence<sizeof... (Groups)>{});
+    using group_::get_max_enum_value;
+    using enum_type = group_::enum_type_t<Group>;
+    using mask_type = group_::mask_type_t<Group>;
+
+    return static_cast<enum_type>
+    (
+        std::max
+        (
+            {
+                static_cast<mask_type>(get_max_enum_value(Group{})), 
+                static_cast<mask_type>(get_max_enum_value(Groups{}))...
+            }
+        )
+    );
 }
 
-///////////////////////////////////////////////////////////////////////////////
-
+// TODO: remove
 template <c::enum_ Enum>
 class utils
 {
@@ -349,7 +226,7 @@ public:
 
     //-----------------------------------------------------------------------------
     // execute operation Op if enum value chunk belongs to group and return unprocessed
-    // enum value reminder
+    // enum value remainder
     //-----------------------------------------------------------------------------
     template <std::size_t Size_, typename Op>
     static constexpr auto process_on_group(group_t<Size_> const &group, mask_type masked_en, Op const &op) -> mask_type

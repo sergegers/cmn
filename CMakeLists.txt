@@ -45,15 +45,15 @@ add_library (
  cmn 
 
  "cmn/meta/concepts.h"
+ 
  "cmn/meta/promote.h"
- "cmn/meta/util.h"
  "cmn/meta/symbols.h"
 
  "cmn/util/fixed_string.h"
  "cmn/util/param.h"
  "cmn/util/lexical_cast.h"
  "cmn/util/lexical_cast.cpp"
- "cmn/util/util.h"
+ "cmn/util/inverse.h" 
 
  "cmn/io/manip/slot/concepts.h"
  "cmn/io/manip/slot/decoder.h"
@@ -62,9 +62,23 @@ add_library (
  "cmn/io/manip/slot/traits.h"
  "cmn/io/manip/slot/util.h"
 
+ "cmn/range/io.h"
+
+ "cmn/tuple/ops.h"
+ "cmn/tuple/io.h"
+
+ "cmn/enum/util/magic_get.h"
+ "cmn/enum/util/qualified_name.h" 
+ "cmn/enum/util/name.h" 
+ "cmn/enum/util/record.h" 
+ "cmn/enum/util/mask.h" 
+ "cmn/enum/util/group.h" 
+ "cmn/enum/util/groups.h"
+ "cmn/enum/util/enum.h"
+
+ "cmn/enum/util.h"
  "cmn/enum/macro.h"  
  "cmn/enum/op.h" 
- "cmn/enum/util.h" 
  "cmn/enum/traits.h" 
  "cmn/enum/enum.h" 
  "cmn/enum/bitfield.h" 
@@ -76,10 +90,36 @@ add_library (
  "cmn/enum/manip.h" 
  "cmn/enum/feature.h"
  
+ "cmn/algorithm/detail/result.h"
+ "cmn/algorithm/detail/visitor.h"
+ "cmn/algorithm/switch/ordered.h"
+ "cmn/algorithm/switch/sequenced.h"
+ "cmn/algorithm/switch/unordered.h"
+ "cmn/algorithm/switch.h"
+ "cmn/algorithm/switch.h"
+ "cmn/algorithm/at.h"
+ "cmn/algorithm/binary_find.h"
+ "cmn/algorithm/copy.h"
+ "cmn/algorithm/erase.h"
+ "cmn/algorithm/find.h"
+ "cmn/algorithm/fold.h"
+ "cmn/algorithm/for_each.h"
+ "cmn/algorithm/rank.h"
+ "cmn/algorithm/while.h"
+
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
 
- )
+ "cmn/name/generator.h"
+ "cmn/name/generator.cpp"
+ "cmn/name/generator_symbols.h"
+ "cmn/name/generator_symbols.cpp"
+ "cmn/name/parser.h"
+ "cmn/name/parser.cpp"
+ "cmn/name/parser_symbols.h"
+ "cmn/name/parser_symbols.cpp"
+ "cmn/name/types.h"
+  )
 
 target_include_directories(cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
@@ -87,8 +127,10 @@ target_include_directories(cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_D
  test
   
   "test/main.cpp"
+  "test/error.cpp"
   "test/enum.cpp"
- )
+  "test/name.cpp"
+  )
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 

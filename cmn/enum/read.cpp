@@ -43,6 +43,12 @@ auto get_close(std::basic_istream<Char, CharTraits>& istr)
 }
 
 template <typename Char, typename CharTraits>
+auto get_delim(std::basic_istream<Char, CharTraits>& istr)
+{
+    return basic_bitfield_delim_manip<Char, CharTraits>::value(istr);
+}
+
+template <typename Char, typename CharTraits>
 constexpr auto class_prefix(std::basic_string_view<Char, CharTraits> enum_name) noexcept
 {
     using string_type = std::basic_string<Char, CharTraits>;
@@ -69,7 +75,7 @@ constexpr auto check_errors
 // NOTE: transfer istream iterators by reference
 // because they don't meet iterator requirements
 template <typename Char, typename CharTraits>
-auto raise_errors
+auto check_result
 (
       bool parse_result
     , boost::spirit::basic_istream_iterator<Char, CharTraits> const &begin
@@ -91,7 +97,7 @@ auto raise_errors
         string_type text;
         std::copy(begin, end, std::back_inserter(text));
 
-        BOOST_THROW_EXCEPTION((io_error{ "Parsing failed for \xB2%1%\xB1", to_string(text) }));
+        BOOST_THROW_EXCEPTION((io_error{ "Parsing failed for \xB2{0}\xB1", to_string(text) }));
     }
 
     if (last != end)
@@ -135,38 +141,33 @@ template <typename Char, typename CharTraits> auto parse_enum
     auto last = begin;
     auto const end = iterator_type{};
 
+    bool parse_result;
     if (is_scoped)
     {
         auto const class_prefix_ = class_prefix(enum_name);
-
-        raise_errors
+        
+        parse_result = phrase_parse
         (
-            phrase_parse
-            (
-                  last
-                , end
-                , lit(open) >> lit(class_prefix_) >> item >> lit(close)
-                , space
-                , items
-            ),
-            begin, last, end
+              last
+            , end
+            , lit(open) >> lit(class_prefix_) >> item >> lit(close)
+            , space
+            , items
         );
     }
     else
     {
-        raise_errors
+        parse_result = phrase_parse
         (
-            phrase_parse
-            (
-                  last
-                , end
-                , lit(open) >> item >> lit(close)
-                , space
-                , items
-            ),
-            begin, last, end
+              last
+            , end
+            , lit(open) >> item >> lit(close)
+            , space
+            , items
         );
     }
+
+    check_result(parse_result, begin, last, end);
 
     return items;
 }
@@ -301,7 +302,7 @@ auto parse_combo
         }
 
         const parser{ item, open, close, delim, pfx };
-        raise_errors
+        check_result
         (
             qi::phrase_parse(last, end, parser, qi::space, items),
             begin, last, end
@@ -336,7 +337,7 @@ auto parse_combo
         }
 
         const parser { item, open, close, delim };
-        raise_errors
+        check_result
         (
             qi::phrase_parse(last, end, parser, qi::space, items),
             begin, last, end
@@ -346,8 +347,8 @@ auto parse_combo
     return items;
 }
 
-template auto parse_combo(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, std::string_view, bool)->std::ptrdiff_t;
-template auto parse_combo(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, std::wstring_view, bool)->std::ptrdiff_t;
+template auto parse_combo(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, std::string_view, bool) -> std::ptrdiff_t;
+template auto parse_combo(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, std::wstring_view, bool) -> std::ptrdiff_t;
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits>

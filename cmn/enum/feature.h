@@ -1,9 +1,9 @@
 #pragma once
 
 #include <limits>
+#include <cassert>
 
 #include <cmn/meta/concepts.h>
-//#include <cmn/meta/type_traits.h>
 
 namespace cmn
 {
@@ -14,7 +14,10 @@ template <c::enumerable Policy>
 
 template <c::strong_bitfield Policy>
 [[nodiscard]] constexpr auto has_feature(Policy pol, Policy feat) noexcept -> bool
-{ return feat == (pol & feat); }
+{
+    //assert(!empty(feat));
+    return feat == (pol & feat);
+}
 
 template <c::strong_bitfield Policy, c::strong_bitfield... Features>
     requires (... && std::same_as<Policy, Features>)
