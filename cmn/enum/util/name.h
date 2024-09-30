@@ -2,7 +2,6 @@
 
 #include <cmn/meta/concepts.h>
 
-#include "magic_get.h"
 #include "qualified_name.h"
 
 namespace cmn::enum_
@@ -16,8 +15,8 @@ struct name_info
     wqualified_name m_wname;
 
     consteval name_info():
-        m_name{ get_enum_name(Enum{}) },
-        m_wname{ get_enum_wname(Enum{})}
+        m_name{ Enum{} },
+        m_wname{ Enum{}}
     {}
 };
 

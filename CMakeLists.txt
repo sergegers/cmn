@@ -54,6 +54,9 @@ add_library (
  "cmn/util/lexical_cast.h"
  "cmn/util/lexical_cast.cpp"
  "cmn/util/inverse.h" 
+# "cmn/util/strong_typedef.h" 
+# "cmn/util/strong_typedef_io.h" 
+# "cmn/util/strong_typedef_io.cpp" 
 
  "cmn/io/manip/slot/concepts.h"
  "cmn/io/manip/slot/decoder.h"

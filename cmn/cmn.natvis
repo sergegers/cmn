@@ -20,8 +20,13 @@
         </Expand>
     </Type>
     
-    <Type Name="cmn::emum_::record_info&lt;*&gt;">
-        <DisplayString>zzzz</DisplayString>
-    </Type>
+<!--    <Type Name="cmn::emum_::record_info&lt;*&gt;">
+        <DisplayString>enum_value,en</DisplayString>
+        <Expand>
+            <Item Name="[value]">enum_value,en</Item>
+            <Item Name="[name]">m_name</Item>
+            <Item Name="[wide_name]">m_wname</Item>
+        </Expand>
+    </Type> -->
     
 </AutoVisualizer>

@@ -76,7 +76,7 @@ consteval auto adapt_enum_info(cl_cmb_t)
          default_ops(kind_t::combo) | op_interoperable);
 }
 
-using namespace cmn::enum_::op;
+CMN_PP_INJECT_ENUM_OPS()
 
 static_assert(std::is_same_v<mask_type_t<cl_cmb_t>, unsigned int>);
 static_assert(ops_v<cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
@@ -84,17 +84,18 @@ static_assert(std::tuple_size_v<decltype(groups_v<cl_cmb_t>)> == 2);
 static_assert(kind_v<cl_cmb_t> == kind_t::combo);
 
 // magic get
-static_assert(get_enum_name(cl_cmb_t{}) == "cmn::enum_::cl_cmb_t");
-static_assert(get_enum_wname(cl_cmb_t{}) == L"cmn::enum_::cl_cmb_t");
-static_assert(get_enum_member_name<cl_cmb_t::one>() == "cmn::enum_::cl_cmb_t::one");
-static_assert(get_enum_member_wname<cl_cmb_t::one>() == L"cmn::enum_::cl_cmb_t::one");
+static_assert(magic_enum_name_v<cl_cmb_t> == "cmn::enum_::cl_cmb_t");
+static_assert(magic_enum_wname_v<cl_cmb_t> == L"cmn::enum_::cl_cmb_t");
+static_assert(magic_enum_member_name_v<cl_cmb_t::one> == "cmn::enum_::cl_cmb_t::one");
+static_assert(magic_enum_member_wname_v<cl_cmb_t::one> == L"cmn::enum_::cl_cmb_t::one");
 
 // qualified name
-static_assert(qualified_name{ get_enum_name(cl_cmb_t{})}.m_ns == "cmn::enum_");
-static_assert(qualified_name{ get_enum_name(cl_cmb_t{})}.m_enum_name == "cl_cmb_t");
-static_assert(qualified_member_name{ get_enum_member_name<cl_cmb_t::green>() }.m_ns == "cmn::enum_");
-static_assert(qualified_member_name{ get_enum_member_name<cl_cmb_t::green>() }.m_enum_name == "cl_cmb_t");
-static_assert(qualified_member_name{ get_enum_member_name<cl_cmb_t::green>() }.m_enum_member_name == "green");
+static_assert(qualified_name{ cl_cmb_t{} }.m_ns == "cmn::enum_");
+static_assert(qualified_name{ cl_cmb_t{} }.m_enum_name == "cl_cmb_t");
+// qualified member name
+static_assert(qualified_member_name{ make_int_t<cl_cmb_t::green>{} }.m_ns == "cmn::enum_");
+static_assert(qualified_member_name{ make_int_t<cl_cmb_t::green>{} }.m_enum_name == "cl_cmb_t");
+static_assert(qualified_member_name{ make_int_t<cl_cmb_t::green>{} }.m_enum_member_name == "green");
 
 BOOST_AUTO_TEST_CASE(masks)
 {
@@ -164,50 +165,24 @@ BOOST_AUTO_TEST_CASE(enum_class_out)
         BOOST_CHECK(tstr.is_equal("[green]"));
     }
 }
-//
-//CMN_PP_DECLARE_COMBO
-//(
-//    cmb_t,
-//    (
-//        (one,       0x0)
-//        (two,       0x1)
-//        (three,     0x2)
-//    )
-//    (
-//        (red,       0x0)
-//        (green,     0x4)
-//        (blue,      0x8)
-//    ),
-//
-//    (digit_mask,    0x3)
-//    (color_mask,    0xC)
-//)
 
-enum cmb_t
-{
-    one        = 0x0,
-    two        = 0x1,
-    three      = 0x2,
-    red        = 0x0,
-    green      = 0x4,
-    blue       = 0x8,
-    digit_mask = 0x3,
-    color_mask = 0xC
-};
-
-consteval auto adapt_enum_info(cmb_t)
-{
-    return adapt_combo_info_helper
+CMN_PP_DEFINE_COMBO
+(
+    cmb_t,
     (
-        groups_info
-        {
-            group_::make<one, two, three>(),
-            group_::make<red, green, blue>()
-        }
-    );
-}
+        (one,       0x0)
+        (two,       0x1)
+        (three,     0x2)
+    )
+    (
+        (red,       0x0)
+        (green,     0x4)
+        (blue,      0x8)
+    ),
 
-using namespace op;
+    (digit_mask,    0x3)
+    (color_mask,    0xC)
+)
 
 BOOST_AUTO_TEST_CASE(enum_out)
 {
@@ -357,27 +332,14 @@ BOOST_AUTO_TEST_CASE(read_combo)
     }
 }
 
-//CMN_PP_DECLARE_BITFIELD
-//(
-//    bf_t,
-//    (bf_zero,  0x0)
-//    (bf_one,   0x1)
-//    (bf_two,   0x2)
-//    (bf_four,  0x4)
-//)
-
-enum bf_t
-{
-    bf_zero     = 0x0,
-    bf_one      = 0x1,
-    bf_two      = 0x2,
-    bf_four     = 0x4
-};
-
-consteval auto adapt_enum_info(bf_t)
-{
-    return adapt_bitfield_info_helper<bf_zero, bf_one, bf_two, bf_four>();
-}
+CMN_PP_DEFINE_BITFIELD
+(
+    bf_t,
+    (bf_zero,  0x0)
+    (bf_one,   0x1)
+    (bf_two,   0x2)
+    (bf_four,  0x4)
+)
 
 static_assert(kind_v<bf_t> == kind_t::bitfield);
 static_assert(std::tuple_size_v<decltype(groups_v<bf_t>)> == 4);
@@ -392,29 +354,22 @@ BOOST_AUTO_TEST_CASE(read_bitfield)
     BOOST_TEST((bf_two | bf_four) == boost::lexical_cast<bf_t>("[bf_two bf_four]"s));
 }
 
-//CMN_PP_DECLARE_ENUM
-//(
-//    en_t,
-//    (en_apple, 4)
-//    (en_banana)
-//    (en_carrot, 17)
-//    (en_cherry)
-//)
+CMN_PP_DEFINE_ENUM
+(
+    en_t,
+    (en_apple, 4)
+    (en_banana)
+    (en_carrot, 17)
+    (en_cherry)
+)
 
-enum en_t
-{
-    en_apple    = 4,
-    en_banana,
-    en_carrot   = 17,
-    en_cherry
-};
-
-consteval auto adapt_enum_info(en_t)
-{
-    return adapt_enum_info_helper<en_apple, en_banana, en_carrot, en_cherry>();
-}
-
-using namespace op;
+// magic get
+static_assert(magic_enum_member_name_v<en_apple> == "cmn::enum_::en_apple");
+static_assert(magic_enum_member_wname_v<en_apple> == L"cmn::enum_::en_apple");
+// qualified member name
+static_assert(qualified_member_name{ make_int_t<en_apple>{} }.m_ns == "cmn::enum_");
+static_assert(qualified_member_name{ make_int_t<en_apple>{} }.m_enum_name == "en_t");
+static_assert(qualified_member_name{ make_int_t<en_apple>{} }.m_enum_member_name == "en_apple");
 
 BOOST_AUTO_TEST_CASE(read_enum)
 {
@@ -433,28 +388,14 @@ BOOST_AUTO_TEST_CASE(read_enum)
     BOOST_TEST(out == en_carrot);
 }
 
-//CMN_PP_DECLARE_ENUM_CLASS
-//(
-//    cl_en_t,
-//    (apple, 4)
-//    (banana)
-//    (carrot, 17)
-//    (cherry)
-//)
-
-enum cl_en_t
-{
-    apple    = 4,
-    banana,
-    carrot   = 17,
-    cherry
-};
-
-consteval auto adapt_enum_info(cl_en_t)
-{
-    using enum cl_en_t;
-    return adapt_enum_info_helper<apple, banana, carrot, cherry>();
-}
+CMN_PP_DEFINE_ENUM_CLASS
+(
+    cl_en_t,
+    (apple, 4)
+    (banana)
+    (carrot, 17)
+    (cherry)
+)
 
 BOOST_AUTO_TEST_CASE(class_prefix_)
 {
@@ -489,41 +430,20 @@ BOOST_AUTO_TEST_CASE(class_prefix_)
     }
 }
 
-//CMN_PP_DECLARE_ENUM_CLASS
-//(
-//    uns_en_t,
-//    (four, 4)
-//    (one, 1)
-//    (minus_one, -1)
-//    (seventeen, 17)
-//    (five, 5)
-//    (six, 6)
-//)
-
-enum class uns_en_t
-{
-    four            = 4,
-    one             = 1,
-    minus_one       = -1,
-    seventeen       = 17,
-    five            = 5,
-    six             = 6
-};
-
-consteval auto adapt_enum_info(uns_en_t)
-{
-    using enum uns_en_t;
-    return adapt_bitfield_info_helper<four, one, minus_one, seventeen, five, six>();
-}
-
-using namespace op;
+CMN_PP_DEFINE_ENUM_CLASS
+(
+    uns_en_t,
+    (four, 4)
+    (one, 1)
+    (minus_one, -1)
+    (seventeen, 17)
+    (five, 5)
+    (six, 6)
+)
 
 BOOST_AUTO_TEST_CASE(unsorted_enum)
 {
-    using record_type = utils<uns_en_t>::record_type;
     using enum uns_en_t;
-
-    auto g = groups_v<uns_en_t>;
 
     BOOST_TEST(begin_v<uns_en_t> == uns_en_t::minus_one);
     BOOST_TEST(last_v<uns_en_t> == uns_en_t::seventeen);

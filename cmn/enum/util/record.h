@@ -1,8 +1,10 @@
 #pragma once
 
-#include <cmn/meta/concepts.h>
+#include <type_traits>
 
-#include "magic_get.h"
+#include <cmn/meta/concepts.h>
+#include <cmn/meta/util.h>
+
 #include "qualified_name.h"
 #include "mask.h"
 
@@ -22,8 +24,8 @@ struct record_info
     wqualified_member_name      m_wname;
 
     consteval record_info():
-        m_name{ get_enum_member_name<En_>() },
-        m_wname{ get_enum_member_wname<En_>() }
+        m_name{ make_int_t<En_>{} },
+        m_wname{ make_int_t<En_>{} }
     {}
 
     template <typename Char, typename CharTraits>

@@ -8,6 +8,7 @@
 
 #include <cmn/error/exception.h>
 #include <cmn/enum/manip.h>
+#include <cmn/enum/feature.h>
 #include <cmn/util/util.h>   // overloaded
 #include <cmn/util/lexical_cast.h>
 
@@ -46,16 +47,6 @@ template <typename Char, typename CharTraits>
 auto get_delim(std::basic_istream<Char, CharTraits>& istr)
 {
     return basic_bitfield_delim_manip<Char, CharTraits>::value(istr);
-}
-
-template <typename Char, typename CharTraits>
-constexpr auto class_prefix(std::basic_string_view<Char, CharTraits> enum_name) noexcept
-{
-    using string_type = std::basic_string<Char, CharTraits>;
-
-    string_type pfx{ enum_name };
-    pfx += symbols<Char, CharTraits>::scope_resolution.c_str();
-    return pfx;
 }
 
 // NOTE: transfer istream iterators by reference
@@ -125,8 +116,8 @@ template <typename Char, typename CharTraits> auto parse_enum
 (
       std::basic_istream<Char, CharTraits> &istr
     , qi::symbols<Char, std::ptrdiff_t> const &item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 )
     -> std::ptrdiff_t
 {
@@ -142,15 +133,13 @@ template <typename Char, typename CharTraits> auto parse_enum
     auto const end = iterator_type{};
 
     bool parse_result;
-    if (is_scoped)
+    if (has_feature(po, print_t::class_prefix))
     {
-        auto const class_prefix_ = class_prefix(enum_name);
-        
         parse_result = phrase_parse
         (
               last
             , end
-            , lit(open) >> lit(class_prefix_) >> item >> lit(close)
+            , lit(open) >> lit(enum_name.class_prefix()) >> item >> lit(close)
             , space
             , items
         );
@@ -172,8 +161,8 @@ template <typename Char, typename CharTraits> auto parse_enum
     return items;
 }
 
-template auto parse_enum(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, std::string_view enum_name, bool) -> std::ptrdiff_t;
-template auto parse_enum(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, std::wstring_view, bool) -> std::ptrdiff_t;
+template auto parse_enum(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, qualified_name, print_t) -> std::ptrdiff_t;
+template auto parse_enum(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, wqualified_name, print_t) -> std::ptrdiff_t;
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits>
@@ -181,8 +170,8 @@ auto try_parse_enum
 (
     std::basic_istream<Char, CharTraits>& istr
     , qi::symbols<Char, std::ptrdiff_t> const& item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 ) noexcept
  -> boost::optional<std::ptrdiff_t>
 {
@@ -197,9 +186,8 @@ auto try_parse_enum
     auto last = begin;
     auto const end = iterator_type{};
 
-    if (is_scoped)
+    if (has_feature(po, print_t::class_prefix))
     {
-        auto const class_prefix_ = class_prefix(enum_name);
         if
         ( 
             check_errors
@@ -208,7 +196,7 @@ auto try_parse_enum
                 (
                       last
                     , end
-                    , lit(open) >> lit(class_prefix_) >> item >> lit(close)
+                    , lit(open) >> lit(enum_name.class_prefix()) >> item >> lit(close)
                     , space
                     , items
                 ),
@@ -242,10 +230,10 @@ auto try_parse_enum
     }
 }
 
-template auto try_parse_enum(std::istream& istr, qi::symbols<char, std::ptrdiff_t> const &item, 
-    std::string_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
-template auto try_parse_enum(std::wistream& istr, qi::symbols<wchar_t, std::ptrdiff_t> const &item, 
-    std::wstring_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
+template auto try_parse_enum(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, 
+    qualified_name, print_t) noexcept -> boost::optional<std::ptrdiff_t>;
+template auto try_parse_enum(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, 
+    wqualified_name, print_t) noexcept -> boost::optional<std::ptrdiff_t>;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename Char, typename CharTraits>
@@ -253,8 +241,8 @@ auto parse_combo
 (
       std::basic_istream<Char, CharTraits>& istr
     , qi::symbols<Char, std::ptrdiff_t> const &item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 )
     ->std::ptrdiff_t
 {
@@ -271,10 +259,8 @@ auto parse_combo
     auto const begin = iterator_type{ istr };
     auto last = begin;
     auto const end = iterator_type{};
-    if (is_scoped)
+    if (has_feature(po, print_t::class_prefix))
     {
-        auto const pfx = class_prefix(enum_name);
-
         struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
         {
             qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
@@ -301,7 +287,7 @@ auto parse_combo
             }
         }
 
-        const parser{ item, open, close, delim, pfx };
+        const parser{ item, open, close, delim, enum_name.class_prefix() };
         check_result
         (
             qi::phrase_parse(last, end, parser, qi::space, items),
@@ -347,8 +333,8 @@ auto parse_combo
     return items;
 }
 
-template auto parse_combo(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, std::string_view, bool) -> std::ptrdiff_t;
-template auto parse_combo(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, std::wstring_view, bool) -> std::ptrdiff_t;
+template auto parse_combo(std::istream &, qi::symbols<char, std::ptrdiff_t> const &, qualified_name, print_t) -> std::ptrdiff_t;
+template auto parse_combo(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &, wqualified_name, print_t) -> std::ptrdiff_t;
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits>
@@ -356,8 +342,8 @@ auto try_parse_combo
 (
     std::basic_istream<Char, CharTraits>& istr
     , qi::symbols<Char, std::ptrdiff_t> const& item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 ) noexcept
  -> boost::optional<std::ptrdiff_t>
 {
@@ -374,10 +360,8 @@ auto try_parse_combo
     auto const begin = iterator_type{ istr };
     auto last = begin;
     auto const end = iterator_type{};
-    if (is_scoped)
+    if (has_feature(po, print_t::class_prefix))
     {
-        auto const pfx = class_prefix(enum_name);
-
         struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
         {
             qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
@@ -404,7 +388,7 @@ auto try_parse_combo
             }
         }
 
-        const parser{ item, open, close, delim, pfx };
+        const parser{ item, open, close, delim, enum_name.class_prefix() };
         if
         (
             check_errors
@@ -460,10 +444,10 @@ auto try_parse_combo
     }
 }
 
-template auto try_parse_combo(std::istream& istr, qi::symbols<char, std::ptrdiff_t> const& item,
-    std::string_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
-template auto try_parse_combo(std::wistream& istr, qi::symbols<wchar_t, std::ptrdiff_t> const& item,
-    std::wstring_view enum_name, bool is_scoped) noexcept -> boost::optional<std::ptrdiff_t>;
+template auto try_parse_combo(std::istream &, qi::symbols<char, std::ptrdiff_t> const &,
+    qualified_name, print_t) noexcept -> boost::optional<std::ptrdiff_t>;
+template auto try_parse_combo(std::wistream &, qi::symbols<wchar_t, std::ptrdiff_t> const &,
+    wqualified_name, print_t) noexcept -> boost::optional<std::ptrdiff_t>;
 
 }
 

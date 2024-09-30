@@ -24,28 +24,6 @@ BOOST_AUTO_TEST_CASE(ctor)
     }
 }
 
-//BOOST_AUTO_TEST_CASE(get_error_description_)
-//{
-//    try
-//    {
-//        BOOST_THROW_EXCEPTION
-//        ((
-//            io_error{ "Text is not parsed" }
-//            << error::errinfo_msg
-//              {
-//                {
-//                        .m_msg = "My text",
-//                        .m_open = 5
-//                    }
-//                }
-//        ));
-//    }
-//    catch (boost::exception const &ex)
-//    {
-//        BOOST_TEST(get_error_description(ex) == "Text is not parsed");
-//    }
-//}
-
 BOOST_AUTO_TEST_SUITE_END() // error
 BOOST_AUTO_TEST_SUITE_END() // cmn
 

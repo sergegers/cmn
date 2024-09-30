@@ -77,4 +77,7 @@ using make_integer_sequence = typename detail::add_and_convert
 template <std::size_t B_, std::size_t E_>
 using make_index_sequence = make_integer_sequence<B_, E_>;
 
+///////////////////////////////////////////////////////////////////////////////
+template <auto Int_> using make_int_t = std::integral_constant<decltype(Int_), Int_>;
+
 }

@@ -94,7 +94,7 @@ consteval auto adapt_enum_info_helper(unsigned int ops = default_ops(kind_t::enu
     return enum_info
     {
         .m_ops = ops,
-        .m_groups = groups_info { group_info { record_info<Ens_>{} }... }
+        .m_groups = std::make_tuple(group_::make<Ens_...>())
     };
 }
 
@@ -104,7 +104,7 @@ consteval auto adapt_bitfield_info_helper(unsigned int ops = default_ops(kind_t:
     return enum_info
     {
         .m_ops = ops,
-        .m_groups = groups_info { group_::make<Ens_>()... }
+        .m_groups = std::make_tuple(group_::make<Ens_>()...)
     };
 }
 
@@ -187,17 +187,19 @@ template <c::enum_ En> constexpr int ops_v = traits<En>::ops;
 template <c::e_any_enum Enum> constexpr Enum begin_v = traits<Enum>::begin;
 template <c::e_any_enum Enum> constexpr Enum last_v = traits<Enum>::last;
 template <c::e_any_enum Enum> constexpr Enum end_v = traits<Enum>::end;
-template <c::e_any_enum Enum> constexpr auto groups_v = traits<Enum>::enum_info.m_groups;
+template <c::e_any_enum Enum> constexpr auto enum_info_v = traits<Enum>::enum_info;
+template <c::e_any_enum Enum> constexpr auto groups_v = enum_info_v<Enum>.m_groups;
 template <c::e_any_enum Enum, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<Enum>);
 template <c::e_any_enum Enum> constexpr auto masks_v = traits<Enum>::masks;
+template <c::e_any_enum Enum> constexpr auto name_info_v = traits<Enum>::name_info;
 
 template <c::enum_ Enum, typename Char, typename CharTraits>
 constexpr auto name(Enum, std::basic_ios<Char, CharTraits> const &) noexcept
 {
     if constexpr (std::is_same_v<Char, char>) 
-        return traits<Enum>::name_info.m_name.m_name;
+        return traits<Enum>::name_info.m_name;
     else 
-        return traits<Enum>::m_wname.m_name;
+        return traits<Enum>::m_wname;
 }
 
 }

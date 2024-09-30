@@ -33,8 +33,8 @@ auto parse_enum
 (
       std::basic_istream<Char, CharTraits>& istr
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 )
     ->std::ptrdiff_t;
 
@@ -44,8 +44,8 @@ auto parse_combo
 (
       std::basic_istream<Char, CharTraits>& istr
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 )
     ->std::ptrdiff_t;
 
@@ -56,8 +56,8 @@ template <typename Char, typename CharTraits>
 (
     std::basic_istream<Char, CharTraits>& istr
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 ) noexcept
  -> boost::optional<std::ptrdiff_t>;
 
@@ -67,8 +67,8 @@ auto try_parse_combo
 (
     std::basic_istream<Char, CharTraits>& istr
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , std::basic_string_view<Char, CharTraits> enum_name
-    , bool is_scoped
+    , basic_qualified_name<Char, CharTraits> enum_name
+    , print_t po
 ) noexcept
  -> boost::optional<std::ptrdiff_t>;
 
@@ -231,16 +231,7 @@ struct reader<Enum, kind_t::enum_>
             }
         );
 
-        this->m_val = static_cast<Enum>
-        (
-            detail::parse_enum
-            (
-                  istr
-                , item
-                , name(Enum{}, istr)
-                , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
-            )
-        );
+        this->m_val = static_cast<Enum>(detail::parse_enum(istr, item, name(Enum{}, istr), po));
 
         return istr;
     }
@@ -282,16 +273,7 @@ struct reader<Enum, kind_t::bitfield>
             }
         );
 
-        this->m_val = static_cast<Enum>
-        (
-            detail::parse_combo
-            (
-                  istr
-                , item
-                , name(Enum{}, istr)
-                , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
-            )
-        );
+        this->m_val = static_cast<Enum>(detail::parse_combo(istr, item, name(Enum{}, istr), po));
 
         return istr;
     }
@@ -338,16 +320,7 @@ struct reader<Enum, kind_t::combo>
             }
         );
 
-        this->m_val = static_cast<Enum>
-        (
-            detail::parse_combo
-            (
-                  istr
-                , item
-                , name(Enum{}, istr)
-                , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
-            )
-        );
+        this->m_val = static_cast<Enum>(detail::parse_combo(istr, item, name(Enum{}, istr), po));
 
         return istr;
     }

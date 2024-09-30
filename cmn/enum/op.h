@@ -154,12 +154,28 @@ auto operator >> (std::basic_istream<Char, CharTaits> &istr, Enum &en) -> std::b
     return io::reader{ en, kkind_t<kind_v<Enum>>{} }.read(istr);
 } 
 
-
 #undef CMN_PP_ENUM_CONSTEXPR_BINARY_OP
 #undef CMN_PP_ENUM_CONSTEXPR_UNARY_OP
 #undef CMN_PP_ENUM_MUTABLE_PREFIX_UNARY_OP
 #undef CMN_PP_ENUM_MUTABLE_POSTFIX_UNARY_OP
 #undef CMN_PP_ENUM_COMPOUND_OP
+
+#define CMN_PP_INJECT_ENUM_OPS()   \
+    using ::cmn::enum_::op::operator ==; \
+    using ::cmn::enum_::op::operator !=; \
+    using ::cmn::enum_::op::operator &; \
+    using ::cmn::enum_::op::operator &=; \
+    using ::cmn::enum_::op::operator |; \
+    using ::cmn::enum_::op::operator |=; \
+    using ::cmn::enum_::op::operator ^; \
+    using ::cmn::enum_::op::operator ^=; \
+    using ::cmn::enum_::op::operator ~; \
+    using ::cmn::enum_::op::operator ++; \
+    using ::cmn::enum_::op::operator --; \
+    using ::cmn::enum_::op::operator +; \
+    using ::cmn::enum_::op::operator -; \
+    using ::cmn::enum_::op::operator <<; \
+    using ::cmn::enum_::op::operator >>;
 
 }
 
