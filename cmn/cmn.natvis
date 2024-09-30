@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+    <Type Name="cmn::enum_::basic_qualified_name&lt;*,*&gt;">
+        <DisplayString>{{ {m_name,na} }}</DisplayString>
+        <Expand>
+            <Item Name="[name]">m_name,na</Item>
+            <Item Name="[namespace]">m_ns,na</Item>
+            <Item Name="[enum_name]">m_enum_name,na</Item>
+        </Expand>    
+    </Type>
+    
+    <Type Name="cmn::enum_::basic_qualified_member_name&lt;*,*&gt;">
+        <DisplayString>{{ {m_name,na} }}</DisplayString>
+        <Expand>
+            <Item Name="[name]">m_name,na</Item>
+            <Item Name="[namespace]">m_ns,na</Item>
+            <Item Name="[enum_name]">m_enum_name,na</Item>
+            <Item Name="[enum_member_name]">m_enum_member_name,na</Item>
+        </Expand>
+    </Type>
+    
+    <Type Name="cmn::emum_::record_info&lt;*&gt;">
+        <DisplayString>zzzz</DisplayString>
+    </Type>
+    
+</AutoVisualizer>

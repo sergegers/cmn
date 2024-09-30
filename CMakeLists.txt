@@ -28,8 +28,8 @@ set(Boost_USE_STATIC_RUNTIME ON)
 set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/boost/)
 
 find_package(Boost REQUIRED COMPONENTS 
-    unit_test_framework 
     exception
+    unit_test_framework 
 )
 
 # message(STATUS "Boost_INCLUDE_DIRS = " ${Boost_INCLUDE_DIRS})
@@ -119,12 +119,16 @@ add_library (
  "cmn/name/parser_symbols.h"
  "cmn/name/parser_symbols.cpp"
  "cmn/name/types.h"
-  )
+)
+
+set(cmn_NatvisPath "${CMAKE_CURRENT_SOURCE_DIR}/cmn/cmn.natvis")
 
 target_include_directories(cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 
+target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
+
  add_executable (
- test
+  test
   
   "test/main.cpp"
   "test/error.cpp"
@@ -133,6 +137,7 @@ target_include_directories(cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_D
   )
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})
 
 target_link_libraries(test ${Boost_LIBRARIES})
 target_link_libraries(test cmn)

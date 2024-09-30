@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cmn/meta/concepts.h>
-//#include <cmn/enum/manip.h>
 
 #include "magic_get.h"
 #include "qualified_name.h"

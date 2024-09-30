@@ -523,6 +523,8 @@ BOOST_AUTO_TEST_CASE(unsorted_enum)
     using record_type = utils<uns_en_t>::record_type;
     using enum uns_en_t;
 
+    auto g = groups_v<uns_en_t>;
+
     BOOST_TEST(begin_v<uns_en_t> == uns_en_t::minus_one);
     BOOST_TEST(last_v<uns_en_t> == uns_en_t::seventeen);
 
