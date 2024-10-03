@@ -1,5 +1,7 @@
 #pragma once
 
+#include <boost/mp11.hpp>
+
 #include <type_traits>
 #include <utility>
 
@@ -18,6 +20,13 @@ using underlying_type_t = typename underlying_type<T>::type;
 // enum specialization
 template <c::enum_ T>
 struct underlying_type<T>: std::underlying_type<T> {};
+
+// unit specialization
+template <c::unit Unit>
+struct underlying_type<Unit>: std::type_identity<typename Unit::underlying_type> {};
+
+template <typename T>
+using underlying_type_t = typename underlying_type<T>::type;
 
 //-----------------------------------------------------------------------------
 template <typename I>
@@ -79,5 +88,18 @@ using make_index_sequence = make_integer_sequence<B_, E_>;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <auto Int_> using make_int_t = std::integral_constant<decltype(Int_), Int_>;
+
+///////////////////////////////////////////////////////////////////////////////
+template <typename T> constexpr bool is_char_v = boost::mp11::mp_find
+<
+    boost::mp11::mp_list
+    <
+          char
+        , unsigned char
+        , signed char
+        , wchar_t
+    >,
+    std::remove_cvref_t<T>
+>::value;
 
 }

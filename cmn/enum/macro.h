@@ -1,3 +1,4 @@
+#pragma once
 
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/facilities/overload.hpp>
@@ -54,35 +55,6 @@
 // simply eats value arguments
 #define CMN_PP_EXTRACT_GROUP_SEQ(group_nvp_seq) \
     BOOST_PP_SEQ_ENUM(group_nvp_seq)
-
-///////////////////////////////////////////////////////////////////////////////
-#define CMN_PP_ADAPT_ENUM_INFO(name, group_nvp_seq) \
-    consteval auto adapt_enum_info(name)    \
-    {   \
-        using enum name;    \
-        return ::cmn::enum_::adapt_enum_info_helper<CMN_PP_EXTRACT_GROUP_SEQ(group_nvp_seq)>();  \
-    }
-
-///////////////////////////////////////////////////////////////////////////////
-#define CMN_PP_ADAPT_BITFIELD_INFO(name, group_nvp_seq) \
-    consteval auto adapt_enum_info(name)    \
-    {   \
-        using enum name;    \
-        return ::cmn::enum_::adapt_bitfield_info_helper<CMN_PP_EXTRACT_GROUP_SEQ(group_nvp_seq)>();  \
-    }
-
-///////////////////////////////////////////////////////////////////////////////
-
-#define CMN_PP_MARKUP_GROUP_INFO(r, data, i, group_nvp_seq) \
-    BOOST_PP_COMMA_IF(i) ::cmn::enum_::group_::make<CMN_PP_EXTRACT_GROUP_SEQ(group_nvp_seq)>()
-
-#define CMN_PP_ADAPT_COMBO_INFO(name, groups_seq) \
-    consteval auto adapt_enum_info(name)    \
-    {   \
-        using enum name;    \
-        return ::cmn::enum_::adapt_combo_info_helper(   \
-            ::cmn::enum_::groups_info{ BOOST_PP_SEQ_FOR_EACH_I(CMN_PP_MARKUP_GROUP_INFO, data, groups_seq) });    \
-    }
 
 ///////////////////////////////////////////////////////////////////////////////
 #define CMN_PP_INJECT_ENUM_OPS()   \

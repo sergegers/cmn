@@ -44,8 +44,8 @@ endif()
 add_library (
  cmn 
 
+ "cmn/meta/macro.h"
  "cmn/meta/concepts.h"
- 
  "cmn/meta/promote.h"
  "cmn/meta/symbols.h"
 
@@ -54,9 +54,9 @@ add_library (
  "cmn/util/lexical_cast.h"
  "cmn/util/lexical_cast.cpp"
  "cmn/util/inverse.h" 
-# "cmn/util/strong_typedef.h" 
-# "cmn/util/strong_typedef_io.h" 
-# "cmn/util/strong_typedef_io.cpp" 
+ "cmn/util/strong_typedef.h" 
+ "cmn/util/strong_typedef_io.h" 
+ "cmn/util/strong_typedef_io.cpp" 
 
  "cmn/io/manip/slot/concepts.h"
  "cmn/io/manip/slot/decoder.h"
@@ -72,12 +72,12 @@ add_library (
 
  "cmn/enum/util/magic_get.h"
  "cmn/enum/util/qualified_name.h" 
- "cmn/enum/util/name.h" 
- "cmn/enum/util/record.h" 
+ "cmn/enum/util/name_info.h" 
+ "cmn/enum/util/record_info.h" 
  "cmn/enum/util/mask.h" 
- "cmn/enum/util/group.h" 
- "cmn/enum/util/groups.h"
- "cmn/enum/util/enum.h"
+ "cmn/enum/util/group_info.h" 
+ "cmn/enum/util/groups_info.h"
+ "cmn/enum/util/enum_info.h"
 
  "cmn/enum/util.h"
  "cmn/enum/macro.h"  
@@ -122,7 +122,7 @@ add_library (
  "cmn/name/parser_symbols.h"
  "cmn/name/parser_symbols.cpp"
  "cmn/name/types.h"
-)
+ )
 
 set(cmn_NatvisPath "${CMAKE_CURRENT_SOURCE_DIR}/cmn/cmn.natvis")
 
@@ -137,7 +137,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/error.cpp"
   "test/enum.cpp"
   "test/name.cpp"
-  )
+   "test/io.cpp")
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

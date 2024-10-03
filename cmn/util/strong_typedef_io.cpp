@@ -8,6 +8,7 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
+#include <cmn/util/util.h>
 
 // ReSharper disable CppUnusedIncludeDirective
 #include <cmn/enum/io.h>
@@ -16,8 +17,6 @@
 
 namespace cmn::io
 {
-
-template auto operator << (std::ostream &, int_fmt_t)->std::ostream &;
 
 namespace manip
 {
@@ -57,15 +56,15 @@ auto int_fmt_storage_t::value(std::ios_base const &ios) -> keep_type
 auto int_fmt_storage_t::value(std::ios_base &ios_, keep_type value) -> void
 {
     // set mask
-    auto const fvalue = gsl::narrow_cast<int_fmt_t>(value);
+    auto const fvalue = static_cast<int_fmt_t>(value);
     auto const mask   = get_mask(fvalue);
 
-    auto const old_fvalue = gsl::narrow_cast<int_fmt_t>(int_fmt_storage_t::value(ios_));
+    auto const old_fvalue = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios_));
     auto const new_fvalue = set_value(old_fvalue, fvalue, mask);
 
     auto const new_value = static_cast<keep_type>(0) | static_cast<short>(new_fvalue);
 
-    ios_.iword(index()) = gsl::narrow_cast<int>(new_value);
+    ios_.iword(index()) = static_cast<int>(new_value);
 }
 
 }
@@ -135,7 +134,7 @@ struct default_read_char
 
     [[noreturn]] auto operator ()(Char c) const -> void
     {
-        throw_<format_error>::defer_fmt_error("Input error. Unknown symbol [%1%]. Allowed [%2%] only.", c, char_list{})
+        throw format_error{ "Input error. Unknown symbol [%1%]. Allowed [%2%] only.", c, char_list{} }
             << make_steam_err_info(m_istr, 1);
     }
 };
@@ -328,7 +327,7 @@ struct sign_pfx
                 case plus: pfx_.m_unit = 1; break;
 
                 default:
-                    throw_unexpected();
+                    throw unexpected{};
                 }
             }
             else if (has_feature(pfx_.m_fmt, forcesign))
@@ -342,7 +341,7 @@ struct sign_pfx
                 case plus: pfx_.m_unit = 1; break;
 
                 default:
-                    throw_unexpected();
+                    throw unexpected{};
                 }
             }
             return istr;
@@ -593,9 +592,9 @@ struct width
             if (has_feature(w_.m_fmt, long_))
             {
                 if (has_feature(w_.m_fmt, dec))
-                    istr >> std::internal >> std::setw(dec_digits) >> std::setfill(zero);
+                    istr >> std::internal >> std::setw(dec_digits);
                 else if (has_feature(w_.m_fmt, hex))
-                    istr >> std::internal >> std::setw(hex_digits) >> std::setfill(zero);
+                    istr >> std::internal >> std::setw(hex_digits);
             }
             else if (has_feature(w_.m_fmt, short_))
             {
@@ -737,5 +736,12 @@ template auto try_read_(std::istream &istr) noexcept -> boost::optional<std::ptr
 template auto try_read_(std::wistream &istr) noexcept -> boost::optional<std::ptrdiff_t>;
 
 }
+
+}
+
+namespace cmn::enum_::op
+{
+
+template auto operator << (std::ostream &, cmn::io::int_fmt_t)->std::ostream &;
 
 }

@@ -3,8 +3,6 @@
 #include <type_traits>
 #include <concepts>
 
-#include <gsl/gsl>
-
 // boost
 #include <boost/operators.hpp>
 #include <boost/functional/hash.hpp>
@@ -13,10 +11,9 @@
 // boost.io
 #include <boost/io/ios_state.hpp>
 
-#include <cmn/cfg/macro.h>
-
-#include <cmn/shared/meta/concepts.h>
-#include <cmn/shared/meta/type_traits.h>
+#include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
+#include <cmn/meta/macro.h>
 
 namespace cmn
 {
@@ -99,6 +96,8 @@ public:
     constexpr strong_typedef_impl(itself const &) = default;
     constexpr strong_typedef_impl(itself &&) = default;
 
+    constexpr ~strong_typedef_impl() = default;
+
     constexpr auto operator=(itself const &) noexcept -> itself& = default;
     constexpr auto operator=(itself &&) noexcept -> itself& = default;
 
@@ -147,7 +146,7 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, c::fmt_unit auto c
     static_assert
     (
         sizeof(Char) == 0,
-        "If you want to luxury output strong typedef, include header <cmn/shared/util/strong_typedef_io.h>"
+        "If you want to luxury output strong typedef, include header <cmn/util/strong_typedef_io.h>"
     );
     return ostr;
 }
@@ -175,7 +174,7 @@ auto operator >> (std::basic_istream<Char, CharTraits> &istr, c::fmt_unit auto &
     static_assert
     (
         sizeof(Char) == 0,
-        "If you want to luxury input strong typedef, include header <cmn/shared/util/strong_typedef_io.h>"
+        "If you want to luxury input strong typedef, include header <cmn/util/strong_typedef_io.h>"
     );
     return istr;        
 }
@@ -243,13 +242,13 @@ public:
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (c::int_convertible_to<T> auto rhs) const noexcept
     {
-        return inherited::operator <=> (gsl::narrow_cast<T>(rhs));
+        return inherited::operator <=> (static_cast<T>(rhs));
     }
 
     // allow interop operations
     constexpr auto operator += (c::int_convertible_to<Ptrdiff> auto rhs) -> U &
     {
-        this->m_t += gsl::narrow_cast<Ptrdiff>(rhs);
+        this->m_t += static_cast<Ptrdiff>(rhs);
         return static_cast<U &>(*this);
     }
 
@@ -261,7 +260,7 @@ public:
 
     constexpr auto operator -= (c::int_convertible_to<Ptrdiff> auto rhs) -> U &
     {
-        this->m_t -= gsl::narrow_cast<Ptrdiff>(rhs);
+        this->m_t -= static_cast<Ptrdiff>(rhs);
         return static_cast<U &>(*this);
     }
 
@@ -275,7 +274,7 @@ public:
     constexpr auto operator -- () -> U & { return --this->m_t, static_cast<U &>(*this); }
 
     friend constexpr auto operator - (U const &lhs, U const &rhs) -> Ptrdiff
-    { return gsl::narrow_cast<Ptrdiff>(lhs.m_t - rhs.m_t); }
+    { return static_cast<Ptrdiff>(lhs.m_t - rhs.m_t); }
 };
 
 //-----------------------------------------------------------------------------
@@ -371,7 +370,7 @@ public:
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (c::int_convertible_to<T> auto rhs) const noexcept
     {
-        return inherited::operator <=> (gsl::narrow_cast<T>(rhs));
+        return inherited::operator <=> (static_cast<T>(rhs));
     }
 
     using inherited::operator +=;
@@ -382,7 +381,7 @@ public:
 
     constexpr auto operator += (c::int_convertible_to<T> auto const &rhs) -> U &
     {
-        this->m_t += gsl::narrow_cast<T>(rhs);
+        this->m_t += static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
@@ -394,7 +393,7 @@ public:
 
     constexpr auto operator -=(c::int_convertible_to<T> auto rhs) -> U &
     {
-        this->m_t -= gsl::narrow_cast<T>(rhs);
+        this->m_t -= static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
@@ -406,7 +405,7 @@ public:
 
     constexpr auto operator *= (T rhs) -> U &
     {
-        this->m_t *= gsl::narrow_cast<T>(rhs);
+        this->m_t *= static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
@@ -418,7 +417,7 @@ public:
 
     constexpr auto operator /= (T rhs) -> U &
     {
-        this->m_t /= gsl::narrow_cast<T>(rhs);
+        this->m_t /= static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
@@ -430,7 +429,7 @@ public:
 
     constexpr auto operator %= (T rhs) -> U &
     {
-        this->m_t %= gsl::narrow_cast<T>(rhs);
+        this->m_t %= static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
@@ -481,5 +480,5 @@ using strong_typedef_integral_interop = st_facade<T, Tag, Default_, strong_typed
 }
 
 #ifdef UNITY_BUILD
-#   include <cmn/shared/util/strong_typedef_io.h>
+#   include <cmn/util/strong_typedef_io.h>
 #endif

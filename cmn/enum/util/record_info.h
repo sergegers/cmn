@@ -3,7 +3,6 @@
 #include <type_traits>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/util.h>
 
 #include "qualified_name.h"
 #include "mask.h"

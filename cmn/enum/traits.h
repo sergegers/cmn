@@ -85,41 +85,6 @@ struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// adapt_enum_info() helpers
-//
-///////////////////////////////////////////////////////////////////////////////
-template <c::enum_ auto ... Ens_>
-consteval auto adapt_enum_info_helper(unsigned int ops = default_ops(kind_t::enum_))
-{
-    return enum_info
-    {
-        .m_ops = ops,
-        .m_groups = std::make_tuple(group_::make<Ens_...>())
-    };
-}
-
-template <c::enum_ auto ... Ens_>
-consteval auto adapt_bitfield_info_helper(unsigned int ops = default_ops(kind_t::bitfield))
-{
-    return enum_info
-    {
-        .m_ops = ops,
-        .m_groups = std::make_tuple(group_::make<Ens_>()...)
-    };
-}
-
-template <typename... Groups>
-consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, unsigned int ops = default_ops(kind_t::combo))
-{
-    return enum_info
-    {
-        .m_ops = ops,
-        .m_groups = std::move(groups)
-    };
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
 // first enum constant value in next group based on previous mask
 //
 template <c::enumerable Int> 

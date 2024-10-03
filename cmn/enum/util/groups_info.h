@@ -15,7 +15,7 @@
 
 #include <cmn/enum/feature.h>
 
-#include "group.h"
+#include "group_info.h"
 
 namespace cmn::enum_
 {

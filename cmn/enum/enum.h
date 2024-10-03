@@ -1,6 +1,32 @@
 #pragma once
 
-#include "macro.h"
+#include <cmn/enum/util.h>
+// ReSharper disable once CppUnusedIncludeDirective
+#include <cmn/enum/op.h>
+#include <cmn/enum/macro.h>
+
+namespace cmn::enum_
+{
+
+template <c::enum_ auto ... Ens_>
+consteval auto adapt_enum_info_helper(unsigned int ops = default_ops(kind_t::enum_))
+{
+    return enum_info
+    {
+        .m_ops = ops,
+        .m_groups = std::make_tuple(group_::make<Ens_...>())
+    };
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+#define CMN_PP_ADAPT_ENUM_INFO(name, group_nvp_seq) \
+    consteval auto adapt_enum_info(name)    \
+    {   \
+        using enum name;    \
+        return ::cmn::enum_::adapt_enum_info_helper<CMN_PP_EXTRACT_GROUP_SEQ(group_nvp_seq)>();  \
+    }
 
 ///////////////////////////////////////////////////////////////////////////////
 //

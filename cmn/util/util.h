@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <bit>
+#include <concepts>
 
 namespace cmn
 {
@@ -47,6 +48,16 @@ constexpr auto bsf(std::unsigned_integral auto value) -> std::size_t
 constexpr auto bsr(std::unsigned_integral auto value) -> std::size_t
 {
     return static_cast<std::size_t>(std::bit_width(value) - 1);
+}
+
+//
+// https://stackoverflow.com/a/4609795/8452129
+//
+template <std::integral Int>
+constexpr auto sgn(Int val) -> std::make_signed_t<Int>
+{
+    static constexpr auto zero = Int{ 0 };
+    return (zero < val) - (val < zero);
 }
 
 }

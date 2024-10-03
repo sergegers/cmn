@@ -34,6 +34,7 @@ public:
 };
 
 using not_implemented = basic_error<struct not_implemented_>;
+using unexpected = basic_error<struct unexpected_>;
 using io_error = basic_error<struct io_error_>;
 using format_error = basic_error<struct format_error_>;
 

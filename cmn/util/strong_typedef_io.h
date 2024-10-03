@@ -7,9 +7,10 @@
 #include <boost/implicit_cast.hpp>
 #include <boost/optional.hpp>
 
+#include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
-#include <cmn/meta/concepts.h>
 #include <cmn/enum/combo.h>
 #include <cmn/enum/feature.h>
 #include <cmn/util/strong_typedef.h>
@@ -25,55 +26,110 @@ namespace io
 //
 
 // NOTE: zero value isn't used, so we can get mask from value
-#pragma warning(push)
-#pragma warning(disable: 4002)
-CHT_PP_DECLARE_COMBO_CLASS_BASE
-(
-    int_fmt_t, short,
+//CMN_PP_DEFINE_COMBO_CLASS_BASE
+//(
+//    int_fmt_t, short,
+//    (
+//      (dec,             0b0000'0000'0000'0001)
+//      (hex,             0b0000'0000'0000'0010)
+//    )                    
+//    (                    
+//        (showbase,      0b0000'0000'0000'0100)
+//        (hidebase,      0b0000'0000'0000'1000)
+//    )                    
+//    (                    
+//        (asm_,          0b0000'0000'0001'0000)
+//        (c,             0b0000'0000'0010'0000)
+//    )                    
+//    (                    
+//        (short_,        0b0000'0000'0100'0000)
+//        (long_,         0b0000'0000'1000'0000)
+//    )                    
+//    (                    
+//        (uppercase,     0b0000'0001'0000'0000)
+//        (lowercase,     0b0000'0010'0000'0000)
+//    )                    
+//    (                    
+//        (sign,          0b0000'0100'0000'0000)      // space for zero
+//        (nosign,        0b0000'1000'0000'0000)
+//        (forcesign,     0b0001'0000'0000'0000)      // + for zero
+//    )                    
+//    ,                    
+//    (empty,             0b0000'0000'0000'0000)
+//    (default_,          dec | hidebase | c    | short_ | lowercase | nosign)    // must be synced with
+//                                                                                // strong_typedef_traits::default_
+//
+//    (base_mask,         dec | hex)
+//    (showbase_mask,     showbase | hidebase)
+//    (lang_mask,         asm_ | c)
+//    (width_mask,        short_ | long_)
+//    (case_mask,         uppercase | lowercase)
+//    (sign_mask,         sign | nosign | forcesign)
+//
+//    (sshort_asm_up_hex, hex | showbase | asm_ | short_ | uppercase | sign)          // +1Bh
+//    (long_asm_up_hex,   hex | showbase | asm_ | long_ | uppercase | nosign)         // 0000001Bh
+//    (long_c_up_hex,     hex | showbase | c | long_ | uppercase | forcesign)         // +0x0000001B
+//)
+
+enum class int_fmt_t: short
+{
+    dec                 = 0b0000'0000'0000'0001,
+    hex                 = 0b0000'0000'0000'0010,
+
+    showbase            = 0b0000'0000'0000'0100,
+    hidebase            = 0b0000'0000'0000'1000,
+
+    asm_                = 0b0000'0000'0001'0000,
+    c                   = 0b0000'0000'0010'0000,
+                            
+    short_              = 0b0000'0000'0100'0000,
+    long_               = 0b0000'0000'1000'0000,
+                            
+    uppercase           = 0b0000'0001'0000'0000,
+    lowercase           = 0b0000'0010'0000'0000,
+                            
+    sign                = 0b0000'0100'0000'0000,      // space for zero
+    nosign              = 0b0000'1000'0000'0000,
+    forcesign           = 0b0001'0000'0000'0000,      // + for zero
+    
+    empty               = 0b0000'0000'0000'0000,
+    default_            = dec | hidebase | c    | short_ | lowercase | nosign,      // must be synced with
+                                                                                    // strong_typedef_traits::default_
+    // masks                            
+    base_mask           = dec | hex,
+    showbase_mask       = showbase | hidebase,
+    lang_mask           = asm_ | c,
+    width_mask          = short_ | long_,
+    case_mask           = uppercase | lowercase,
+    sign_mask           = sign | nosign | forcesign,
+    // predefined formats
+    sshort_asm_up_hex   = hex | showbase | asm_ | short_ | uppercase | sign,        // +1Bh
+    long_asm_up_hex     = hex | showbase | asm_ | long_ | uppercase | nosign,       // 0000001Bh
+    long_c_up_hex       = hex | showbase | c | long_ | uppercase | forcesign        // +0x0000001B
+};
+
+consteval auto adapt_enum_info(int_fmt_t)
+{
+    using namespace cmn::enum_;
+    using enum int_fmt_t;
+
+    return adapt_combo_info_helper
     (
-      (dec,             0b0000'0000'0000'0001)
-      (hex,             0b0000'0000'0000'0010)
-    )                    
-    (                    
-        (showbase,      0b0000'0000'0000'0100)
-        (hidebase,      0b0000'0000'0000'1000)
-    )                    
-    (                    
-        (asm_,          0b0000'0000'0001'0000)
-        (c,             0b0000'0000'0010'0000)
-    )                    
-    (                    
-        (short_,        0b0000'0000'0100'0000)
-        (long_,         0b0000'0000'1000'0000)
-    )                    
-    (                    
-        (uppercase,     0b0000'0001'0000'0000)
-        (lowercase,     0b0000'0010'0000'0000)
-    )                    
-    (                    
-        (sign,          0b0000'0100'0000'0000)      // space for zero
-        (nosign,        0b0000'1000'0000'0000)
-        (forcesign,     0b0001'0000'0000'0000)      // + for zero
-    )                    
-    ,                    
-    (empty,             0b0000'0000'0000'0000)
-    (default_,          dec | hidebase | c    | short_ | lowercase | nosign)    // must be synced with
-                                                                                // strong_typedef_traits::default_
+        groups_info
+        {
+              group_::make<dec, hex>()
+            , group_::make<showbase, hidebase>()
+            , group_::make<asm_, c>()
+            , group_::make<short_, long_>()
+            , group_::make<uppercase, lowercase>()
+            , group_::make<sign, nosign, forcesign>()
+        },
+         default_ops(kind_t::combo) | op_interoperable
+    );
+}
 
-    (base_mask,         dec | hex)
-    (showbase_mask,     showbase | hidebase)
-    (lang_mask,         asm_ | c)
-    (width_mask,        short_ | long_)
-    (case_mask,         uppercase | lowercase)
-    (sign_mask,         sign | nosign | forcesign)
+CMN_PP_INJECT_ENUM_OPS()
 
-    (sshort_asm_up_hex, hex | showbase | asm_ | short_ | uppercase | sign)          // +1Bh
-    (long_asm_up_hex,   hex | showbase | asm_ | long_ | uppercase | nosign)         // 0000001Bh
-    (long_c_up_hex,     hex | showbase | c | long_ | uppercase | forcesign)         // +0x0000001B
-)
-#pragma warning(pop)
-
-extern template auto operator << (std::ostream &, int_fmt_t)->std::ostream &;
 
 namespace manip
 {
@@ -169,14 +225,14 @@ struct reader
     }
 };
 
-// BUG: https://developercommunity.visualstudio.com/content/problem/954614/typedef-with-trailing-return-type-function-breaks.html
 template
 <
       typename Char
     , typename CharTraits
     , std::integral Unit
 >
-using te_reader = std::function<std::basic_istream<Char, CharTraits> & (std::basic_istream<Char, CharTraits> &, int_fmt_t, Unit &)>;
+using te_reader = std::function<auto (std::basic_istream<Char, CharTraits> &, int_fmt_t, Unit &)
+    -> std::basic_istream<Char, CharTraits> &>;
 
 //-----------------------------------------------------------------------------
 template
@@ -205,14 +261,14 @@ struct writer
     }
 };
 
-// BUG: https://developercommunity.visualstudio.com/content/problem/954614/typedef-with-trailing-return-type-function-breaks.html
 template
 <
       typename Char
     , typename CharTraits
     , std::integral Unit
 >
-using te_writer = std::function<std::basic_ostream<Char, CharTraits> & (std::basic_ostream<Char, CharTraits> &, int_fmt_t, Unit const &)>;
+using te_writer = std::function<auto (std::basic_ostream<Char, CharTraits> &, int_fmt_t, Unit const &)
+    -> std::basic_ostream<Char, CharTraits> & >;
 
 //-----------------------------------------------------------------------------
 template
@@ -271,7 +327,7 @@ template
     (
         [](std::ptrdiff_t i)
         {
-            return Unit{ gsl::narrow_cast<underlying_type>(i) };
+            return Unit{ static_cast<underlying_type>(i) };
         }
     );
 }
@@ -291,7 +347,9 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Unit const &unit)-
 { 
     using namespace io::detail;
     using writer_type = writer<Char, CharTraits, Unit>;
-    return write(ostr, get_value(ostr, unit), { writer_type{} }, unit.value());
+    using te_writer_type = te_writer<Char, CharTraits, underlying_type_t<Unit>>;
+
+    return write(ostr, get_value(ostr, unit), te_writer_type{ writer_type{} }, unit.value());
 }
 
 template
@@ -306,7 +364,16 @@ auto operator >> (std::basic_istream<Char, CharTraits> &istr, Unit &unit)-> std:
 {
     using namespace io::detail;
     using reader_type = reader<Char, CharTraits, Unit>;
-    return read(istr,  get_value(istr, unit), { reader_type{} }, io::access::value_ref(unit));
+    using te_reader_type = te_reader<Char, CharTraits, underlying_type_t<Unit>>;
+
+    return read(istr,  get_value(istr, unit), te_reader_type{ reader_type{} }, io::access::value_ref(unit));
+}
+
+namespace enum_::op
+{
+
+extern template auto operator << (std::ostream &, cmn::io::int_fmt_t) -> std::ostream &;
+
 }
 
 }

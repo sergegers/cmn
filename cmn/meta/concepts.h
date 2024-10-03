@@ -30,6 +30,24 @@ concept random_access_fus_sequence =
 namespace cmn
 {
 
+namespace io
+{
+
+enum class int_fmt_t: short;
+
+//-----------------------------------------------------------------------------
+//
+// traits
+//
+template <typename Unit>
+struct strong_typedef_fmt_traits
+{
+    static constexpr bool enable_luxury_io = false;
+    static constexpr auto default_ = static_cast<int_fmt_t>(2665);  // int_fmt_t::default_
+};
+
+}
+
 namespace c
 {
 
@@ -50,7 +68,41 @@ concept noscoped_enum = enum_<T> && !std::is_scoped_enum_v<T>;
 template <typename T>
 concept enumerable = std::integral<T> || std::is_enum_v<T>;
 
+template <typename U, typename V>
+concept int_convertible_to =
+    std::integral<U>
+ && std::integral<V>
+ && std::convertible_to<U, V>
+;
+
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// instance_of
+//
+// https://cukic.co/2019/03/15/template-meta-functions-for-detecting-template-instantiation/
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+template <template <typename...> typename TemplateT, typename T>
+struct is_instance_of_: std::false_type {};
+
+template <template <typename...> typename TemplateT, typename... Args>
+struct is_instance_of_<TemplateT, TemplateT<Args...>>: std::true_type {};
+
+}
+
+namespace c
+{
+
+template <typename T, template <typename...> typename TemplateT>
+concept instance_of = detail::is_instance_of_<TemplateT, T>::value;
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
@@ -189,6 +241,30 @@ concept bitfield =
         && bit_ops_<T, mask_type_t<T>, mask_type_t<T>>
     )  
  )
+;
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+struct strong_typedef_tag {};
+
+namespace c
+{
+
+template <typename T>
+concept unit = 
+    std::is_base_of_v<strong_typedef_tag, T>
+ && requires
+    {
+        typename T::underlying_type;
+    }
+ && std::constructible_from<typename T::underlying_type>
+;
+
+template <typename T>
+concept fmt_unit =
+    unit<T>
+ && io::strong_typedef_fmt_traits<T>::enable_luxury_io
 ;
 
 }

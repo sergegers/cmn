@@ -5,13 +5,11 @@
 
 // boost.mp11
 #include <boost/mp11.hpp>
-// boost.fusion
-#include <boost/fusion/algorithm/iteration/fold.hpp>
 
 #include <cmn/enum/feature.h>
 #include <cmn/algorithm/find.h>
 
-#include "record.h"
+#include "record_info.h"
 
 namespace cmn::enum_
 {
@@ -83,54 +81,6 @@ constexpr auto find
         }
     );
     return reminder;
-
-    //boost::fusion::fold
-    //(
-    //    group, 
-    //    en & addditional_mask, 
-    //    [&op, group_mask]<c::enum_ auto En_>(mask_type const remainder, record_info<En_> const &rec)
-    //    {
-    //        if (empty(rec.value_as_mask))
-    //        {
-    //            if ((remainder & group_mask) != 0x0) op(rec);
-
-    //            std::cout
-    //                << std::hex << std::showbase << std::boolalpha
-    //                << "empty "
-    //                << rec.m_name << " (" << rec.value_as_mask << "); "
-    //                << remainder << " -> " << remainder
-    //                << "\n";
-
-    //            return remainder;
-    //        }
-    //        else if (has_feature(remainder, rec.value_as_mask)) 
-    //        {
-    //            op(rec);
-    //            auto const res = remainder & ~rec.value_as_mask;
-
-    //            std::cout
-    //                << std::hex << std::showbase << std::boolalpha
-    //                << "feature "
-    //                << rec.m_name << " (" << rec.value_as_mask << "); "
-    //                << "has_feature(): " << has_feature(remainder, rec.value_as_mask) << "; "
-    //                << remainder << " -> " << res
-    //                << "\n";
-
-    //            return res;
-    //        }
-    //        else
-    //        {
-    //            std::cout
-    //                << "untouched "
-    //                << std::hex << std::showbase << std::boolalpha
-    //                << rec.m_name << " (" << rec.value_as_mask << "); "
-    //                << remainder << " -> " << remainder
-    //                << "\n";
-    //            
-    //            return remainder;
-    //        }
-    //    }
-    //);
 }
 
 }

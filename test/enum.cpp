@@ -36,24 +36,6 @@ using boost::test_tools::per_element;
 
 using namespace io;
 
-//CMN_PP_DECLARE_COMBO_CLASS
-//(
-//    cl_cmb_t,
-//    (
-//        (one,       0x0)
-//        (two,       0x1)
-//        (three,     0x2)
-//    )
-//    (
-//        (red,       0x0)
-//        (green,     0x4)
-//        (blue,      0x8)
-//    ),
-//
-//    (digit_mask,    0x3)
-//    (color_mask,    0xC)
-//)
-
 enum class cl_cmb_t
 {
     zero       = 0x0,

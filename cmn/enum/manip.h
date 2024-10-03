@@ -7,7 +7,7 @@
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/util.h>
 
-#include "op.h"
+#include <cmn/enum/bitfield.h>
 
 namespace cmn::enum_::io
 {

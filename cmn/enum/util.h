@@ -11,14 +11,14 @@
 #include <utility>
 
 #include <cmn/meta/concepts.h> // kind_t, op_t, print_t
-#include <cmn/meta/util.h>
+#include <cmn/meta/type_traits.h>
 
 #include <cmn/name/types.h>
 
-#include <cmn/enum/util/name.h>
-#include <cmn/enum/util/group.h>
-#include <cmn/enum/util/groups.h>
-#include <cmn/enum/util/enum.h>
+#include <cmn/enum/util/name_info.h>
+#include <cmn/enum/util/group_info.h>
+#include <cmn/enum/util/groups_info.h>
+#include <cmn/enum/util/enum_info.h>
 
 namespace cmn::enum_
 {
