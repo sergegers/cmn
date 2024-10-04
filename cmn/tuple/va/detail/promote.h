@@ -2,7 +2,8 @@
 
 #include <type_traits>
 
-#include <cmn/meta/promote.h>
+#include <boost/type_traits/promote.hpp>
+
 #include <cmn/meta/concepts.h>
 #include <cmn/tuple/va/concepts.h>
 
@@ -29,10 +30,10 @@ template <typename T> requires !c::va_promoted<T> && !c::va_big<T>
 struct keep_type_<T, true>: std::type_identity<T> {};
 
 template <c::float_ T>
-struct keep_type_<T, true>: float_promotion<T> {};
+struct keep_type_<T, true>: boost::promote<T> {};
 
 template <c::int_ T>
-struct keep_type_<T, true>: int_promotion<T> {};
+struct keep_type_<T, true>: boost::promote<T> {};
 
 template <c::unit T>
 struct keep_type_<T, true>: underlying_type<T> {};

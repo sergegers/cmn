@@ -4,11 +4,10 @@
 #include <type_traits>
 
 #include <boost/mp11.hpp>
+#include <boost/type_traits/promote.hpp>
 
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/fusion/support/category_of.hpp>
-
-#include "promote.h"
 
 namespace boost::c
 {
@@ -109,10 +108,10 @@ template <typename T>
 struct mask_type : std::make_unsigned<T> {};
 
 template <typename T> requires std::integral<T>
-struct mask_type<T> : int_promotion<T> {};
+struct mask_type<T> : boost::promote<T> {};
 
 template <typename T> requires c::enum_<T>
-struct mask_type<T> : int_promotion<std::underlying_type_t<T>> {};
+struct mask_type<T> : boost::promote<std::underlying_type_t<T>> {};
 
 template <typename T> requires c::scoped_enum<T>
 struct mask_type<T> : std::make_unsigned<std::underlying_type_t<T>> {};
@@ -233,7 +232,7 @@ concept bitfield =
      &&
      (
             // for integral types & C enums with implicit conversion to int types
-           bit_n_ops_<T, int_promotion_t<T>>
+           bit_n_ops_<T, boost::promote_t<T>>
         && bit_ops_<T, mask_type_t<T>, mask_type_t<T>>
       ||
             // for nonscoped enums with overloaded operators

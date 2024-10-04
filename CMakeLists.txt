@@ -46,7 +46,7 @@ add_library (
 
  "cmn/meta/macro.h"
  "cmn/meta/concepts.h"
- "cmn/meta/promote.h"
+ 
  "cmn/meta/symbols.h"
 
  "cmn/util/fixed_string.h"
@@ -84,7 +84,7 @@ add_library (
  "cmn/enum/util/qualified_name.h" 
  "cmn/enum/util/name_info.h" 
  "cmn/enum/util/record_info.h" 
- "cmn/enum/util/mask.h" 
+  
  "cmn/enum/util/group_info.h" 
  "cmn/enum/util/groups_info.h"
  "cmn/enum/util/enum_info.h"
