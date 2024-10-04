@@ -69,6 +69,16 @@ add_library (
 
  "cmn/tuple/ops.h"
  "cmn/tuple/io.h"
+ "cmn/tuple/va/detail/promote.h"
+ "cmn/tuple/va/detail/tuple_get.h"
+ "cmn/tuple/va/detail/tuple_set.h"
+ "cmn/tuple/va/concepts.h"
+ "cmn/tuple/va/tuple.h"
+ "cmn/tuple/va/tuple_adapt.h"
+ "cmn/tuple/va/tuple_event.h"
+ "cmn/tuple/va/tuple_traits.h"
+ "cmn/tuple/va/tuple_utils.h"
+ "cmn/tuple/va/tuple_view.h"
 
  "cmn/enum/util/magic_get.h"
  "cmn/enum/util/qualified_name.h" 
@@ -137,7 +147,9 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/error.cpp"
   "test/enum.cpp"
   "test/name.cpp"
-   "test/io.cpp")
+   "test/io.cpp" 
+   "test/tuple.cpp"
+ )
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

@@ -1,3 +1,4 @@
+#pragma once
 
 #include <boost/spirit/include/qi_symbols.hpp>
 #include <boost/spirit/include/karma_symbols.hpp>
