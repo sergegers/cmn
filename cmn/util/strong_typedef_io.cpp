@@ -25,7 +25,7 @@ auto get_mask(int_fmt_t en) -> short
 {
     // NOTE: zero value isn't used, so we can get mask from value
     for (auto const mask: enum_::traits<int_fmt_t>::masks)
-        if (has_feature( static_cast<int_fmt_t>(mask), en))
+        if (enum_::has_feature( static_cast<int_fmt_t>(mask), en))
             return mask;
 
     return 0;    
@@ -35,7 +35,7 @@ auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t
 {
     for (auto const mask: enum_::traits<int_fmt_t>::masks)
         if (auto const mask_over = mask & over; int_fmt_t::empty != mask_over)
-            orig = set_value(orig, mask_over, mask);
+            orig = enum_::set_value(orig, mask_over, mask);
 
     return orig;
 }
@@ -60,7 +60,7 @@ auto int_fmt_storage_t::value(std::ios_base &ios_, keep_type value) -> void
     auto const mask   = get_mask(fvalue);
 
     auto const old_fvalue = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios_));
-    auto const new_fvalue = set_value(old_fvalue, fvalue, mask);
+    auto const new_fvalue = enum_::set_value(old_fvalue, fvalue, mask);
 
     auto const new_value = static_cast<keep_type>(0) | static_cast<short>(new_fvalue);
 
@@ -211,14 +211,14 @@ struct base
         friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, base_ const &bs_)
         {
             using enum int_fmt_t;
-            if (has_feature(bs_.m_fmt, showbase))
+            if (enum_::has_feature(bs_.m_fmt, showbase))
             {
-                if (has_any_feature(bs_.m_fmt, c, asm_))
+                if (enum_::has_any_feature(bs_.m_fmt, c, asm_))
                     ostr << std::noshowbase;
                 else
                     ostr << std::showbase;
             }
-            else if (has_feature(bs_.m_fmt, hidebase))
+            else if (enum_::has_feature(bs_.m_fmt, hidebase))
                 ostr << std::noshowbase;
             return ostr;
         }
@@ -226,14 +226,14 @@ struct base
         friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, base_ bs_)
         {
             using enum int_fmt_t;
-            if (has_feature(bs_.m_fmt, showbase))
+            if (enum_::has_feature(bs_.m_fmt, showbase))
             {
-                if (has_any_feature(bs_.m_fmt, c, asm_))
+                if (enum_::has_any_feature(bs_.m_fmt, c, asm_))
                     istr >> std::noshowbase;
                 else
                     istr >> std::showbase;                
             }
-            else if (has_feature(bs_.m_fmt, hidebase))
+            else if (enum_::has_feature(bs_.m_fmt, hidebase))
                 istr >> std::noshowbase;
             return istr;
         }
@@ -282,10 +282,9 @@ struct sign_pfx
         friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, sign_pfx_ const &pfx_)
         {
             using enum int_fmt_t;
-            if (has_feature(pfx_.m_fmt, sign))
+            if (enum_::has_feature(pfx_.m_fmt, sign))
             {
-                auto const sgn = cmn::sgn(boost::implicit_cast<signed_type>(pfx_.m_unit));
-                switch (sgn)
+                switch (auto const sgn = cmn::sgn(boost::implicit_cast<signed_type>(pfx_.m_unit)))
                 {
                 case -1: ostr << minus; break;
                 case  0: ostr << space; break;
@@ -295,10 +294,9 @@ struct sign_pfx
                     BOOST_THROW_EXCEPTION(cmn::format_error{});
                 }
             }
-            else if (has_feature(pfx_.m_fmt, forcesign))
+            else if (enum_::has_feature(pfx_.m_fmt, forcesign))
             {
-                auto const sgn = cmn::sgn(boost::implicit_cast<signed_type>(pfx_.m_unit));
-                switch (sgn)
+                switch (auto const sgn = cmn::sgn(boost::implicit_cast<signed_type>(pfx_.m_unit)))
                 {
                 case -1: ostr << minus; break;
                 case  0:
@@ -315,7 +313,7 @@ struct sign_pfx
         friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, sign_pfx_ pfx_)
         {
             using enum int_fmt_t;
-            if (has_feature(pfx_.m_fmt, sign))
+            if (enum_::has_feature(pfx_.m_fmt, sign))
             {
                 Char sgn;
                 do istr >> sgn; while (sgn == endl);
@@ -330,7 +328,7 @@ struct sign_pfx
                     throw unexpected{};
                 }
             }
-            else if (has_feature(pfx_.m_fmt, forcesign))
+            else if (enum_::has_feature(pfx_.m_fmt, forcesign))
             {
                 Char sgn;
                 do istr >> sgn; while (sgn == endl);
@@ -389,7 +387,7 @@ struct c_pfx
         friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, c_pfx_ const &pfx_)
         {
             using enum int_fmt_t;
-            if (has_all_features(pfx_.m_fmt, c, hex, showbase))
+            if (enum_::has_all_features(pfx_.m_fmt, c, hex, showbase))
             {
                 ostr << symbols_type::hex_prefix;
             }
@@ -399,7 +397,7 @@ struct c_pfx
         friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, c_pfx_ pfx_)
         {
             using enum int_fmt_t;
-            if (has_all_features(pfx_.m_fmt, c, hex, showbase))
+            if (enum_::has_all_features(pfx_.m_fmt, c, hex, showbase))
             for (;;)
             {
                 Char buf[symbols_type::hex_prefix.size() + 1];
@@ -457,7 +455,7 @@ struct asm_pfx
         friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, asm_pfx_ const &pfx_)
         {
             using enum int_fmt_t;
-            if (has_all_features(pfx_.m_fmt, asm_, hex, showbase))
+            if (enum_::has_all_features(pfx_.m_fmt, asm_, hex, showbase))
                 ostr << symbols_type::hex_postfix;
             return ostr;
         }
@@ -465,7 +463,7 @@ struct asm_pfx
         friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, asm_pfx_ pfx_)
         {
             using enum int_fmt_t;
-            if (has_all_features(pfx_.m_fmt, asm_, hex, showbase))
+            if (enum_::has_all_features(pfx_.m_fmt, asm_, hex, showbase))
             {
                 Char h;
                 istr >> h;
@@ -509,9 +507,9 @@ struct radix
         friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, radix_ const &rdx_)
         {
             using enum int_fmt_t;
-            if (has_feature(rdx_.m_fmt, hex))
+            if (enum_::has_feature(rdx_.m_fmt, hex))
                 ostr << std::hex;
-            else if (has_feature(rdx_.m_fmt, dec))
+            else if (enum_::has_feature(rdx_.m_fmt, dec))
                 ostr << std::dec;
 
             return ostr;
@@ -520,9 +518,9 @@ struct radix
         friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, radix_ rdx_)
         {
             using enum int_fmt_t;
-            if (has_feature(rdx_.m_fmt, hex))
+            if (enum_::has_feature(rdx_.m_fmt, hex))
                 istr >> std::hex;
-            else if (has_feature(rdx_.m_fmt, dec))
+            else if (enum_::has_feature(rdx_.m_fmt, dec))
                 istr >> std::dec;
 
             return istr;
@@ -571,14 +569,14 @@ struct width
         friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, width_ const &w_)
         {
             using enum int_fmt_t;
-            if (has_feature(w_.m_fmt, long_))
+            if (enum_::has_feature(w_.m_fmt, long_))
             {
-                if (has_feature(w_.m_fmt, dec))
+                if (enum_::has_feature(w_.m_fmt, dec))
                     ostr << std::internal << std::setw(dec_digits) << std::setfill(zero);
-                else if (has_feature(w_.m_fmt, hex))
+                else if (enum_::has_feature(w_.m_fmt, hex))
                     ostr << std::internal << std::setw(hex_digits) << std::setfill(zero);
             }
-            else if (has_feature(w_.m_fmt, short_))
+            else if (enum_::has_feature(w_.m_fmt, short_))
             {
                 ostr.unsetf(std::ios_base::internal);
             }
@@ -589,14 +587,14 @@ struct width
         friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, width_ w_)
         {
             using enum int_fmt_t;
-            if (has_feature(w_.m_fmt, long_))
+            if (enum_::has_feature(w_.m_fmt, long_))
             {
-                if (has_feature(w_.m_fmt, dec))
+                if (enum_::has_feature(w_.m_fmt, dec))
                     istr >> std::internal >> std::setw(dec_digits);
-                else if (has_feature(w_.m_fmt, hex))
+                else if (enum_::has_feature(w_.m_fmt, hex))
                     istr >> std::internal >> std::setw(hex_digits);
             }
-            else if (has_feature(w_.m_fmt, short_))
+            else if (enum_::has_feature(w_.m_fmt, short_))
             {
                 istr.unsetf(std::ios_base::internal);
             }
@@ -640,9 +638,9 @@ struct case_
         friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, case__ const &cs_)
         {
             using enum int_fmt_t;
-            if (has_feature(cs_.m_fmt, uppercase))
+            if (enum_::has_feature(cs_.m_fmt, uppercase))
                 ostr << std::uppercase;
-            else if (has_feature(cs_.m_fmt, lowercase))
+            else if (enum_::has_feature(cs_.m_fmt, lowercase))
                 ostr << std::nouppercase;
 
             return ostr;
@@ -651,9 +649,9 @@ struct case_
         friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, case__ cs_)
         {
             using enum int_fmt_t;
-            if (has_feature(cs_.m_fmt, uppercase))
+            if (enum_::has_feature(cs_.m_fmt, uppercase))
                 istr >> std::uppercase;
-            else if (has_feature(cs_.m_fmt, lowercase))
+            else if (enum_::has_feature(cs_.m_fmt, lowercase))
                 istr >> std::nouppercase;
 
             return istr;

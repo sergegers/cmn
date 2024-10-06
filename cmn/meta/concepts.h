@@ -102,6 +102,13 @@ concept instance_of = detail::is_instance_of_<TemplateT, T>::value;
 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// ext enum concepts
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace enum_
+{
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
@@ -118,14 +125,6 @@ struct mask_type<T> : std::make_unsigned<std::underlying_type_t<T>> {};
 
 template <c::enumerable T>
 using mask_type_t = typename mask_type<T>::type;
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// ext enum concepts
-//
-///////////////////////////////////////////////////////////////////////////////
-namespace enum_
-{
 
 enum class kind_t
 {
@@ -226,18 +225,18 @@ concept bitfield =
  (
         // for scoped bitfields
         bit_n_ops_<T, T> 
-     && bit_ops_<T, mask_type_t<T>, T>
+     && bit_ops_<T, enum_::mask_type_t<T>, T>
     ||
-    std::equality_comparable_with<T, mask_type_t<T>>
+    std::equality_comparable_with<T, enum_::mask_type_t<T>>
      &&
      (
             // for integral types & C enums with implicit conversion to int types
            bit_n_ops_<T, boost::promote_t<T>>
-        && bit_ops_<T, mask_type_t<T>, mask_type_t<T>>
+        && bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
       ||
             // for nonscoped enums with overloaded operators
            bit_n_ops_<T, T>
-        && bit_ops_<T, mask_type_t<T>, mask_type_t<T>>
+        && bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
     )  
  )
 ;

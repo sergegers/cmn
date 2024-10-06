@@ -5,7 +5,6 @@
 #include <cmn/meta/concepts.h>
 
 #include "qualified_name.h"
-#include "mask.h"
 
 namespace cmn::enum_
 {

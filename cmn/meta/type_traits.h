@@ -4,6 +4,7 @@
 
 #include <type_traits>
 #include <utility>
+#include <limits>
 
 #include <cmn/meta/concepts.h>
 
@@ -101,5 +102,13 @@ template <typename T> constexpr bool is_char_v = boost::mp11::mp_find
     >,
     std::remove_cvref_t<T>
 >::value;
+
+namespace enum_
+{
+
+template <c::enumerable T>
+static constexpr auto no_mask = std::numeric_limits<mask_type_t<T>>::max();
+
+}
 
 }

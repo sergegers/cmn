@@ -13,7 +13,7 @@
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 #include <boost/fusion/view/zip_view.hpp>
 
-#include <cmn/enum/feature.h>
+#include <cmn/meta/type_traits.h>
 
 #include "group_info.h"
 

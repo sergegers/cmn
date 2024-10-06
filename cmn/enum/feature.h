@@ -5,7 +5,7 @@
 
 #include <cmn/meta/concepts.h>
 
-namespace cmn
+namespace cmn::enum_
 {
 
  // feature utils

@@ -207,7 +207,7 @@ struct reader
     {
         using enum int_fmt_t;
 
-        if (Unit unit; has_any_feature(fmt, sign, forcesign))
+        if (Unit unit; enum_::has_any_feature(fmt, sign, forcesign))
         {
             auto const sgn = te_unit;
             access::in(istr, unit);
@@ -249,7 +249,7 @@ struct writer
         -> std::basic_ostream<Char, CharTraits> &
     {
         using enum int_fmt_t;
-        if (has_any_feature(fmt, sign, forcesign) && te_unit < 0)
+        if (enum_::has_any_feature(fmt, sign, forcesign) && te_unit < 0)
         {
             using signed_type = std::make_signed_t<te_type>;
             // does not require unary minus
