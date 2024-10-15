@@ -56,6 +56,9 @@ namespace c
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T>
+concept function = std::is_function_v<T>;
+
+template <typename T>
 concept enum_ = std::is_enum_v<T>;
 
 template <typename T>

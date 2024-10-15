@@ -1,32 +1,13 @@
 #pragma once
 
-#include <cstdarg>
 #include <tuple>
-#include <new>
+#include <utility>
 
-// boost.mp11
 #include <boost/mp11.hpp>
 
-#include <cmn/meta/type_traits.h>
-
-#include <cmn/tuple/va/detail/tuple_get.h>
-#include <cmn/tuple/va/detail/tuple_set.h>
-
-#include "concepts.h"
-#include "tuple_utils.h"
-
-//------------------------------------------------------------------------------
-// NOTE: about ellipsis functions:
-//
-//Parameters of functions that correspond to ... are promoted before passing 
-//to your variadic function. char and short are promoted to int, 
-//float is promoted to double, etc.
-//6.5.2.2.7 The ellipsis notation in a function prototype declarator causes 
-//argument type conversion to stop after the last declared parameter.
-//The default argument promotions are performed on trailing arguments.
-// https://en.cppreference.com/w/cpp/language/variadic_arguments
-// http://stackoverflow.com/questions/11270588/variadic-function-va-arg-doesnt-work-with-float
-//
+#include <cmn/meta/concepts.h>
+#include <cmn/tuple/va/concepts.h>
+#include <cmn/tuple/va/detail/util.h>
 
 namespace cmn::va
 {
@@ -36,160 +17,286 @@ namespace cmn::va
 // va_tuple is C-like ellipsis function argument container
 //
 ////////////////////////////////////////////////////////////////////////////////
-template <c::eva_argument... EArgs>
-class tuple final: public tuple_tag
-{
-private:
-    using itself = tuple<EArgs...>;
-    using storage_type = std::aligned_storage_t<tuple_size_in_bytes<EArgs...>(), 4>;
-
-    static constexpr auto ellipis_index = tuple_ellipsis_index<EArgs...>();
-
-    storage_type m_buffer;
-
-    template <std::size_t Idx_>
-    static constexpr auto offset() noexcept -> std::size_t
-    {
-        return tuple_offset<Idx_, EArgs...>();
-    }
-
-    template <std::size_t Idx_, typename Arg>
-    constexpr auto set(Arg arg) noexcept -> void
-    { 
-        using elem_type = tuple_element_t<Idx_, EArgs...>;
-        using keep_type = tuple_keep_element_t<Idx_, EArgs...>;
-        static constexpr bool is_ellipsis_arg = ellipis_index != -1 && Idx_ >= ellipis_index;        
-
-        new
-            (reinterpret_cast<char *>(&m_buffer) + offset<Idx_>())
-            keep_type
-            {
-                detail::tuple_set
-                (
-                      std::bool_constant<is_ellipsis_arg>{}
-                    , static_cast<elem_type>(arg)
-                )
-            }
-        ;
-    }
-
-    //template <std::size_t Idx_>
-    //static constexpr void reset(storage_type &buffer)
-    //{
-    //    using arg_type = std::tuple_element_t<Idx_, detail::va_tuple_::va_tuple_args_t<EArgs...>>;
-    //    reinterpret_cast<arg_type *>(reinterpret_cast<char *>(&buffer) + offset<Idx_>())->~arg_type();
-    //}
-
-    template <typename ArgTuple, std::size_t... Indices_>
-    explicit constexpr tuple(ArgTuple args, std::index_sequence<Indices_...>) noexcept
-    {
-        (set<Indices_>(std::get<Indices_>(args)), ...);
-    }
-public:
-    using args_type = std::tuple<EArgs...>;
-
-    template <typename... Args>
-    // ReSharper disable CppNonExplicitConvertingConstructor
-    constexpr tuple(Args &&... args) noexcept: 
-    // ReSharper restore CppNonExplicitConvertingConstructor
-        itself 
-        { 
-              std::tuple{ args... }
-            , std::index_sequence_for<Args...>{}
-        }
-    {}
-
-    static constexpr auto size_in_bytes() noexcept -> std::size_t
-    { return tuple_size_in_bytes<EArgs...>(); }
-
-    static constexpr auto size() noexcept -> std::size_t
-    { return std::tuple_size_v<tuple_args_t<EArgs...>>; }
-
-    template <std::size_t Idx_>
-        requires (Idx_ < size())
-    constexpr auto get() const noexcept -> tuple_element_t<Idx_, EArgs...>
-    {
-        using elem_type = tuple_element_t<Idx_, EArgs...>;
-        using keep_type = tuple_keep_element_t<Idx_, EArgs...>;
-        static constexpr bool is_ellipsis_arg = ellipis_index != -1 && Idx_ >= ellipis_index;
-
-        auto const keep_arg_ptr = std::launder
-        (
-              reinterpret_cast<keep_type const *>(reinterpret_cast<char const *>(&m_buffer) 
-            + offset<Idx_>())
-        );
-        return detail::tuple_get<elem_type>(std::bool_constant<is_ellipsis_arg>{}, *keep_arg_ptr);
-    }
-
-    template <typename T>
-    constexpr auto get() const noexcept
-    {
-        using pure_args_type = tuple_args_t<EArgs...>;
-        constexpr auto idx = boost::mp11::mp_find<pure_args_type, T>::value;
-        static_assert(idx != boost::mp11::mp_size<pure_args_type>::value, "Type isn't exist");
-
-        return get<idx>();
-    }
-
-    constexpr auto as_va_list() const noexcept
-    { return const_cast<std::va_list>(reinterpret_cast<char const *>(&m_buffer)); }
-};
-
-// zero argument tuple specialization
-template <>
-class tuple<ellipsis>: public tuple_tag
-{
-private:
-    using itself = tuple<ellipsis>;
-public:
-    using args_type = std::tuple<ellipsis>;
-
-    static constexpr auto size() -> std::size_t { return 0; }
-    constexpr auto as_va_list() const noexcept -> std::va_list { return nullptr; }
-};
-
-
 namespace detail
 {
-	
-template <typename VaSig> struct make_va_tuple_impl;
 
-template <typename Res, typename... EArgs>
-struct make_va_tuple_impl<auto (EArgs...) -> Res>
+using namespace boost::mp11;
+
+template <c::instance_of<std::tuple> ArgTplOfTpls>
+class tuple_impl;
+
+template <typename ... NamedArgs, c::va_arg_... VaArgs>
+class tuple_impl<std::tuple<std::tuple<NamedArgs...>, std::tuple<VaArgs...>>>
 {
-    template <typename... Args>
-    constexpr auto operator ()(Args &&... args) const noexcept -> tuple<EArgs...>
+public:
+    using args_type = std::tuple<NamedArgs..., VaArgs...>;
+    using eargs_type = std::tuple<NamedArgs..., ellipsis, VaArgs...>;
+    using named_args_type = std::tuple<NamedArgs...>;
+    using keep_named_args_type = named_args_type;
+    using keep_va_args_type = std::tuple<keep_type_t<VaArgs>...>;
+    using keep_args_type = mp_append<keep_named_args_type, keep_va_args_type>;
+
+    //-----------------------------------------------------------------------------
+    //
+    // interface for detail::get(), detail::put() functions
+    //
+    //-----------------------------------------------------------------------------
+    static constexpr auto named_args_size = sizeof... (NamedArgs);
+    static constexpr auto va_args_size = sizeof... (VaArgs);
+    static constexpr auto args_size = named_args_size + va_args_size;
+
+    using va_args_type = std::tuple<VaArgs...>;
+
+    template <std::size_t Idx_> using arg_t = std::tuple_element_t<Idx_, args_type>;
+
+    template <std::size_t Idx_, typename Self>
+    using res_t = remove_rvalue_reference_t<decltype(std::forward_like<Self>(std::declval<arg_t<Idx_>>()))>;
+
+    constexpr auto &named_args(this auto &self_) { return self_.m_named_args; }
+
+    template <std::size_t Idx_, typename Self> requires (Idx_ >= named_args_size)
+    constexpr decltype(auto) slot(this Self &&self_)
     {
-        return { std::forward<Args>(args)... };
+        using keep_type = std::remove_reference_t<decltype(std::forward_like<Self>(std::declval<keep_type_<Idx_>>()))>;
+        return reinterpret_cast<keep_type *>(std::forward<Self>(self_).m_va_arg_buffer + va_arg_offset_in_bytes<Idx_>());
+    }
+
+    template <std::size_t Idx_, typename Self> requires (Idx_ >= named_args_size) && c::ref_va_arg<arg_t<Idx_>>
+    constexpr decltype(auto) big_arg_slot(this Self &&self_)
+    {
+        return std::get<big_slot_idx_v<tuple_impl, Idx_>>(std::forward<Self>(self_).m_big_arg_buffer);
+    }
+    //
+    //-----------------------------------------------------------------------------
+private:
+    static_assert(sizeof... (NamedArgs) > 0, "At least one named argument is required");
+
+    using big_arg_buffer_type = big_arg_buffer_t<tuple_impl>;
+
+    keep_named_args_type    m_named_args;
+    big_arg_buffer_type     m_big_args_buffer;
+
+    template <typename T>
+    static constexpr auto idx_v = (mp_count<args_type, T>::value == 1)?
+        mp_find<args_type, T>::value:
+        mp_size<args_type>::value
+    ;
+
+    // The behavior of the va_start macro is undefined if the last parameter before the ellipsis has reference type,
+    // or has type that is not compatible with the type that results from default argument promotions
+    // https://en.cppreference.com/w/cpp/language/variadic_arguments Default conversions
+    static_assert(c::va_arg_<mp_back<named_args_type>>);
+
+    template <std::size_t Idx_> using keep_type_ = std::tuple_element_t<Idx_, keep_args_type>;
+
+    template <std::size_t... Idss_>
+    static consteval auto va_arg_offset_in_bytes_impl(std::index_sequence<Idss_...>) -> std::size_t
+    {
+        return va_arg_offset_in_bytes_v<arg_t<Idss_>...>;
+    }
+
+    template <std::size_t Idx_>
+    static consteval auto va_arg_offset_in_bytes() -> std::size_t
+    {
+        return va_arg_offset_in_bytes_impl(std::make_index_sequence<Idx_ - named_args_size>{});
+    }
+
+    static consteval auto va_args_size_in_bytes() -> std::size_t
+    {
+        return va_arg_offset_in_bytes<va_args_size>();
+    }
+
+    alignas(4) std::byte m_va_arg_buffer[va_args_size_in_bytes()];
+
+    template <std::size_t... Idss_, typename... Args>
+    tuple_impl(std::index_sequence<Idss_...>, Args &&... args)
+    {
+        (detail::put<Idss_>(*this, std::forward<Args>(args)), ... );
+    }
+
+public:
+    template <typename... Args> requires (sizeof... (Args) == sizeof... (NamedArgs) + sizeof... (VaArgs))
+    tuple_impl(Args &&... args):
+        tuple_impl{ std::index_sequence_for<Args...>{}, std::forward<Args>(args)... }
+    {}
+
+    static constexpr auto size() { return sizeof... (NamedArgs) + sizeof... (VaArgs); }
+
+    // BUG: https://developercommunity.visualstudio.com/t/Structured-Binding-With-Deducing-This-ge/10773966
+    // https://developercommunity.visualstudio.com/t/VS-2022-17112:-Internal-Compiler-Error/10736199
+    template <std::size_t Idx_> requires (Idx_ < size())
+    constexpr auto get() noexcept //-> decltype(detail::get<Idx_>(*this))
+    {
+        return detail::get<Idx_>(*this);
+    }
+
+    template <std::size_t Idx_> requires (Idx_ < size())
+    constexpr auto get() const noexcept //-> decltype(detail::get<Idx_>(*this))
+    {
+        return detail::get<Idx_>(*this);
+    }
+
+    //-----------------------------------------------------------------------------
+    template <typename T> requires (idx_v<T> < size())
+    constexpr auto get() noexcept //-> decltype(detail::get<idx_v<T>>(*this))
+    {
+        return detail::get<idx_v<T>>(*this);
+    }
+
+    template <typename T> requires (idx_v<T> < size())
+    constexpr auto get() const noexcept //-> decltype(detail::get<idx_v<T>>(*this))
+    {
+        return detail::get<idx_v<T>>(*this);
+    }
+
+    constexpr auto as_va_list() const -> std::va_list
+    {
+        return const_cast<std::va_list>(reinterpret_cast<char const *>(&m_va_arg_buffer));
     }
 };
 
-template <typename VaSig> struct to_va_tuple_impl;
-
-template <typename Res, typename... EArgs>
-struct to_va_tuple_impl<auto (EArgs...) -> Res>
+///////////////////////////////////////////////////////////////////////////////
+//
+// NamedArgs == 0
+//
+///////////////////////////////////////////////////////////////////////////////
+template <c::va_arg_... VaArgs>
+class tuple_impl<std::tuple<std::tuple<>, std::tuple<VaArgs...>>>
 {
-    template <typename... Args, std::size_t... Indices_>
-    constexpr auto operator ()(std::tuple<Args...> const &tpl , std::index_sequence<Indices_...>) const noexcept
-        -> tuple<EArgs...>
+public:
+    using args_type = std::tuple<VaArgs...>;
+    using eargs_type = std::tuple<ellipsis, VaArgs...>;
+    using named_args_type = std::tuple<>;
+    using keep_named_args_type = named_args_type;
+    using keep_va_args_type = std::tuple<keep_type_t<VaArgs>...>;
+    using keep_args_type = mp_append<keep_named_args_type, keep_va_args_type>;
+
+    //-----------------------------------------------------------------------------
+    //
+    // interface for detail::get(), detail::put() functions
+    //
+    //-----------------------------------------------------------------------------
+    static constexpr auto named_args_size = 0;
+    static constexpr auto va_args_size = sizeof... (VaArgs);
+    static constexpr auto args_size = named_args_size + va_args_size;
+
+    using va_args_type = std::tuple<VaArgs...>;
+
+    template <std::size_t Idx_> using arg_t = std::tuple_element_t<Idx_, args_type>;
+
+    template <std::size_t Idx_, typename Self>
+    using res_t = remove_rvalue_reference_t<decltype(std::forward_like<Self>(std::declval<arg_t<Idx_>>()))>;
+
+    constexpr auto &named_args(this auto &self_) { return self_.m_named_args; }
+
+    template <std::size_t Idx_, typename Self> requires (Idx_ >= named_args_size)
+    constexpr decltype(auto) slot(this Self &&self_)
     {
-        return { std::get<Indices_>(tpl)... };
+        using keep_type = std::remove_reference_t<decltype(std::forward_like<Self>(std::declval<keep_type_<Idx_>>()))>;
+        return reinterpret_cast<keep_type *>(std::forward<Self>(self_).m_va_arg_buffer + va_arg_offset_in_bytes<Idx_>());
+    }
+
+    template <std::size_t Idx_, typename Self> requires (Idx_ >= named_args_size) && c::ref_va_arg<arg_t<Idx_>>
+    constexpr decltype(auto) big_arg_slot(this Self &&self_)
+    {
+        return std::get<big_slot_idx_v<tuple_impl, Idx_>>(std::forward<Self>(self_).m_big_args_buffer);
+    }
+    //
+    //-----------------------------------------------------------------------------
+private:
+
+    using big_arg_buffer_type = big_arg_buffer_t<tuple_impl>;
+
+    big_arg_buffer_type     m_big_args_buffer;
+
+    template <typename T>
+    static constexpr auto idx_v = (mp_count<args_type, T>::value == 1)?
+        mp_find<args_type, T>::value:
+        mp_size<args_type>::value
+    ;
+
+    template <std::size_t Idx_> using keep_type_ = std::tuple_element_t<Idx_, keep_args_type>;
+
+    template <std::size_t... Idss_>
+    static consteval auto va_arg_offset_in_bytes_impl(std::index_sequence<Idss_...>) -> std::size_t
+    {
+        return va_arg_offset_in_bytes_v<arg_t<Idss_>...>;
+    }
+
+    template <std::size_t Idx_>
+    static consteval auto va_arg_offset_in_bytes() -> std::size_t
+    {
+        return va_arg_offset_in_bytes_impl(std::make_index_sequence<Idx_ - named_args_size>{});
+    }
+
+    static consteval auto va_args_size_in_bytes() -> std::size_t
+    {
+        return va_arg_offset_in_bytes<va_args_size>();
+    }
+
+    alignas(4) std::byte m_va_arg_buffer[va_args_size_in_bytes()];
+
+    template <std::size_t... Idss_, typename... Args>
+    tuple_impl(std::index_sequence<Idss_...>, Args &&... args)
+    {
+        (detail::put<Idss_>(*this, std::forward<Args>(args)), ... );
+    }
+
+public:
+    template <typename... Args> requires (sizeof... (Args) == sizeof... (VaArgs))
+    tuple_impl(Args &&... args):
+        tuple_impl{ std::index_sequence_for<Args...>{}, std::forward<Args>(args)... }
+    {}
+
+    static constexpr auto size() { return sizeof... (VaArgs); }
+
+    // BUG: https://developercommunity.visualstudio.com/t/Structured-Binding-With-Deducing-This-ge/10773966
+    // https://developercommunity.visualstudio.com/t/VS-2022-17112:-Internal-Compiler-Error/10736199
+    template <std::size_t Idx_> requires (Idx_ < size())
+    constexpr auto get() noexcept //-> decltype(detail::get<Idx_>(*this))
+    {
+        return detail::get<Idx_>(*this);
+    }
+
+    template <std::size_t Idx_> requires (Idx_ < size())
+    constexpr auto get() const noexcept //-> decltype(detail::get<Idx_>(*this))
+    {
+        return detail::get<Idx_>(*this);
+    }
+
+    //-----------------------------------------------------------------------------
+    template <typename T> requires (idx_v<T> < size())
+    constexpr auto get() noexcept //-> decltype(detail::get<idx_v<T>>(*this))
+    {
+        return detail::get<idx_v<T>>(*this);
+    }
+
+    template <typename T> requires (idx_v<T> < size())
+    constexpr auto get() const noexcept //-> decltype(detail::get<idx_v<T>>(*this))
+    {
+        return detail::get<idx_v<T>>(*this);
+    }
+
+    constexpr auto as_va_list() const -> std::va_list
+    {
+        return const_cast<std::va_list>(reinterpret_cast<char const *>(&m_va_arg_buffer));
     }
 };
 
 }
 
-// NOTE: couldn't use perfect forwarding for arguments to decay argument types
-template <c::eva_signature VaSig, c::va_argument... Args>
-constexpr auto make_va_tuple(Args... args) noexcept
-{
-    return detail::make_va_tuple_impl<VaSig>{}(args...);
-}
+template <c::function Sig>
+class tuple;
 
-template <c::eva_signature VaSig, c::va_argument... Args>
-constexpr auto to_va_tuple(std::tuple<Args...> const &tpl) noexcept
+template <typename... EArgs, typename Res>
+class tuple<auto (EArgs...) -> Res> final:
+    public detail::tuple_impl<boost::mp11::mp_split<std::tuple<EArgs...>, ellipsis>>
 {
-    return detail::to_va_tuple_impl<VaSig>{}(tpl, std::make_index_sequence<sizeof... (Args)>{});
-}
+private:
+    using inherited = detail::tuple_impl<boost::mp11::mp_split<std::tuple<EArgs...>, ellipsis>>;
+    friend inherited;
+public:
+    using inherited::inherited;
+};
 
 }   

@@ -11,10 +11,6 @@
 // boost.fusion
 #include <boost/fusion/functional/invocation/invoke.hpp>
 
-#include "tuple.h"
-#include "tuple_adapt.h"
-#include "tuple_traits.h"
-
 namespace cmn::va
 {
 
@@ -85,7 +81,7 @@ auto make_empty_fire_event_result
 
 } 
 
-// fire_event() for va_tuple_view
+// fire_event() for va::tuple_view
 template
 <
     typename Combiner,
@@ -96,13 +92,14 @@ template
     typename Mutex,
     typename Res,
     typename... Args,
+    typename ERes,
     typename... EArgs
 >
 auto fire_event
 (
     boost::signals2::signal
     <
-        Res(Args...),
+        auto (Args...) -> Res,
         Combiner, 
         Group, 
         GroupCompare, 
@@ -110,14 +107,14 @@ auto fire_event
         ExtendedSlotFunction,
         Mutex
     > &sig,
-    tuple_view<EArgs...> const &tv
-) -> detail::fire_event_result_type_t<Res(Args...)>
+    tuple_view<auto (EArgs...) -> ERes> const &tv
+) -> detail::fire_event_result_type_t<auto (Args...) -> Res>
 {
     // compiler couldn't properly deduce one signature for signal and tuple, so we're 
-    // remain both of them as independent templates and then check their conformance manually
+    // remaining both of them as independent templates and then check their conformance manually
     static_assert
     (
-        std::is_same_v<Res(Args...), remove_ellipsis_t<Res (EArgs...)>>,
+        std::same_as<auto (Args...) -> Res, remove_ellipsis_t<auto (EArgs...) -> ERes>>,
         "Mismatch between signal and tuple signatures"
     );
 
@@ -158,7 +155,7 @@ auto fire_event
         Mutex
     > &sig,
     std::tuple<Args...> const &t
-) -> detail::fire_event_result_type_t<Res(Args...)>
+) -> detail::fire_event_result_type_t<auto (Args...) -> Res>
 {
     if (sig.empty()) return detail::make_empty_fire_event_result(sig);  // empty signal optimization
 
@@ -187,7 +184,7 @@ auto fire_event
 (
     boost::signals2::signal
     <
-        Res(Args...),
+        auto (Args...) -> Res,
         Combiner, 
         Group, 
         GroupCompare, 
@@ -195,8 +192,8 @@ auto fire_event
         ExtendedSlotFunction,
         Mutex
     > &sig,
-    std::tuple<Args...> &t
-) -> detail::fire_event_result_type_t<Res(Args...)>
+    tuple<auto (Args...) -> Res> &t
+) -> detail::fire_event_result_type_t<auto (Args...) -> Res>
 {
     if (sig.empty()) return detail::make_empty_fire_event_result(sig);  // empty signal optimization
 

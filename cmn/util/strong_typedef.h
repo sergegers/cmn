@@ -198,8 +198,7 @@ private:
 public:
     using difference_type = Ptrdiff;
 
-    using inherited::inherited;
-    using inherited::operator =;
+    using inherited::inherited, inherited::operator =;
 
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator<=>(rhs); }
@@ -234,8 +233,7 @@ private:
 public:
     using difference_type = Ptrdiff;
 
-    using inherited::inherited;
-    using inherited::operator =;
+    using inherited::inherited, inherited::operator =;
 
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator<=>(rhs); }
@@ -287,8 +285,7 @@ private:
     using inherited = strong_typedef_impl<U, T, Default_>;
     using itself = strong_typedef_flag_impl;
 public:
-    using inherited::inherited;
-    using inherited::operator =;
+    using inherited::inherited, inherited::operator =;
 
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator<=>(rhs); }
     constexpr auto operator <=> (T rhs) const noexcept { return inherited::operator<=>(rhs); }
@@ -309,15 +306,12 @@ private:
     using inherited     = strong_typedef_flag_impl<U, T, Default_>;
     using itself        = strong_typedef_flag_interop_impl;
 public:
-    using inherited::inherited;
-    using inherited::operator=;
+    using inherited::inherited, inherited::operator=;
 
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator <=> (rhs); }
     constexpr auto operator <=> (T rhs) const noexcept { return inherited::operator <=> (rhs); }
 
-    using inherited::operator ^=;
-    using inherited::operator &=;
-    using inherited::operator |=;
+    using inherited::operator ^=, inherited::operator &=, inherited::operator |=;
 
     constexpr auto operator ^= (T const &rhs) -> U& { return this->m_t ^= rhs, static_cast<U &>(*this); }
     constexpr auto operator &= (T const &rhs) -> U& { return this->m_t &= rhs, static_cast<U &>(*this); }
@@ -335,8 +329,7 @@ private:
     using inherited     = strong_typedef_impl<U, T, Default_>;
     using itself        = strong_typedef_integral_impl;
 public:
-    using inherited::inherited;
-    using inherited::operator=;
+    using inherited::inherited, inherited::operator=;
 
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator <=> (rhs); }
@@ -362,8 +355,7 @@ private:
     using inherited     = strong_typedef_integral_impl<U, T, Default_>;
     using itself        = strong_typedef_integral_interop_impl;
 public:
-    using inherited::inherited;
-    using inherited::operator =;
+    using inherited::inherited, inherited::operator =;
 
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator <=> (rhs); }
@@ -373,11 +365,7 @@ public:
         return inherited::operator <=> (static_cast<T>(rhs));
     }
 
-    using inherited::operator +=;
-    using inherited::operator -=;
-    using inherited::operator *=;
-    using inherited::operator /=;
-    using inherited::operator %=;
+    using inherited::operator +=, inherited::operator -=, inherited::operator *=, inherited::operator /=, inherited::operator %=;
 
     constexpr auto operator += (c::int_convertible_to<T> auto const &rhs) -> U &
     {

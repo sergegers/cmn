@@ -102,7 +102,7 @@ auto make_steam_err_info
 }
 
 template <typename Char, typename CharTraits, Char Char_, Char...  Chars_>
-struct default_read_char
+struct default_read_char final
 {
     std::basic_istream<Char, CharTraits> &m_istr;
 
@@ -146,7 +146,7 @@ template
     , typename CharTraits
     , std::integral Unit
 >
-struct reader_
+struct reader_ final
 {
     using te_reader_type = te_reader<Char, CharTraits, Unit>;
 
@@ -172,7 +172,7 @@ template
     , typename CharTraits
     , std::integral Unit
 >
-struct writer_
+struct writer_ final
 {
     using te_writer_type = te_writer<Char, CharTraits, Unit>;
 
@@ -192,14 +192,14 @@ struct writer_
 };
 
 //-----------------------------------------------------------------------------
-struct base
+struct base final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct base_
+    struct base_ final
     {
         std::basic_ios<Char, CharTraits>    &m_ios;
         int_fmt_t const                     m_fmt;
@@ -253,14 +253,14 @@ struct base
 };
 //-----------------------------------------------------------------------------
 template <std::integral Unit>
-struct sign_pfx
+struct sign_pfx final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct sign_pfx_
+    struct sign_pfx_ final
     {
         using signed_type = std::make_signed_t<Unit>;
         using symbols_type = symbols<Char, CharTraits>;
@@ -365,14 +365,14 @@ struct sign_pfx
 };
 
 //-----------------------------------------------------------------------------
-struct c_pfx
+struct c_pfx final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct c_pfx_
+    struct c_pfx_ final
     {
         using symbols_type = symbols<Char, CharTraits>;
         static constexpr auto endl = to_char(symbols_type::endl);
@@ -434,14 +434,14 @@ struct c_pfx
 };
 
 //-----------------------------------------------------------------------------
-struct asm_pfx
+struct asm_pfx final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct asm_pfx_
+    struct asm_pfx_ final
     {
         using symbols_type = symbols<Char, CharTraits>;
 
@@ -488,14 +488,14 @@ struct asm_pfx
 };
 
 //-----------------------------------------------------------------------------
-struct radix
+struct radix final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct radix_
+    struct radix_ final
     {
         std::basic_ios<Char, CharTraits>    &m_ios;
         int_fmt_t const                     m_fmt;
@@ -542,7 +542,7 @@ struct radix
 
 //-----------------------------------------------------------------------------
 template <std::integral Unit>
-struct width
+struct width final
 {
     static constexpr auto hex_digits = 
         std::numeric_limits<std::make_unsigned_t<Unit>>::digits / 4;
@@ -554,7 +554,7 @@ struct width
           typename Char
         , typename CharTraits
     >
-    struct width_
+    struct width_ final
     {
         using symbols_type = symbols<Char, CharTraits>;
         static constexpr auto zero = to_char(symbols_type::zero);
@@ -619,14 +619,14 @@ struct width
 };
 
 //-----------------------------------------------------------------------------
-struct case_
+struct case_ final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct case__
+    struct case__ final
     {
         std::basic_ios<Char, CharTraits>    &m_ios;
         int_fmt_t const                     m_fmt;
@@ -740,6 +740,6 @@ template auto try_read_(std::wistream &istr) noexcept -> boost::optional<std::pt
 namespace cmn::enum_::op
 {
 
-template auto operator << (std::ostream &, cmn::io::int_fmt_t)->std::ostream &;
+template auto operator << (std::ostream &, cmn::io::int_fmt_t) -> std::ostream &;
 
 }

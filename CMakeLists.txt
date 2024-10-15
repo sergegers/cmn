@@ -63,22 +63,22 @@ add_library (
  "cmn/io/manip/slot/forwarder.h"
  "cmn/io/manip/slot/manip.h"
  "cmn/io/manip/slot/traits.h"
- "cmn/io/manip/slot/util.h"
 
  "cmn/range/io.h"
 
+ "cmn/tuple/tuple.h"
  "cmn/tuple/ops.h"
  "cmn/tuple/io.h"
- "cmn/tuple/va/detail/promote.h"
- "cmn/tuple/va/detail/tuple_get.h"
- "cmn/tuple/va/detail/tuple_set.h"
  "cmn/tuple/va/concepts.h"
  "cmn/tuple/va/tuple.h"
- "cmn/tuple/va/tuple_adapt.h"
- "cmn/tuple/va/tuple_event.h"
- "cmn/tuple/va/tuple_traits.h"
- "cmn/tuple/va/tuple_utils.h"
  "cmn/tuple/va/tuple_view.h"
+ "cmn/tuple/va/event.h"
+ "cmn/tuple/va/traits.h"
+ "cmn/tuple/va/adapt/binding.h" 
+ "cmn/tuple/va/adapt/std_tuple.h" 
+ "cmn/tuple/va/adapt/fusion.h" 
+ "cmn/tuple/va/adapt/mpl.h"
+  "cmn/tuple/va/adapt.h"
 
  "cmn/enum/util/magic_get.h"
  "cmn/enum/util/qualified_name.h" 
@@ -132,7 +132,7 @@ add_library (
  "cmn/name/parser_symbols.h"
  "cmn/name/parser_symbols.cpp"
  "cmn/name/types.h"
- )
+ "cmn/tuple/va/detail/util.h")
 
 set(cmn_NatvisPath "${CMAKE_CURRENT_SOURCE_DIR}/cmn/cmn.natvis")
 
@@ -148,7 +148,8 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/enum.cpp"
   "test/name.cpp"
    "test/io.cpp" 
-   "test/tuple.cpp"
+   "test/tuple/tuple.cpp"
+   "test/tuple/va.cpp"
  )
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)

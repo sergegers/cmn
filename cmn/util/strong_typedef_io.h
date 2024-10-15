@@ -26,51 +26,6 @@ namespace io
 //
 
 // NOTE: zero value isn't used, so we can get mask from value
-//CMN_PP_DEFINE_COMBO_CLASS_BASE
-//(
-//    int_fmt_t, short,
-//    (
-//      (dec,             0b0000'0000'0000'0001)
-//      (hex,             0b0000'0000'0000'0010)
-//    )                    
-//    (                    
-//        (showbase,      0b0000'0000'0000'0100)
-//        (hidebase,      0b0000'0000'0000'1000)
-//    )                    
-//    (                    
-//        (asm_,          0b0000'0000'0001'0000)
-//        (c,             0b0000'0000'0010'0000)
-//    )                    
-//    (                    
-//        (short_,        0b0000'0000'0100'0000)
-//        (long_,         0b0000'0000'1000'0000)
-//    )                    
-//    (                    
-//        (uppercase,     0b0000'0001'0000'0000)
-//        (lowercase,     0b0000'0010'0000'0000)
-//    )                    
-//    (                    
-//        (sign,          0b0000'0100'0000'0000)      // space for zero
-//        (nosign,        0b0000'1000'0000'0000)
-//        (forcesign,     0b0001'0000'0000'0000)      // + for zero
-//    )                    
-//    ,                    
-//    (empty,             0b0000'0000'0000'0000)
-//    (default_,          dec | hidebase | c    | short_ | lowercase | nosign)    // must be synced with
-//                                                                                // strong_typedef_traits::default_
-//
-//    (base_mask,         dec | hex)
-//    (showbase_mask,     showbase | hidebase)
-//    (lang_mask,         asm_ | c)
-//    (width_mask,        short_ | long_)
-//    (case_mask,         uppercase | lowercase)
-//    (sign_mask,         sign | nosign | forcesign)
-//
-//    (sshort_asm_up_hex, hex | showbase | asm_ | short_ | uppercase | sign)          // +1Bh
-//    (long_asm_up_hex,   hex | showbase | asm_ | long_ | uppercase | nosign)         // 0000001Bh
-//    (long_c_up_hex,     hex | showbase | c | long_ | uppercase | forcesign)         // +0x0000001B
-//)
-
 enum class int_fmt_t: short
 {
     dec                 = 0b0000'0000'0000'0001,
