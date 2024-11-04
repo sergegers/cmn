@@ -43,9 +43,9 @@
 <span class="keyword">void</span>
 <span class="identifier">parse_into</span><span class="special">(</span>
     <span class="identifier">V</span><span class="special">&amp;</span> <span class="identifier">v</span><span class="special">,</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">istream</span><span class="special">&amp;</span> <span class="identifier">is</span><span class="special">,</span>
-    <span class="identifier">std</span><span class="special">::</span><span class="identifier">error_code</span><span class="special">&amp;</span> <span class="identifier">ec</span><span class="special">,</span>
-    <span class="identifier">parse_options</span> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">opt</span> <span class="special">=</span> <span class="special">{});</span>
+    <a href="https://en.cppreference.com/w/cpp/io/basic_istream" target="_top"><code class="literal">std::istream</code></a><span class="special">&amp;</span> <span class="identifier">is</span><span class="special">,</span>
+    <a href="https://en.cppreference.com/w/cpp/error/error_code" target="_top"><code class="literal">std::error_code</code></a><span class="special">&amp;</span> <span class="identifier">ec</span><span class="special">,</span>
+    <a class="link" href="../boost__json__parse_options.html" title="parse_options"><code class="literal">parse_options</code></a> <span class="keyword">const</span><span class="special">&amp;</span> <span class="identifier">opt</span> <span class="special">=</span> <span class="special">{});</span>
 </pre>
 <h6>
 <a name="json.ref.boost__json__parse_into.overload4.h1"></a>
@@ -56,6 +56,8 @@
           by the user. If the buffer does not contain a complete serialized JSON
           text, or contains extra non-whitespace data, an error occurs. In this case
           <code class="computeroutput"><span class="identifier">v</span></code> may be partially filled.
+        </p>
+<p>
           The function supports default constructible types satisfying <a href="https://en.cppreference.com/w/cpp/named_req/SequenceContainer" target="_top"><span class="emphasis"><em>SequenceContainer</em></span></a>,
           arrays, arithmetic types, <code class="computeroutput"><span class="keyword">bool</span></code>,
           <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">tuple</span></code>, <code class="computeroutput"><span class="identifier">std</span><span class="special">::</span><span class="identifier">pair</span></code>,

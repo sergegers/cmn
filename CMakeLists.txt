@@ -20,7 +20,6 @@ endif()
 
 project ("cmn")
 
-
 #set(Boost_DEBUG ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_LIBS ON)
@@ -43,9 +42,12 @@ endif()
 # Add source to this project's executable.
 add_library (
  cmn 
+ STATIC
 
  "cmn/meta/macro.h"
  "cmn/meta/concepts.h"
+ "cmn/meta/type_traits.h"
+ "cmn/meta/function_traits.h"
  
  "cmn/meta/symbols.h"
 
@@ -133,6 +135,9 @@ add_library (
  "cmn/name/parser_symbols.cpp"
  "cmn/name/types.h"
  "cmn/tuple/va/detail/util.h")
+
+ set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
+ set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
 
 set(cmn_NatvisPath "${CMAKE_CURRENT_SOURCE_DIR}/cmn/cmn.natvis")
 

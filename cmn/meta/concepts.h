@@ -6,6 +6,13 @@
 #include <boost/mp11.hpp>
 #include <boost/type_traits/promote.hpp>
 
+#if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
+
+#include <boost/mp11/concepts.hpp>
+#include <boost/fusion/concepts.hpp>
+
+#else
+
 #include <boost/fusion/support/is_sequence.hpp>
 #include <boost/fusion/support/category_of.hpp>
 
@@ -25,6 +32,8 @@ concept random_access_fus_sequence =
        fus_sequence<S> && fusion::traits::is_random_access<S>::value;
 
 }
+
+#endif
 
 namespace cmn
 {
