@@ -439,6 +439,51 @@ BOOST_AUTO_TEST_CASE(unsorted_enum)
     );
 }
 
+}
+
+}
+
+namespace outer_ns
+{
+
+struct outer_t
+{
+    enum inner_t
+    {
+        i_a0, i_a1, i_a2
+    };
+};
+
+CMN_PP_ADAPT_ENUM
+(
+    outer_t::inner_t,
+    (i_a0)
+    (i_a1)
+    (i_a2)
+)
+
+}
+
+namespace cmn
+{
+
+namespace enum_
+{
+
+static_assert(kind_v<outer_ns::outer_t::inner_t> == kind_t::enum_);
+
+BOOST_AUTO_TEST_CASE(inner_enum)
+{
+    using namespace outer_ns;
+    using enum outer_t::inner_t;
+
+    outer_t::inner_t e { i_a2 };
+    
+    output_test_stream tstr;
+    tstr << e;
+    BOOST_CHECK(tstr.is_equal("[i_a2]"));
+}
+
 BOOST_AUTO_TEST_SUITE_END() // enum_
 BOOST_AUTO_TEST_SUITE_END() // cmn
 
