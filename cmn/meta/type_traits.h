@@ -11,6 +11,9 @@
 namespace cmn
 {
 
+template <std::size_t I_> using int_ = std::integral_constant<std::size_t, I_>;
+
+//-----------------------------------------------------------------------------
 template<typename T>
 struct remove_rvalue_reference
 {

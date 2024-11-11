@@ -155,7 +155,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
    "test/io.cpp" 
    "test/tuple/tuple.cpp"
    "test/tuple/va.cpp"
- )
+  "test/util.cpp" "test/meta/type_traits.cpp")
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

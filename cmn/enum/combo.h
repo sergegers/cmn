@@ -2,8 +2,8 @@
 
 #include <boost/preprocessor/cat.hpp>
 #include <boost/preprocessor/punctuation/comma_if.hpp>
-#include <boost/preprocessor/seq/cat.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
+#include <boost/preprocessor/seq/cat.hpp>
 
 #include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
@@ -112,7 +112,7 @@ consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, unsigned
 
 ///////////////////////////////////////////////////////////////////////////////
 #define CMN_PP_DEFINE_COMBO_CLASS_BASE(name, base, groups_seq, ...)                         \
-    CMN_PP_DEFINE_ENUM_HEADER(class, name, BOOST_PP_CAT(:, base))                           \
+    CMN_PP_DEFINE_ENUM_HEADER(class, name, : base)                                          \
         CMN_PP_DEFINE_GROUP_BODY(BOOST_PP_SEQ_CAT(groups_seq))                              \
         CMN_PP_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
     CMN_PP_DEFINE_ENUM_FOOTER()                                                             \

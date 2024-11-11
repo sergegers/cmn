@@ -1,6 +1,7 @@
 #pragma once
 
 #include <concepts>
+#include <string>
 #include <type_traits>
 
 #include <boost/mp11.hpp>
@@ -276,6 +277,18 @@ concept fmt_unit =
     unit<T>
  && io::strong_typedef_fmt_traits<T>::enable_luxury_io
 ;
+
+//-----------------------------------------------------------------------------
+template <typename T, typename Char, typename CharTraits>
+concept basic_string = requires (T const &ct, std::size_t idx)
+{
+    { ct.c_str() } -> std::same_as<Char const *>;
+    { ct[idx] } -> std::same_as<Char const &>;
+};
+
+template <typename T> concept string = basic_string<T, char, std::char_traits<char>>;
+template <typename T> concept wstring = basic_string<T, wchar_t, std::char_traits<wchar_t>>;
+
 
 }
 

@@ -38,8 +38,6 @@ template <typename... Groups> consteval auto get_kind(enum_info<Groups...> const
         ((std::tuple_size_v<Groups> == 1) && ...)? bitfield: combo;
 }
 
-template <std::size_t I_> using int_ = std::integral_constant<std::size_t, I_>;
-
 template <typename Group, typename... Groups>
 consteval auto calc_masks(enum_info<Group, Groups...> const &enum_info)
     -> std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1>
