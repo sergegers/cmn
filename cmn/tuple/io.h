@@ -3,7 +3,12 @@
 #include <boost/fusion/sequence/io/out.hpp>
 #include <boost/fusion/sequence/io/in.hpp>
 
-#include <cmn/meta/concepts.h>
+#if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
+#   include <boost/mp11/concepts.hpp>
+#   include <boost/fusion/concepts.hpp>
+#else
+#   include <cmn/meta/concepts.h>
+#endif
 
 namespace boost::fusion::sequence
 {
@@ -27,3 +32,10 @@ auto operator >> (std::basic_istream<Char, CharTraits> &istr, Seq &seq) -> declt
 
 }
 
+namespace std
+{
+
+using boost::fusion::sequence::operators::operator <<;
+using boost::fusion::sequence::operators::operator >>;
+
+}

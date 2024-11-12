@@ -4,11 +4,16 @@
 #include <type_traits>
 
 #include <boost/mp11.hpp>
-#include <boost/mp11/concepts.hpp>
-#include <boost/fusion/concepts.hpp>
 #include <boost/fusion/sequence/intrinsic/at.hpp>
 
-#include <cmn/meta/utility.h>         // make_index_sequence_reverse
+#if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
+#   include <boost/mp11/concepts.hpp>
+#   include <boost/fusion/concepts.hpp>
+#else
+#   include <cmn/meta/concepts.h>
+#endif
+
+#include <cmn/meta/type_traits.h>         // make_index_sequence_reverse
 
 namespace cmn
 {

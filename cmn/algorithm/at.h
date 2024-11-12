@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <cassert>
 
 // boost.mp11
 #include <boost/mp11.hpp>
@@ -9,18 +10,17 @@
 // boost.fusion
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 #include <boost/fusion/sequence/intrinsic/empty.hpp>
-#include <boost/fusion/concepts.hpp>
 // boost.variant
 #include <boost/variant.hpp>
 
 #if __has_include(<boost/mp11/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
+#   include <boost/fusion/concepts.hpp>
 #else
 #   include <cmn/meta/concepts.h>
 #endif
 
 #include <cmn/meta/type_traits.h>    // underlying_type_t<>
-#include <cmn/shared/util/assert.h>
 #include <cmn/algorithm/detail/result.h>
 #include <cmn/algorithm/detail/visitor.h>
 
@@ -51,7 +51,7 @@ constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
     using int_type = underlying_type_t<Idx>;
 
     static constexpr auto size = mp_size<L>::value;
-    asserte_msg(idx < size, "Index %1% is out of bounds [0, %2%)", idx, size);
+    assert(("Index is out of bounds", idx < size));
 
     static auto const tbl = []<int_type... Indices>(std::integer_sequence<int_type, Indices...>)
     {

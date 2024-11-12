@@ -200,6 +200,32 @@ template <typename Seq, typename Seq::value_type X, typename Seq::value_type Y>
 using index_swap_t = typename index_swap<Seq, X, Y>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
+//
+// make_integer_sequence_reverse
+// make_index_sequence_reverse
+//
+// https://stackoverflow.com/a/51409050/8452129
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+template <typename I, I... Is>
+constexpr auto make_integer_sequence_reverse_impl(std::integer_sequence<I, Is...>)
+{
+    return std::index_sequence<sizeof...(Is) - 1U - Is...>{};
+}
+
+}
+
+template <std::integral I, I Size_>
+using make_integer_sequence_reverse = 
+    decltype(detail::make_integer_sequence_reverse_impl(std::make_integer_sequence<decltype(Size_), Size_>{}));
+
+template <std::size_t Size_>
+using make_index_sequence_reverse = make_integer_sequence_reverse<std::size_t, Size_>;
+
+///////////////////////////////////////////////////////////////////////////////
 template <auto Int_> using make_int_t = std::integral_constant<decltype(Int_), Int_>;
 
 ///////////////////////////////////////////////////////////////////////////////
