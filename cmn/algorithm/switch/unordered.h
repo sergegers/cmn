@@ -6,8 +6,8 @@
 #include <boost/optional.hpp>
 #include <boost/mp11.hpp>
 
-#include <cmn/shared/meta/concepts.h>       // c::enumerable<>
-#include <cmn/shared/algorithm/detail/result.h>
+#include <cmn/meta/concepts.h>       // c::enumerable<>
+#include <cmn/algorithm/detail/result.h>
 
 namespace cmn
 {

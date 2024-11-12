@@ -80,19 +80,18 @@ add_library (
  "cmn/tuple/va/adapt/std_tuple.h" 
  "cmn/tuple/va/adapt/fusion.h" 
  "cmn/tuple/va/adapt/mpl.h"
-  "cmn/tuple/va/adapt.h"
+ "cmn/tuple/va/adapt.h"
+ "cmn/tuple/va/detail/util.h"
 
  "cmn/enum/util/magic_get.h"
  "cmn/enum/util/qualified_name.h" 
  "cmn/enum/util/name_info.h" 
- "cmn/enum/util/record_info.h" 
-  
+ "cmn/enum/util/record_info.h"  
  "cmn/enum/util/group_info.h" 
  "cmn/enum/util/groups_info.h"
  "cmn/enum/util/enum_info.h"
-
+ "cmn/enum/util/macro.h"  
  "cmn/enum/util.h"
- "cmn/enum/macro.h"  
  "cmn/enum/op.h" 
  "cmn/enum/traits.h" 
  "cmn/enum/enum.h" 
@@ -124,17 +123,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-
- "cmn/name/generator.h"
- "cmn/name/generator.cpp"
- "cmn/name/generator_symbols.h"
- "cmn/name/generator_symbols.cpp"
- "cmn/name/parser.h"
- "cmn/name/parser.cpp"
- "cmn/name/parser_symbols.h"
- "cmn/name/parser_symbols.cpp"
- "cmn/name/types.h"
- "cmn/tuple/va/detail/util.h")
+)
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -151,7 +140,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/main.cpp"
   "test/error.cpp"
   "test/enum.cpp"
-  "test/name.cpp"
+  
    "test/io.cpp" 
    "test/tuple/tuple.cpp"
    "test/tuple/va.cpp"

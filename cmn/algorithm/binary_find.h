@@ -7,11 +7,11 @@
 #include <boost/fusion/concepts.hpp>
 #include <boost/fusion/ext.h>
 
-#include <cmn/shared/meta/concepts.h>
-#include <cmn/shared/meta/type_traits.h>
+#include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
 #include <cmn/shared/util/util.h>
-#include <cmn/shared/algorithm/detail/visitor.h>
-#include <cmn/shared/algorithm/detail/result.h>
+#include <cmn/algorithm/detail/visitor.h>
+#include <cmn/algorithm/detail/result.h>
 
 namespace cmn
 {
@@ -62,7 +62,7 @@ struct binary_find_if_mp11_impl
 
         if constexpr (BeginIdx_ == EndIdx_)
         {
-            if constexpr (BeginIdx_ == mp_size_v<L>)
+            if constexpr (BeginIdx_ == mp_size<L>::value)
             {
                 // use the first sequence element to compute a visitor result type
                 return
@@ -369,7 +369,7 @@ constexpr auto binary_find_mp11
     return bs
     (
           mp_size_t<0>{}
-        , mp_size_t<mp_size_v<L>>{}
+        , mp_size_t<mp_size<L>::value>{}
         , std::forward<T>(t)
         , std::forward<Visitor>(visitor)
         , std::forward<Args>(args)...
@@ -406,7 +406,7 @@ constexpr auto binary_find_if_mp11
     return bs
     (
           mp_size_t<0>{}
-        , mp_size_t<mp_size_v<L>>{}
+        , mp_size_t<mp_size<L>::value>{}
         , std::forward<T>(t)
         , std::forward<Visitor>(visitor)
         , std::forward<Args>(args)...

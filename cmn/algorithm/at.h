@@ -5,18 +5,24 @@
 // boost.mp11
 #include <boost/mp11.hpp>
 #include <boost/mp11/mpl_list.hpp>
-#include <boost/mp11/concepts.hpp>
+
 // boost.fusion
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
 #include <boost/fusion/sequence/intrinsic/empty.hpp>
 #include <boost/fusion/concepts.hpp>
 // boost.variant
 #include <boost/variant.hpp>
- 
-#include <cmn/shared/meta/type_traits.h>    // underlying_type_t<>
+
+#if __has_include(<boost/mp11/concepts.hpp>)
+#   include <boost/mp11/concepts.hpp>
+#else
+#   include <cmn/meta/concepts.h>
+#endif
+
+#include <cmn/meta/type_traits.h>    // underlying_type_t<>
 #include <cmn/shared/util/assert.h>
-#include <cmn/shared/algorithm/detail/result.h>
-#include <cmn/shared/algorithm/detail/visitor.h>
+#include <cmn/algorithm/detail/result.h>
+#include <cmn/algorithm/detail/visitor.h>
 
 namespace cmn
 {
@@ -37,14 +43,14 @@ template
     , c::enumerable Idx
     , typename Visitor = detail::empty_visitor
 >
-    requires !boost::mp11::mp_empty_v<L>
+    requires !boost::mp11::mp_empty<L>::value
     
 constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
 {
     using namespace boost::mp11;
     using int_type = underlying_type_t<Idx>;
 
-    static constexpr auto size = mp_size_v<L>;
+    static constexpr auto size = mp_size<L>::value;
     asserte_msg(idx < size, "Index %1% is out of bounds [0, %2%)", idx, size);
 
     static auto const tbl = []<int_type... Indices>(std::integer_sequence<int_type, Indices...>)

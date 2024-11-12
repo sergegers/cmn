@@ -4,7 +4,7 @@
 
 #include <boost/mp11/concepts.hpp>   // for mpl, mp11 & fusion concepts
 
-#include <cmn/shared/algorithm/detail/result.h>
+#include <cmn/algorithm/detail/result.h>
 
 namespace cmn
 {

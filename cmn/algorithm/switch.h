@@ -7,13 +7,13 @@
 
 #include <boost/mp11.hpp>
 
-#include <cmn/shared/meta/concepts.h>       // c::enumerable<>
-#include <cmn/shared/meta/type_traits.h>    // underlying_type_t<>
+#include <cmn/meta/concepts.h>       // c::enumerable<>
+#include <cmn/meta/type_traits.h>    // underlying_type_t<>
 
-#include <cmn/shared/algorithm/switch/unordered.h>
-#include <cmn/shared/algorithm/switch/ordered.h>
-#include <cmn/shared/algorithm/switch/sequenced.h>
-#include <cmn/shared/algorithm/detail/result.h>
+#include <cmn/algorithm/switch/unordered.h>
+#include <cmn/algorithm/switch/ordered.h>
+#include <cmn/algorithm/switch/sequenced.h>
+#include <cmn/algorithm/detail/result.h>
 
 namespace cmn
 {

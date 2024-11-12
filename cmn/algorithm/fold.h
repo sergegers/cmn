@@ -8,7 +8,7 @@
 #include <boost/fusion/concepts.hpp>
 #include <boost/fusion/sequence/intrinsic/at.hpp>
 
-#include <cmn/shared/meta/utility.h>         // make_index_sequence_reverse
+#include <cmn/meta/utility.h>         // make_index_sequence_reverse
 
 namespace cmn
 {

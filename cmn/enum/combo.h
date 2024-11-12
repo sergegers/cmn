@@ -8,7 +8,7 @@
 #include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
-#include <cmn/enum/macro.h>
+#include <cmn/enum/util/macro.h>
 
 namespace cmn::enum_
 {

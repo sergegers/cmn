@@ -74,3 +74,15 @@
     using ::cmn::enum_::op::operator <<; \
     using ::cmn::enum_::op::operator >>;
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// generate enum item pair from macro definition
+//
+// #define item 5
+// CMN_PP_DEFINE_ENUM_CONST(item) ->
+// (item_, item) ->
+// item_ = item after preprocessing
+//
+///////////////////////////////////////////////////////////////////////////////
+#define CMN_PP_DEFINE_ENUM_CONST(item)              (item##_ BOOST_PP_COMMA() item)
+#define CMN_PP_DEFINE_ENUM_CONST_CAST(item, to)     (item##_ BOOST_PP_COMMA() static_cast<to>(item))
