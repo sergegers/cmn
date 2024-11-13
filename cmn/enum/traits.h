@@ -4,6 +4,7 @@
 #include <tuple>
 #include <bit>
 #include <iosfwd>
+#include <concepts>
 
 #include <cmn/meta/concepts.h>
 #include <cmn/util/util.h>        // for bsr()
@@ -99,6 +100,7 @@ template
       c::enumerable Enum
     , c::enumerable... Enums
 >
+    requires (std::same_as<Enum, Enums> && ...)
 constexpr auto in(Enum en, Enums ...ens) -> bool
 {
     return ((en == ens) || ...);

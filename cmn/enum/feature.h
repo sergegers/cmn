@@ -65,10 +65,10 @@ template <c::bitfield Policy>
     return pol & ~mask | val;
 }
 
-template <c::bitfield Policy>
+template <c::strong_bitfield Policy>
 [[nodiscard]] constexpr auto set_value(Policy pol, Policy val, Policy mask) noexcept
 {
-    return set_value(pol, val, static_cast<mask_type_t<Policy>>(mask));
+    return pol & ~mask | val;
 }
 
 template <c::bitfield Policy>
@@ -83,10 +83,10 @@ template <c::bitfield Policy>
     return pol & mask;
 }
 
-template <c::bitfield Policy>
+template <c::strong_bitfield Policy>
 [[nodiscard]] constexpr auto get_value(Policy pol, Policy mask) noexcept
 {
-    return get_value(pol, static_cast<mask_type_t<Policy>>(mask));
+    return pol & mask;
 }
 
 template <c::strong_bitfield Policy>

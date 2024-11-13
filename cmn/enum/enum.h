@@ -83,6 +83,15 @@ consteval auto adapt_enum_info_helper(unsigned int ops = default_ops(kind_t::enu
     CMN_PP_INJECT_ENUM_OPS()
 
 ///////////////////////////////////////////////////////////////////////////////
+#define CMN_PP_DEFINE_ENUM_BASE(name, base, group_nvp_seq, ...)                             \
+    CMN_PP_DEFINE_ENUM_HEADER(, name, : base)                                               \
+        CMN_PP_DEFINE_GROUP_BODY(group_nvp_seq)                                             \
+        CMN_PP_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
+    CMN_PP_DEFINE_ENUM_FOOTER()                                                             \
+    CMN_PP_ADAPT_ENUM_INFO(name, group_nvp_seq)                                             \
+    CMN_PP_INJECT_ENUM_OPS()
+
+///////////////////////////////////////////////////////////////////////////////
 #define CMN_PP_ADAPT_ENUM_CLASS(name, group_nvp_seq)                                        \
     CMN_PP_ADAPT_ENUM(name, group_nvp_seq)
 

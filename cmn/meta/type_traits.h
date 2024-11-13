@@ -1,10 +1,10 @@
 #pragma once
 
-#include <boost/mp11.hpp>
-
 #include <type_traits>
 #include <utility>
 #include <limits>
+
+#include <boost/mp11.hpp>
 
 #include <cmn/meta/concepts.h>
 
@@ -159,7 +159,7 @@ struct add_and_convert<Add_, std::integer_sequence<I, Idss_...>>
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enumerable auto B_, decltype(B_) E_> requires (E_ >= B_)
-using make_integer_sequence = typename detail::add_and_convert
+using make_enumerable_sequence = typename detail::add_and_convert
 <
       B_
     , std::make_integer_sequence
@@ -175,7 +175,7 @@ using make_integer_sequence = typename detail::add_and_convert
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <std::size_t B_, std::size_t E_>
-using make_index_sequence = make_integer_sequence<B_, E_>;
+using make_index_sequence = make_enumerable_sequence<B_, E_>;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -296,6 +296,14 @@ using make_index_sequence_reverse = make_integer_sequence_reverse<std::size_t, S
 
 ///////////////////////////////////////////////////////////////////////////////
 //
+// enumerable_sequence_for<> can make mp11 sequence from any enumerable type
+//
+///////////////////////////////////////////////////////////////////////////////
+template <c::enumerable auto Idx_, decltype(Idx_)... Idss_>
+using mp_from_enumerables = boost::mp11::mp_list_c<decltype(Idx_), Idx_, Idss_...>;
+
+///////////////////////////////////////////////////////////////////////////////
+//
 // mp_from_sequence<> can make mp11 sequence from any enumerable type
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -326,17 +334,35 @@ template <typename Seq> using mp_from_sequence = typename detail::mp_from_sequen
 template <auto Int_> using make_int_t = std::integral_constant<decltype(Int_), Int_>;
 
 ///////////////////////////////////////////////////////////////////////////////
-template <typename T> constexpr bool is_char_v = boost::mp11::mp_find
+namespace detail
+{
+
+using namespace boost::mp11;
+
+using char_types_t = mp_list
 <
-    boost::mp11::mp_list
-    <
-          char
-        , unsigned char
-        , signed char
-        , wchar_t
-    >,
-    std::remove_cvref_t<T>
->::value;
+      char
+    , unsigned char
+    , signed char
+    , wchar_t
+>;
+
+template <typename T>
+consteval auto is_char() -> bool
+{
+    return mp_find<char_types_t, std::remove_cvref_t<T>>::value < mp_size<char_types_t>::value;
+}
+
+}
+
+template <typename T> constexpr bool is_char_v = detail::is_char<T>();
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Usable with 'if constexpr' expression for conditional compilation
+//
+template <bool Val_, typename...>
+constexpr bool dependent_v = Val_;
 
 namespace enum_
 {

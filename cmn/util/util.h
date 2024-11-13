@@ -165,4 +165,11 @@ constexpr auto itoa() -> c::basic_string<Char, CharTraits> auto
     }
 }
 
+//-----------------------------------------------------------------------------
+template <typename T>
+struct assert_type_complete
+{
+    static_assert(c::complete<T>);
+};
+
 }

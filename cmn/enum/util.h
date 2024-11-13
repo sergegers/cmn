@@ -61,6 +61,21 @@ consteval auto default_ops(kind_t kind) -> unsigned int
     ;
 }
 
+// TODO: investigate
+//template <c::enumerable Enum>
+//consteval auto default_ops(Enum, kind_t kind) -> unsigned int
+//{
+//    auto const scoped_enum = std::is_scoped_enum_v<Enum>;
+//
+//    using enum kind_t;
+//    return 
+//        kind == enum_? op_comparable | op_steppable | op_io:
+//        kind == bitfield? op_bitwise | op_io:
+//        kind == combo? op_comparable | op_steppable | op_bitwise | op_io:
+//            op_empty
+//    ;
+//}
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // get smallest enum value

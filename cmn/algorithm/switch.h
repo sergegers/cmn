@@ -105,7 +105,7 @@ constexpr auto switch_
             // index == Idss__...[0]
             []<T Idx_, T... Idss__>(integer_sequence<T, Idx_, Idss__...>, T t) constexpr noexcept 
                 { return t == Idx_;  }
-            (make_integer_sequence<T, Idss_...>{}, index)
+            (make_enumerable_sequence<T, Idss_...>{}, index)
         )
             return detail::result_{ f }
                     .with_args(std::integral_constant<T, Idss_...>{}, std::forward<Args>(args)...)

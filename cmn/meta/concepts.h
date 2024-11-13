@@ -6,8 +6,6 @@
 #include <iosfwd>
 #include <exception>
 
-#include <boost/type_traits.hpp>
-
 #include <boost/mp11.hpp>
 #include <boost/mpl/pair.hpp>
 #include <boost/type_traits/promote.hpp>
@@ -75,7 +73,33 @@ template <typename T>
 concept pointer = std::is_pointer_v<T>;
 
 template <typename T>
-concept dereferencable = boost::has_dereference<T>::value;
+concept dereferencable =  requires (T &t)
+{
+    { *t };
+};
+
+//-----------------------------------------------------------------------------
+//
+// also support smart pointers
+//
+// https://stackoverflow.com/a/78595795/8452129
+//-----------------------------------------------------------------------------
+template <typename T>
+concept pointer_like = 
+    pointer<T>
+ ||
+(
+    dereferencable<T>
+ && requires (T t)
+ {
+    { static_cast<bool>(t) };
+    { t.operator -> () } -> std::convertible_to<decltype( &*t )>;
+ }
+);
+
+//-----------------------------------------------------------------------------
+template <typename T>
+concept class_ = std::is_class_v<T>;
 
 template <typename T>
 concept function = std::is_function_v<T>;
@@ -94,6 +118,7 @@ concept noscoped_enum = enum_<T> && !std::is_scoped_enum_v<T>;
 //-----------------------------------------------------------------------------
 template <typename T>
 concept enumerable = std::integral<T> || std::is_enum_v<T>;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -228,52 +253,56 @@ template <typename Enum>
 concept e_any_enum = e_enum<Enum> || e_bitfield<Enum> || e_combo<Enum>;
 
 ///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
 template <typename Lhs, typename Rhs, typename Res>
-concept bit_ops_ = requires(Lhs lhs, Rhs rhs)
+concept bit_ops__ = requires(Lhs lhs, Rhs rhs)
 {
     { lhs & rhs } noexcept -> std::same_as<Res>;
     { lhs | rhs } noexcept -> std::same_as<Res>;
     { lhs ^ rhs } noexcept -> std::same_as<Res>;
+    { ~lhs } noexcept -> std::same_as<Res>;
 };
 
-template <typename T, typename Res>
-concept not_op_ = requires(T t)
-{
-    { ~t } noexcept -> std::same_as<Res>;
-};
+template <typename Lhs, typename Rhs, typename Res>
+concept bit_ops_ = 
+    bit_ops__<Lhs, Rhs, Res>
+ && bit_ops__<Rhs, Lhs, Res>
+;
 
-template <typename T, typename Res>
-concept bit_n_ops_ = bit_ops_<T, T, Res> && not_op_<T, Res>;
+}
 
 //-----------------------------------------------------------------------------
+//
+// for scoped bitfields
+//
 template <typename T>
 concept strong_bitfield = 
     enumerable<T>
  && std::equality_comparable<T>
- && bit_ops_<T, T, T>
+ && detail::bit_ops_<T, T, T>
 ;
+
 //-----------------------------------------------------------------------------
+//
+// for any bitfields
+//
 template <typename T>
-concept bitfield = 
-    enumerable<T>
- && std::equality_comparable<T>
- && 
+concept bitfield =
+    strong_bitfield<T>
+ ||
  (
-        // for scoped bitfields
-        bit_n_ops_<T, T> 
-     && bit_ops_<T, enum_::mask_type_t<T>, T>
-    ||
-    std::equality_comparable_with<T, enum_::mask_type_t<T>>
+        enumerable<T>
+     && std::equality_comparable<T>
+     && std::equality_comparable_with<T, enum_::mask_type_t<T>>
      &&
      (
             // for integral types & C enums with implicit conversion to int types
-           bit_n_ops_<T, boost::promote_t<T>>
-        && bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
-      ||
-            // for nonscoped enums with overloaded operators
-           bit_n_ops_<T, T>
-        && bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
-    )  
+           detail::bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
+            // for integral types & scoped enums with overloaded operators
+        || detail::bit_ops_<T, enum_::mask_type_t<T>, T>
+     )  
  )
 ;
 
