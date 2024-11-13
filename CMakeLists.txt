@@ -18,6 +18,9 @@ if (POLICY CMP0091)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
 endif()
 
+if(POLICY CMP0167)
+  cmake_policy(SET CMP0167 NEW)
+endif()
 project ("cmn")
 
 #set(Boost_DEBUG ON)
@@ -28,6 +31,7 @@ set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/boost/)
 
 find_package(Boost REQUIRED COMPONENTS 
     exception
+    serialization
     unit_test_framework 
 )
 
@@ -71,6 +75,7 @@ add_library (
  "cmn/tuple/tuple.h"
  "cmn/tuple/ops.h"
  "cmn/tuple/io.h"
+ "cmn/tuple/serialization.h"
  "cmn/tuple/va/concepts.h"
  "cmn/tuple/va/tuple.h"
  "cmn/tuple/va/tuple_view.h"

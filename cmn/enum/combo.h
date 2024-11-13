@@ -98,6 +98,15 @@ consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, unsigned
     CMN_PP_INJECT_ENUM_OPS()
 
 ///////////////////////////////////////////////////////////////////////////////
+#define CMN_PP_DEFINE_COMBO_BASE(name, base, groups_seq, ...)                               \
+    CMN_PP_DEFINE_ENUM_HEADER(, name, : base)                                               \
+        CMN_PP_DEFINE_GROUP_BODY(BOOST_PP_SEQ_CAT(groups_seq))                              \
+        CMN_PP_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
+    CMN_PP_DEFINE_ENUM_FOOTER()                                                             \
+    CMN_PP_ADAPT_COMBO_INFO(name, groups_seq)                                               \
+    CMN_PP_INJECT_ENUM_OPS()
+
+///////////////////////////////////////////////////////////////////////////////
 #define CMN_PP_ADAPT_COMBO_CLASS(name, groups_seq)                                          \
     CMN_PP_ADAPT_COMBO(name, groups_seq)
 

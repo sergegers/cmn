@@ -2,6 +2,7 @@
 
 #include <tuple>
 #include <utility>
+#include <cstdarg>
 
 #include <boost/mp11.hpp>
 

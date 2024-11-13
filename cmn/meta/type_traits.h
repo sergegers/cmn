@@ -29,6 +29,75 @@ struct remove_rvalue_reference<T&&>
 template<typename T>
 using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
 
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> copy_const
+//
+//-----------------------------------------------------------------------------
+template <typename Src, typename Dest> struct copy_const: std::type_identity<Dest> {};
+template <typename Src, typename Dest> struct copy_const<Src, Dest const>: std::type_identity<Dest> {};
+template <typename Src, typename Dest> struct copy_const<Src const, Dest>: std::type_identity<Dest const> {};
+
+template <typename Src, typename Dest> using copy_const_t = typename copy_const<Src, Dest>::type;
+
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> copy_lvalue_reference
+//
+//-----------------------------------------------------------------------------
+template <typename Src, typename Dest> struct copy_lvalue_reference: std::type_identity<Dest> {};
+template <typename Src, typename Dest> struct copy_lvalue_reference<Src, Dest &>: std::type_identity<Dest> {};
+template <typename Src, typename Dest> struct copy_lvalue_reference<Src &, Dest>: std::type_identity<Dest &> {};
+
+template <typename Src, typename Dest> using copy_lvalue_reference_t = typename copy_lvalue_reference<Src, Dest>::type;
+
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> copy_rvalue_reference
+//
+//-----------------------------------------------------------------------------
+template <typename Src, typename Dest> struct copy_rvalue_reference: std::type_identity<Dest> {};
+template <typename Src, typename Dest> struct copy_rvalue_reference<Src, Dest &&>: std::type_identity<Dest> {};
+template <typename Src, typename Dest> struct copy_rvalue_reference<Src &&, Dest>: std::type_identity<Dest &&> {};
+
+template <typename Src, typename Dest> using copy_rvalue_reference_t = typename copy_rvalue_reference<Src, Dest>::type;
+
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> deep_add_const
+//
+//-----------------------------------------------------------------------------
+template <typename T> struct deep_add_const : std::type_identity<T const> {};
+template <typename T> struct deep_add_const<T &> : std::type_identity<T const &> {};
+template <typename T> struct deep_add_const<T *> : std::type_identity<T const * const> {};
+
+template <typename T> using deep_add_const_t = typename deep_add_const<T>::type;
+
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> deep_remove_const
+//
+//-----------------------------------------------------------------------------
+template <typename T> struct deep_remove_const : std::type_identity<T> {};
+template <typename T> struct deep_remove_const<T const> : std::type_identity<T> {};
+template <typename T> struct deep_remove_const<T const &> : std::type_identity<T &> {};
+template <typename T> struct deep_remove_const<T const *> : std::type_identity<T *> {};
+template <typename T> struct deep_remove_const<T const * const> : std::type_identity<T *> {};
+
+template <typename T>
+using deep_remove_const_t = typename deep_remove_const<T>::type;
+
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> deep_copy_const
+//
+//-----------------------------------------------------------------------------
+template <typename Src, typename Dest> struct deep_copy_const : copy_const<Src, Dest> {};
+template <typename Src, typename Dest> struct deep_copy_const<Src, Dest &> : std::add_lvalue_reference<copy_const_t<Src, Dest>> {};
+template <typename Src, typename Dest> struct deep_copy_const<Src, Dest *> : std::add_pointer<copy_const_t<Src, Dest>> {};
+
+template <typename Src, typename Dest> using deep_copy_const_t = typename deep_copy_const<Src, Dest>::type;
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // extended underlying_type
@@ -224,6 +293,34 @@ using make_integer_sequence_reverse =
 
 template <std::size_t Size_>
 using make_index_sequence_reverse = make_integer_sequence_reverse<std::size_t, Size_>;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// mp_from_sequence<> can make mp11 sequence from any enumerable type
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+using namespace boost::mp11;
+
+template <typename Seq> struct mp_from_sequence_impl;
+
+template <c::enumerable I, I... Idss_>
+struct mp_from_sequence_impl<std::integer_sequence<I, Idss_...>>
+{
+    using type = mp_list_c<I, Idss_...>;
+};
+
+template <c::enumerable I, I... Idss_>
+struct mp_from_sequence_impl<integer_sequence<I, Idss_...>>
+{
+    using type = mp_list_c<I, Idss_...>;
+};
+
+}
+
+template <typename Seq> using mp_from_sequence = typename detail::mp_from_sequence_impl<Seq>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <auto Int_> using make_int_t = std::integral_constant<decltype(Int_), Int_>;

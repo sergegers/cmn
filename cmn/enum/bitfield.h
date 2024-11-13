@@ -81,6 +81,24 @@ consteval auto adapt_bitfield_info_helper(unsigned int ops = default_ops(kind_t:
     CMN_PP_ADAPT_BITFIELD_INFO(name, group_nvp_seq)                                         \
     CMN_PP_INJECT_ENUM_OPS()
 
+///////////////////////////////////////////////////////////////////////////////
+#define CMN_PP_DEFINE_BITFIELD_CLASS(name, group_nvp_seq, ...)                              \
+    CMN_PP_DEFINE_ENUM_HEADER(class , name, )                                               \
+        CMN_PP_DEFINE_GROUP_BODY(group_nvp_seq)                                             \
+        CMN_PP_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
+    CMN_PP_DEFINE_ENUM_FOOTER()                                                             \
+    CMN_PP_ADAPT_BITFIELD_INFO(name, group_nvp_seq)                                         \
+    CMN_PP_INJECT_ENUM_OPS()
+
+///////////////////////////////////////////////////////////////////////////////
+#define CMN_PP_DEFINE_BITFIELD_CLASS_BASE(name, base, group_nvp_seq, ...)                   \
+    CMN_PP_DEFINE_ENUM_HEADER(class , name, : base)                                         \
+        CMN_PP_DEFINE_GROUP_BODY(group_nvp_seq)                                             \
+        CMN_PP_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
+    CMN_PP_DEFINE_ENUM_FOOTER()                                                             \
+    CMN_PP_ADAPT_BITFIELD_INFO(name, group_nvp_seq)                                         \
+    CMN_PP_INJECT_ENUM_OPS()
+
 #ifdef UNITY_BUILD
 #   include "io.h"
 #endif

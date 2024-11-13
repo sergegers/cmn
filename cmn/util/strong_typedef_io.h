@@ -85,7 +85,6 @@ consteval auto adapt_enum_info(int_fmt_t)
 
 CMN_PP_INJECT_ENUM_OPS()
 
-
 namespace manip
 {
 
@@ -180,14 +179,14 @@ struct reader
     }
 };
 
+// BUG: couldn't use auto function type
 template
 <
       typename Char
     , typename CharTraits
     , std::integral Unit
 >
-using te_reader = std::function<auto (std::basic_istream<Char, CharTraits> &, int_fmt_t, Unit &)
-    -> std::basic_istream<Char, CharTraits> &>;
+using te_reader = std::function<std::basic_istream<Char, CharTraits> & (std::basic_istream<Char, CharTraits> &, int_fmt_t, Unit &)>;
 
 //-----------------------------------------------------------------------------
 template
@@ -216,14 +215,14 @@ struct writer
     }
 };
 
+// BUG: couldn't use auto function type
 template
 <
       typename Char
     , typename CharTraits
     , std::integral Unit
 >
-using te_writer = std::function<auto (std::basic_ostream<Char, CharTraits> &, int_fmt_t, Unit const &)
-    -> std::basic_ostream<Char, CharTraits> & >;
+using te_writer = std::function<std::basic_ostream<Char, CharTraits> & (std::basic_ostream<Char, CharTraits> &, int_fmt_t, Unit const &)>;
 
 //-----------------------------------------------------------------------------
 template

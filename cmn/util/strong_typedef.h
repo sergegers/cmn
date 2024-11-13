@@ -18,6 +18,19 @@
 namespace cmn
 {
 
+// strong typedef helper concepts
+namespace detail
+{
+
+template <typename U, typename V>
+concept int_convertible_to_ =
+    std::integral<U>
+ && std::integral<V>
+ && std::convertible_to<U, V>
+;
+
+}
+
 namespace io
 {
 
@@ -238,31 +251,31 @@ public:
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator<=>(rhs); }
 #pragma warning(suppress: 26434)
-    constexpr auto operator <=> (c::int_convertible_to<T> auto rhs) const noexcept
+    constexpr auto operator <=> (detail::int_convertible_to_<T> auto rhs) const noexcept
     {
         return inherited::operator <=> (static_cast<T>(rhs));
     }
 
     // allow interop operations
-    constexpr auto operator += (c::int_convertible_to<Ptrdiff> auto rhs) -> U &
+    constexpr auto operator += (detail::int_convertible_to_<Ptrdiff> auto rhs) -> U &
     {
         this->m_t += static_cast<Ptrdiff>(rhs);
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator + (U const &lhs, c::int_convertible_to<Ptrdiff> auto rhs) -> U
+    friend constexpr auto operator + (U const &lhs, detail::int_convertible_to_<Ptrdiff> auto rhs) -> U
     {
         auto res = lhs;
         return std::move(res += rhs);
     }
 
-    constexpr auto operator -= (c::int_convertible_to<Ptrdiff> auto rhs) -> U &
+    constexpr auto operator -= (detail::int_convertible_to_<Ptrdiff> auto rhs) -> U &
     {
         this->m_t -= static_cast<Ptrdiff>(rhs);
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator - (U const &lhs, c::int_convertible_to<Ptrdiff> auto rhs) -> U
+    friend constexpr auto operator - (U const &lhs, detail::int_convertible_to_<Ptrdiff> auto rhs) -> U
     {
         auto res = lhs;
         return std::move(res -= rhs); 
@@ -360,32 +373,32 @@ public:
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator <=> (rhs); }
 #pragma warning(suppress: 26434)
-    constexpr auto operator <=> (c::int_convertible_to<T> auto rhs) const noexcept
+    constexpr auto operator <=> (detail::int_convertible_to_<T> auto rhs) const noexcept
     {
         return inherited::operator <=> (static_cast<T>(rhs));
     }
 
     using inherited::operator +=, inherited::operator -=, inherited::operator *=, inherited::operator /=, inherited::operator %=;
 
-    constexpr auto operator += (c::int_convertible_to<T> auto const &rhs) -> U &
+    constexpr auto operator += (detail::int_convertible_to_<T> auto const &rhs) -> U &
     {
         this->m_t += static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator + (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator + (U const &lhs, detail::int_convertible_to_<T> auto rhs) -> U
     {
         auto res = lhs;
         return std::move(res += rhs);
     }
 
-    constexpr auto operator -=(c::int_convertible_to<T> auto rhs) -> U &
+    constexpr auto operator -= (detail::int_convertible_to_<T> auto rhs) -> U &
     {
         this->m_t -= static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator - (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator - (U const &lhs, detail::int_convertible_to_<T> auto rhs) -> U
     {
         auto res = lhs;
         return std::move(res -= rhs);
@@ -397,7 +410,7 @@ public:
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator * (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator * (U const &lhs, detail::int_convertible_to_<T> auto rhs) -> U
     {
         auto res = lhs;
         return std::move(res *= rhs);
@@ -409,7 +422,7 @@ public:
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator / (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator / (U const &lhs, detail::int_convertible_to_<T> auto rhs) -> U
     {
         auto res = lhs;
         return std::move(res /= rhs);
@@ -421,7 +434,7 @@ public:
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator % (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator % (U const &lhs, detail::int_convertible_to_<T> auto rhs) -> U
     {
         auto res = lhs;
         return std::move(res %= rhs);
