@@ -134,7 +134,7 @@ private:
     }
 public:
     template <c::enum_ auto En_>
-    consteval basic_qualified_member_name(make_int_t<En_>):
+    consteval basic_qualified_member_name(int_<En_>):
         m_name{ basic_magic_enum_member_name_v<En_, Char, CharTraits> },
         m_enum_name{ basic_qualified_name<Char, CharTraits>{ En_ }.m_enum_name }
     {

@@ -75,9 +75,9 @@ static_assert(magic_enum_member_wname_v<cl_cmb_t::one> == L"cmn::enum_::cl_cmb_t
 static_assert(qualified_name{ cl_cmb_t{} }.m_ns == "cmn::enum_");
 static_assert(qualified_name{ cl_cmb_t{} }.m_enum_name == "cl_cmb_t");
 // qualified member name
-static_assert(qualified_member_name{ make_int_t<cl_cmb_t::green>{} }.m_ns == "cmn::enum_");
-static_assert(qualified_member_name{ make_int_t<cl_cmb_t::green>{} }.m_enum_name == "cl_cmb_t");
-static_assert(qualified_member_name{ make_int_t<cl_cmb_t::green>{} }.m_enum_member_name == "green");
+static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_ns == "cmn::enum_");
+static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_name == "cl_cmb_t");
+static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_member_name == "green");
 
 BOOST_AUTO_TEST_CASE(masks)
 {
@@ -349,9 +349,9 @@ CMN_PP_DEFINE_ENUM
 static_assert(magic_enum_member_name_v<en_apple> == "cmn::enum_::en_apple");
 static_assert(magic_enum_member_wname_v<en_apple> == L"cmn::enum_::en_apple");
 // qualified member name
-static_assert(qualified_member_name{ make_int_t<en_apple>{} }.m_ns == "cmn::enum_");
-static_assert(qualified_member_name{ make_int_t<en_apple>{} }.m_enum_name == "en_t");
-static_assert(qualified_member_name{ make_int_t<en_apple>{} }.m_enum_member_name == "en_apple");
+static_assert(qualified_member_name{ int_<en_apple>{} }.m_ns == "cmn::enum_");
+static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_name == "en_t");
+static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_member_name == "en_apple");
 
 BOOST_AUTO_TEST_CASE(read_enum)
 {

@@ -1,8 +1,10 @@
 #pragma once
 
-#include <cmn/enum/util/enum_info.h>
-#include <cmn/enum/util/group_info.h>
 #include <cmn/enum/op.h>
+
+#include <cmn/enum/util/enum_info.h>
+#include <cmn/enum/util/groups_info.h>
+#include <cmn/enum/util/group_info.h>
 #include <cmn/enum/util/macro.h>
 
 // Do not include <cmn/enum/bitfield.h> to avoid circular dependency
@@ -23,13 +25,13 @@ consteval auto adapt_enum_info(print_t)
     return enum_info
     {
         .m_ops = op_comparable | op_bitwise | op_interoperable,
-        .m_groups = std::make_tuple(group_::make<empty, tail, class_prefix>())
+        .m_groups = groups_::make(group_::make<empty, tail, class_prefix>())
     };
 }
 
 CMN_PP_INJECT_ENUM_OPS()
 
 static_assert(ops_v<print_t> == (op_comparable | op_bitwise | op_interoperable));
-static_assert(c::interop_bitfield<print_t>);
+static_assert(c::bitfield<print_t>);
 
 }

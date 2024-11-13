@@ -22,8 +22,8 @@ struct record_info
     wqualified_member_name      m_wname;
 
     consteval record_info():
-        m_name{ make_int_t<En_>{} },
-        m_wname{ make_int_t<En_>{} }
+        m_name{ int_<En_>{} },
+        m_wname{ int_<En_>{} }
     {}
 
     template <typename Char, typename CharTraits>

@@ -54,7 +54,7 @@ consteval auto magic_get_enum_name(c::enum_ auto, wchar_t, std::char_traits<wcha
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enum_ auto En_>
-consteval auto magic_get_enum_member_name(make_int_t<En_>, char, std::char_traits<char>) -> std::string_view
+consteval auto magic_get_enum_member_name(int_<En_>, char, std::char_traits<char>) -> std::string_view
 {
     using namespace std::string_view_literals;
 
@@ -75,7 +75,7 @@ consteval auto magic_get_enum_member_name(make_int_t<En_>, char, std::char_trait
 }
 
 template <c::enum_ auto En_>
-consteval auto magic_get_enum_member_name(make_int_t<En_>, wchar_t, std::char_traits<wchar_t>) -> std::wstring_view
+consteval auto magic_get_enum_member_name(int_<En_>, wchar_t, std::char_traits<wchar_t>) -> std::wstring_view
 {
     using namespace std::string_view_literals;
 
@@ -111,7 +111,7 @@ constexpr auto magic_enum_wname_v = basic_magic_enum_name_v<Enum, wchar_t, std::
 
 //-----------------------------------------------------------------------------
 template <c::enum_ auto En_, typename Char, typename CharTraits>
-constexpr auto basic_magic_enum_member_name_v = detail::magic_get_enum_member_name(make_int_t<En_>{}, Char{}, CharTraits{});
+constexpr auto basic_magic_enum_member_name_v = detail::magic_get_enum_member_name(int_<En_>{}, Char{}, CharTraits{});
 
 template <c::enum_ auto En_>
 constexpr auto magic_enum_member_name_v = basic_magic_enum_member_name_v<En_, char, std::char_traits<char>>;

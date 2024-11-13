@@ -5,10 +5,9 @@
 #include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/preprocessor/seq/cat.hpp>
 
-#include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
-#include <cmn/enum/util/macro.h>
+#include <cmn/enum/util.h>
 
 namespace cmn::enum_
 {
@@ -36,7 +35,7 @@ consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, unsigned
     {   \
         using enum name;    \
         return ::cmn::enum_::adapt_combo_info_helper(   \
-            ::cmn::enum_::groups_info{ BOOST_PP_SEQ_FOR_EACH_I(CMN_PP_MARKUP_GROUP_INFO, data, groups_seq) });    \
+            ::cmn::enum_::groups_::make( BOOST_PP_SEQ_FOR_EACH_I(CMN_PP_MARKUP_GROUP_INFO, data, groups_seq) ));    \
     }
 
 ////////////////////////////////////////////////////////////////////////////////

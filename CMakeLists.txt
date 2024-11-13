@@ -88,6 +88,7 @@ add_library (
  "cmn/tuple/va/adapt.h"
  "cmn/tuple/va/detail/util.h"
 
+ "cmn/enum/util/concepts.h"
  "cmn/enum/util/magic_get.h"
  "cmn/enum/util/qualified_name.h" 
  "cmn/enum/util/name_info.h" 

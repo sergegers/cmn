@@ -1,9 +1,8 @@
 #pragma once
 
-#include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
-#include <cmn/enum/util/macro.h>
+#include <cmn/enum/util.h>
 
 namespace cmn::enum_
 {
@@ -14,7 +13,7 @@ consteval auto adapt_enum_info_helper(unsigned int ops = default_ops(kind_t::enu
     return enum_info
     {
         .m_ops = ops,
-        .m_groups = std::make_tuple(group_::make<Ens_...>())
+        .m_groups = groups_::make(group_::make<Ens_...>())
     };
 }
 

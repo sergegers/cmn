@@ -13,10 +13,12 @@
 #include <cmn/meta/concepts.h> // kind_t, op_t, print_t
 #include <cmn/meta/type_traits.h>
 
+#include <cmn/enum/util/concepts.h>
 #include <cmn/enum/util/name_info.h>
 #include <cmn/enum/util/group_info.h>
 #include <cmn/enum/util/groups_info.h>
 #include <cmn/enum/util/enum_info.h>
+#include <cmn/enum/util/macro.h>
 
 namespace cmn::enum_
 {

@@ -16,16 +16,23 @@
 #include <cmn/meta/type_traits.h>
 
 #include "group_info.h"
+#include "concepts.h"
 
 namespace cmn::enum_
 {
 
-template <typename... GroupInfos> using groups_info = std::tuple<GroupInfos...>;
+template <util::c::group_info... GroupInfos> using groups_info = std::tuple<GroupInfos...>;
 
 namespace groups_
 {
 
-template <typename Op, typename Group, typename... Groups>
+template <util::c::group_info... Groups>
+consteval util::c::groups_info auto make(Groups &&...groups)
+{
+    return groups_info{ std::forward<Groups>(groups)... };
+}
+
+template <typename Op, util::c::group_info Group, util::c::group_info... Groups>
 auto fold
 (
     groups_info<Group, Groups...> const &groups, 

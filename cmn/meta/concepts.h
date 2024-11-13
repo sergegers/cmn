@@ -141,6 +141,25 @@ struct is_instance_of_<TemplateT, TemplateT<Args...>>: std::true_type {};
 template <typename T, template <typename...> typename TemplateT>
 concept instance_of = detail::is_instance_of_<TemplateT, T>::value;
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// Integral constant concepts
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+template <std::integral I, typename T>
+struct instance_of_integral_const: std::false_type {};
+
+template <std::integral I, I I_, template <typename, auto> typename IntConstntT>
+struct instance_of_integral_const<I, IntConstntT<I, I_>>: std::true_type {};
+
+}
+
+template <typename T>
+concept instance_of_bool = detail::instance_of_integral_const<bool, T>::value;
+
 //-----------------------------------------------------------------------------
 //
 // check if type is complete
@@ -257,7 +276,7 @@ namespace detail
 {
 
 template <typename Lhs, typename Rhs, typename Res>
-concept bit_ops__ = requires(Lhs lhs, Rhs rhs)
+concept bit_ops_ = requires(Lhs lhs, Rhs rhs)
 {
     { lhs & rhs } noexcept -> std::same_as<Res>;
     { lhs | rhs } noexcept -> std::same_as<Res>;
@@ -266,9 +285,9 @@ concept bit_ops__ = requires(Lhs lhs, Rhs rhs)
 };
 
 template <typename Lhs, typename Rhs, typename Res>
-concept bit_ops_ = 
-    bit_ops__<Lhs, Rhs, Res>
- && bit_ops__<Rhs, Lhs, Res>
+concept commutative_bit_ops_ = 
+    bit_ops_<Lhs, Rhs, Res>
+ && bit_ops_<Rhs, Lhs, Res>
 ;
 
 }
@@ -299,9 +318,9 @@ concept bitfield =
      &&
      (
             // for integral types & C enums with implicit conversion to int types
-           detail::bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
+           detail::commutative_bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
             // for integral types & scoped enums with overloaded operators
-        || detail::bit_ops_<T, enum_::mask_type_t<T>, T>
+        || detail::commutative_bit_ops_<T, enum_::mask_type_t<T>, T>
      )  
  )
 ;

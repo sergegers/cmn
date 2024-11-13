@@ -11,9 +11,6 @@
 namespace cmn
 {
 
-template <std::size_t I_> using int_ = std::integral_constant<std::size_t, I_>;
-
-//-----------------------------------------------------------------------------
 template<typename T>
 struct remove_rvalue_reference
 {
@@ -331,7 +328,7 @@ struct mp_from_sequence_impl<integer_sequence<I, Idss_...>>
 template <typename Seq> using mp_from_sequence = typename detail::mp_from_sequence_impl<Seq>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
-template <auto Int_> using make_int_t = std::integral_constant<decltype(Int_), Int_>;
+template <c::enumerable auto Int_> using int_ = std::integral_constant<decltype(Int_), Int_>;
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace detail

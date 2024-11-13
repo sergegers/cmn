@@ -1,9 +1,12 @@
 #pragma once
 
+#include "groups_info.h"
+#include "concepts.h"
+
 namespace cmn::enum_
 {
 
-template <typename... Groups>
+template <util::c::group_info... Groups>
 struct enum_info
 {
     unsigned int             m_ops;
