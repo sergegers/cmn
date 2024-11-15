@@ -59,7 +59,7 @@ template <c::bitfield Policy>
     , Policy val
     // BUG: https://developercommunity.visualstudio.com/content/problem/950906/function-default-parameter-value-depended-of-the-s.html
     //, mask_type_t<Policy> mask = std::numeric_limits<decltype(mask)>::max()
-    , mask_type_t<Policy> mask = std::numeric_limits<mask_type_t<Policy>>::max()
+    , interop_type_t<Policy> mask = std::numeric_limits<interop_type_t<Policy>>::max()
 )
 {
     return pol & ~mask | val;
@@ -77,7 +77,7 @@ template <c::bitfield Policy>
       Policy pol
     // BUG: https://developercommunity.visualstudio.com/content/problem/950906/function-default-parameter-value-depended-of-the-s.html
     //, mask_type_t<Policy> mask = std::numeric_limits<decltype(mask)>::max()
-    , mask_type_t<Policy> mask = std::numeric_limits<mask_type_t<Policy>>::max()
+    , interop_type_t<Policy> mask = std::numeric_limits<interop_type_t<Policy>>::max()
 ) noexcept
 {
     return pol & mask;

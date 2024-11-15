@@ -14,7 +14,7 @@ template <c::enum_ auto En_>
 struct record_info
 {
     using enum_type = decltype(En_);
-    using mask_type = mask_type_t<enum_type>;
+    using mask_type = interop_type_t<enum_type>;
 
     static constexpr auto enum_value = En_;
 
@@ -44,8 +44,8 @@ struct record_info
 namespace record_
 {
 
-template <typename T> using enum_type_t = typename T::enum_type;
-template <typename T> using mask_type_t = mask_type_t<enum_type_t<T>>;
+template <typename /*util::c::record_info*/ T> using enum_type_t = typename T::enum_type;
+template <typename /*util::c::record_info*/ T> using mask_type_t = interop_type_t<enum_type_t<T>>;
 
 template <c::enum_ auto En_>
 constexpr auto get_value(record_info<En_> const &rec) -> decltype(En_)
@@ -54,7 +54,7 @@ constexpr auto get_value(record_info<En_> const &rec) -> decltype(En_)
 }
 
 template <c::enum_ auto En_>
-constexpr auto get_value_as_mask(record_info<En_> const &rec) -> enum_::mask_type_t<decltype(En_)>
+constexpr auto get_value_as_mask(record_info<En_> const &rec) -> interop_type_t<decltype(En_)>
 {
     return rec.value_as_mask;
 }

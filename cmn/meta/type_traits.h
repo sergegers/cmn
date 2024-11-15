@@ -117,9 +117,6 @@ template <typename T>
 using underlying_type_t = typename underlying_type<T>::type;
 
 //-----------------------------------------------------------------------------
-template <typename I>
-constexpr auto to_underlying(I i) { return static_cast<underlying_type_t<I>>(i); }
-
 template <typename T>
 constexpr auto underlying_cast(T t) { return static_cast<underlying_type_t<T>>(t); }
 
@@ -365,7 +362,7 @@ namespace enum_
 {
 
 template <c::enumerable T>
-static constexpr auto no_mask = std::numeric_limits<mask_type_t<T>>::max();
+static constexpr auto no_mask = std::numeric_limits<interop_type_t<T>>::max();
 
 }
 

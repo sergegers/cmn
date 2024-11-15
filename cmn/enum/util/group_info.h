@@ -21,8 +21,8 @@ template <util::c::record_info... RecordInfos> using group_info = std::tuple<Rec
 namespace group_
 {
 
-template <typename T> using enum_type_t = record_::enum_type_t<std::tuple_element_t<0, T>>;
-template <typename T> using mask_type_t = mask_type_t<enum_type_t<T>>;
+template <typename T> using record_enum_type_t = record_::enum_type_t<std::tuple_element_t<0, T>>;
+template <typename T> using mask_type_t = interop_type_t<record_enum_type_t<T>>;
 
 template <typename Lhs, typename Rhs> using pred_t = std::bool_constant<(Lhs::enum_value < Rhs::enum_value)>;
 template <c::enum_ auto ... Ens_> using make_t = boost::mp11::mp_sort<group_info<record_info<Ens_>...>, pred_t>;

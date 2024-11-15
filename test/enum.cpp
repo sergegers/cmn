@@ -54,13 +54,16 @@ enum class cl_cmb_t
 consteval auto adapt_enum_info(cl_cmb_t)
 {
     using enum cl_cmb_t;
-    return adapt_combo_info_helper(groups_info{ group_::make<zero, one, two, three>(), group_::make<red, green, blue>() },
-         default_ops(kind_t::combo) | op_interoperable);
+    return adapt_combo_info_helper
+    (
+          groups_info{ group_::make<zero, one, two, three>(), group_::make<red, green, blue>() }
+        , default_ops(kind_t::combo) | op_interoperable
+    );
 }
 
 CMN_PP_INJECT_ENUM_OPS()
 
-static_assert(std::is_same_v<mask_type_t<cl_cmb_t>, unsigned int>);
+static_assert(std::is_same_v<interop_type_t<cl_cmb_t>, int>);
 static_assert(ops_v<cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
 static_assert(std::tuple_size_v<decltype(groups_v<cl_cmb_t>)> == 2);
 static_assert(kind_v<cl_cmb_t> == kind_t::combo);
@@ -352,6 +355,8 @@ static_assert(magic_enum_member_wname_v<en_apple> == L"cmn::enum_::en_apple");
 static_assert(qualified_member_name{ int_<en_apple>{} }.m_ns == "cmn::enum_");
 static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_name == "en_t");
 static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_member_name == "en_apple");
+static_assert(kind_v<en_t> == kind_t::enum_);
+static_assert(ops_v<en_t> == (op_comparable | op_steppable | op_io));
 
 BOOST_AUTO_TEST_CASE(read_enum)
 {

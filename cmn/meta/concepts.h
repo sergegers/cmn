@@ -12,14 +12,11 @@
 #include <boost/exception/all.hpp>
 
 #if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
-
-#include <boost/mp11/concepts.hpp>
-#include <boost/fusion/concepts.hpp>
-
+#   include <boost/mp11/concepts.hpp>
+#   include <boost/fusion/concepts.hpp>
 #else
-
-#include <boost/fusion/support/is_sequence.hpp>
-#include <boost/fusion/support/category_of.hpp>
+#   include <boost/fusion/support/is_sequence.hpp>
+#   include <boost/fusion/support/category_of.hpp>
 
 namespace boost::c
 {
@@ -42,6 +39,8 @@ concept random_access_fus_sequence =
 
 namespace cmn
 {
+
+struct strong_typedef_tag {};
 
 namespace io
 {
@@ -115,10 +114,6 @@ concept scoped_enum = enum_<T> && std::is_scoped_enum_v<T>;
 
 template <typename T>
 concept noscoped_enum = enum_<T> && !std::is_scoped_enum_v<T>;
-//-----------------------------------------------------------------------------
-template <typename T>
-concept enumerable = std::integral<T> || std::is_enum_v<T>;
-
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -150,15 +145,24 @@ namespace detail
 {
 
 template <std::integral I, typename T>
-struct instance_of_integral_const: std::false_type {};
+struct instance_of_integral_: std::false_type {};
 
 template <std::integral I, I I_, template <typename, auto> typename IntConstntT>
-struct instance_of_integral_const<I, IntConstntT<I, I_>>: std::true_type {};
+struct instance_of_integral_<I, IntConstntT<I, I_>>: std::true_type {};
 
 }
 
+template <typename T, typename I>
+concept instance_of_integral =
+    std::integral<I>
+ && detail::instance_of_integral_<I, T>::value
+;
+
 template <typename T>
-concept instance_of_bool = detail::instance_of_integral_const<bool, T>::value;
+concept instance_of_bool = instance_of_integral<T, bool>;
+
+template <typename T>
+concept instance_of_unsigned = instance_of_integral<T, unsigned>;
 
 //-----------------------------------------------------------------------------
 //
@@ -180,7 +184,51 @@ struct is_complete<T, std::void_t<decltype(sizeof(T) != 0)>> : std::true_type {}
 template <typename T>
 concept complete = detail::is_complete<T>::value;
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// unit concepts
+//
+///////////////////////////////////////////////////////////////////////////////
+template <typename T>
+concept unit = 
+    std::is_base_of_v<strong_typedef_tag, T>
+ && requires
+    {
+        typename T::underlying_type;
+    }
+ && std::constructible_from<typename T::underlying_type>
+;
+
+template <typename T>
+concept fmt_unit =
+    unit<T>
+ && io::strong_typedef_fmt_traits<T>::enable_luxury_io
+;
+
+///////////////////////////////////////////////////////////////////////////////
+template <typename T>
+concept enumerable = std::integral<T> || std::is_enum_v<T> || unit<T>;
+
 }
+
+///////////////////////////////////////////////////////////////////////////////
+template <typename T>
+struct interop_type : std::type_identity<T> {};
+
+template <typename T> requires std::integral<T>
+struct interop_type<T> : boost::promote<T> {};
+
+template <typename T> requires c::enum_<T>
+struct interop_type<T> : boost::promote<std::underlying_type_t<T>> {};
+
+template <typename T> requires c::scoped_enum<T>
+struct interop_type<T> : std::underlying_type<T> {};
+
+template <typename T> requires c::unit<T>
+struct interop_type<T> : std::type_identity<typename T::underlying_type> {};
+
+template <c::enumerable T>
+using interop_type_t = typename interop_type<T>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -189,22 +237,6 @@ concept complete = detail::is_complete<T>::value;
 ///////////////////////////////////////////////////////////////////////////////
 namespace enum_
 {
-
-///////////////////////////////////////////////////////////////////////////////
-template <typename T>
-struct mask_type : std::make_unsigned<T> {};
-
-template <typename T> requires std::integral<T>
-struct mask_type<T> : boost::promote<T> {};
-
-template <typename T> requires c::enum_<T>
-struct mask_type<T> : boost::promote<std::underlying_type_t<T>> {};
-
-template <typename T> requires c::scoped_enum<T>
-struct mask_type<T> : std::make_unsigned<std::underlying_type_t<T>> {};
-
-template <c::enumerable T>
-using mask_type_t = typename mask_type<T>::type;
 
 enum class kind_t
 {
@@ -314,42 +346,81 @@ concept bitfield =
  (
         enumerable<T>
      && std::equality_comparable<T>
-     && std::equality_comparable_with<T, enum_::mask_type_t<T>>
+     && std::equality_comparable_with<T, interop_type_t<T>>
      &&
      (
             // for integral types & C enums with implicit conversion to int types
-           detail::commutative_bit_ops_<T, enum_::mask_type_t<T>, enum_::mask_type_t<T>>
+           detail::commutative_bit_ops_<T, interop_type_t<T>, interop_type_t<T>>
             // for integral types & scoped enums with overloaded operators
-        || detail::commutative_bit_ops_<T, enum_::mask_type_t<T>, T>
+        || detail::commutative_bit_ops_<T, interop_type_t<T>, T>
      )  
  )
 ;
 
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+template <typename Lhs, typename Rhs, typename Res>
+concept commutative_ariphmetic_ops__ = requires(Lhs lhs, Rhs rhs)
+{
+    { lhs + rhs } -> std::same_as<Res>;
+    { lhs * rhs } -> std::same_as<Res>;
+};
+
+template <typename Lhs, typename Rhs, typename Res>
+concept commutative_ariphmetic_ops_ =
+    commutative_ariphmetic_ops__<Lhs, Rhs, Res>
+ && commutative_ariphmetic_ops__<Rhs, Lhs, Res>
+;
+
+template <typename Lhs, typename Rhs, typename Res>
+concept noncommutative_ariphmetic_ops_ = requires(Lhs lhs, Rhs rhs)
+{
+    { lhs - rhs } -> std::same_as<Res>;
+    { lhs / rhs } -> std::same_as<Res>;
+    { lhs % rhs } -> std::same_as<Res>;
+};
+
+}
+
+template <typename T>
+concept strong_ariphmetic = 
+    enumerable<T>
+ && std::equality_comparable<T>
+ && detail::commutative_ariphmetic_ops__<T, T, T>
+ && detail::noncommutative_ariphmetic_ops_<T, T, T>
+;
+
+template <typename T>
+concept ariphmetic =
+    strong_ariphmetic<T>
+ ||
+ (
+        enumerable<T>
+     && std::equality_comparable<T>
+     && std::equality_comparable_with<T, interop_type_t<T>>
+     (
+            // for integral types & C enums with implicit conversion to int types
+            detail::commutative_ariphmetic_ops_<T, interop_type_t<T>, interop_type_t<T>>
+         && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, interop_type_t<T>>
+         ||
+            // for integral types & scoped enums with overloaded operators
+            detail::commutative_ariphmetic_ops_<T, interop_type_t<T>, T>
+         && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, T>
+     )
+ )
+;
+
+//-----------------------------------------------------------------------------
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-struct strong_typedef_tag {};
 
 namespace c
 {
 
-template <typename T>
-concept unit = 
-    std::is_base_of_v<strong_typedef_tag, T>
- && requires
-    {
-        typename T::underlying_type;
-    }
- && std::constructible_from<typename T::underlying_type>
-;
-
-template <typename T>
-concept fmt_unit =
-    unit<T>
- && io::strong_typedef_fmt_traits<T>::enable_luxury_io
-;
-
-//-----------------------------------------------------------------------------
 template <typename T, typename Char, typename CharTraits>
 concept basic_string = requires (T const &ct, std::size_t idx)
 {
@@ -368,12 +439,21 @@ concept printable = requires (std::basic_ostream<Char, CharTraits> &ostr, T cons
 };
 
 //-----------------------------------------------------------------------------
-template <typename T>
-concept predicate = requires (T const &t)
+template <typename Src, typename Dest>
+concept explicitly_convertible_to = requires (Src src)
 {
-    { t } -> std::convertible_to<bool>;
-    { !t } -> std::same_as<bool>;
+    { static_cast<Dest>(src) } -> std::same_as<Dest>;
 };
+
+//-----------------------------------------------------------------------------
+template <typename T>
+concept predicate =
+    explicitly_convertible_to<T const &, bool>
+ && requires (T const &t)
+    {
+        { !t } -> std::same_as<bool>;
+    }
+;
 
 //-----------------------------------------------------------------------------
 //
@@ -407,6 +487,18 @@ template <typename T> concept test_move_constuctible = test_constructible_from<T
 #else
 template <typename T> concept test_move_constuctible = std::move_constructible<T>;
 #endif
+
+//-----------------------------------------------------------------------------
+//
+// strong_typedef, offset_value helper concepts
+//
+template <typename U, typename V>
+concept int_convertible_to =
+    std::integral<U>
+ && std::integral<V>
+ && std::convertible_to<U, V>
+;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //

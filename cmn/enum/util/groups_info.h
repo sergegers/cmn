@@ -26,8 +26,8 @@ template <util::c::group_info... GroupInfos> using groups_info = std::tuple<Grou
 namespace groups_
 {
 
-template <util::c::group_info... Groups>
-consteval util::c::groups_info auto make(Groups &&...groups)
+template <typename /*util::c::group_info*/... Groups>
+consteval /*util::c::groups_info*/ auto make(Groups &&...groups)
 {
     return groups_info{ std::forward<Groups>(groups)... };
 }
@@ -39,7 +39,7 @@ auto fold
     std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1> const &group_masks,
     group_::mask_type_t<Group> en, 
     Op const &op,
-    group_::mask_type_t<Group> addditional_mask = no_mask<group_::enum_type_t<Group>>
+    group_::mask_type_t<Group> addditional_mask = no_mask<group_::record_enum_type_t<Group>>
     
 ) -> group_::mask_type_t<Group> // return remainder
 {

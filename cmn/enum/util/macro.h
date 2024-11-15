@@ -57,6 +57,34 @@
     BOOST_PP_SEQ_ENUM(group_nvp_seq)
 
 ///////////////////////////////////////////////////////////////////////////////
+//#define CMN_PP_INJECT_ENUM_OPS()   \
+//    using ::cmn::enum_::op::operator |; \
+//    using ::cmn::enum_::op::operator |=; \
+//    using ::cmn::enum_::op::operator &; \
+//    using ::cmn::enum_::op::operator &=; \
+//    using ::cmn::enum_::op::operator ^; \
+//    using ::cmn::enum_::op::operator ^=; \
+//    using ::cmn::enum_::op::operator ~; \
+//    using ::cmn::enum_::op::operator ++; \
+//    using ::cmn::enum_::op::operator --; \
+//    using ::cmn::enum_::op::operator +; \
+//    using ::cmn::enum_::op::operator +=; \
+//    using ::cmn::enum_::op::operator -; \
+//    using ::cmn::enum_::op::operator -=; \
+//    using ::cmn::enum_::op::operator *; \
+//    using ::cmn::enum_::op::operator *=; \
+//    using ::cmn::enum_::op::operator /; \
+//    using ::cmn::enum_::op::operator /=; \
+//    using ::cmn::enum_::op::operator %; \
+//    using ::cmn::enum_::op::operator %=; \
+//    using ::cmn::enum_::op::operator ==; \
+//    using ::cmn::enum_::op::operator !=; \
+//    using ::cmn::enum_::op::operator >; \
+//    using ::cmn::enum_::op::operator >=; \
+//    using ::cmn::enum_::op::operator <; \
+//    using ::cmn::enum_::op::operator <=; \
+//    using ::cmn::enum_::op::operator <<; \
+//    using ::cmn::enum_::op::operator >>;
 #define CMN_PP_INJECT_ENUM_OPS()   \
     using ::cmn::enum_::op::operator ==; \
     using ::cmn::enum_::op::operator !=; \

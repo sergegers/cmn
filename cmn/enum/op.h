@@ -55,7 +55,13 @@ struct printer
 namespace op
 {
 
-// NOTE: no need to full qualify names because the macros below are used locally only
+//-----------------------------------------------------------------------------
+//
+// NOTES:
+// 1. no need to full qualify names because the macros below are used locally only
+// 2. at least one of the operand types is named Enum
+//
+//-----------------------------------------------------------------------------
 
 #define CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
     requires ((ops_v<Enum> & (OPS_)) == (OPS_))
@@ -106,14 +112,14 @@ namespace op
 
 // bitwise
 CMN_PP_ENUM_CONSTEXPR_BINARY_OP(|, op_bitwise, Enum, Enum, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP(|, op_bitwise | op_interoperable, Enum, mask_type_t<Enum>, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP(|, op_bitwise | op_interoperable, mask_type_t<Enum>, Enum, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP(|, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP(|, op_bitwise | op_interoperable, interop_type_t<Enum>, Enum, Enum)
 CMN_PP_ENUM_CONSTEXPR_BINARY_OP(&, op_bitwise, Enum, Enum, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP(&, op_bitwise | op_interoperable, Enum, mask_type_t<Enum>, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP(&, op_bitwise | op_interoperable, mask_type_t<Enum>, Enum, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP(&, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP(&, op_bitwise | op_interoperable, interop_type_t<Enum>, Enum, Enum)
 CMN_PP_ENUM_CONSTEXPR_BINARY_OP(^, op_bitwise, Enum, Enum, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP(^, op_bitwise | op_interoperable, Enum, mask_type_t<Enum>, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP(^, op_bitwise | op_interoperable, mask_type_t<Enum>, Enum, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP(^, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP(^, op_bitwise | op_interoperable, interop_type_t<Enum>, Enum, Enum)
 CMN_PP_ENUM_CONSTEXPR_UNARY_OP(~, op_bitwise)
 CMN_PP_ENUM_COMPOUND_OP(|, op_bitwise, Enum, Enum)
 CMN_PP_ENUM_COMPOUND_OP(&, op_bitwise, Enum, Enum)
@@ -131,10 +137,10 @@ CMN_PP_ENUM_CONSTEXPR_BINARY_OP(-, op_ariphmetic, Enum, Enum, Enum)
 
 // comparable
 //CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(<=>, op_comparable, Enum, Enum)
-//CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(<=>, op_comparable | op_interoperable, Enum, mask_type_t<Enum>)
-//CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(<=>, op_comparable | op_interoperable, mask_type_t<Enum>, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(==, op_comparable | op_interoperable, mask_type_t<Enum>, Enum)
-CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(!=, op_comparable | op_interoperable, mask_type_t<Enum>, Enum)
+//CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(<=>, op_comparable | op_interoperable, Enum, interop_type_t<Enum>)
+//CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(<=>, op_comparable | op_interoperable, interop_type_t<Enum>, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(==, op_comparable | op_interoperable, interop_type_t<Enum>, Enum)
+CMN_PP_ENUM_CONSTEXPR_BINARY_OP_AUTO(!=, op_comparable | op_interoperable, interop_type_t<Enum>, Enum)
 //CMN_PP_ENUM_CONSTEXPR_BINARY_OP(>, op_comparable, Enum, Enum, bool)
 //CMN_PP_ENUM_CONSTEXPR_BINARY_OP(>=, op_comparable, Enum, Enum, bool)
 //CMN_PP_ENUM_CONSTEXPR_BINARY_OP(<, op_comparable, Enum, Enum, bool)
@@ -159,23 +165,6 @@ auto operator >> (std::basic_istream<Char, CharTaits> &istr, Enum &en) -> std::b
 #undef CMN_PP_ENUM_MUTABLE_PREFIX_UNARY_OP
 #undef CMN_PP_ENUM_MUTABLE_POSTFIX_UNARY_OP
 #undef CMN_PP_ENUM_COMPOUND_OP
-
-#define CMN_PP_INJECT_ENUM_OPS()   \
-    using ::cmn::enum_::op::operator ==; \
-    using ::cmn::enum_::op::operator !=; \
-    using ::cmn::enum_::op::operator &; \
-    using ::cmn::enum_::op::operator &=; \
-    using ::cmn::enum_::op::operator |; \
-    using ::cmn::enum_::op::operator |=; \
-    using ::cmn::enum_::op::operator ^; \
-    using ::cmn::enum_::op::operator ^=; \
-    using ::cmn::enum_::op::operator ~; \
-    using ::cmn::enum_::op::operator ++; \
-    using ::cmn::enum_::op::operator --; \
-    using ::cmn::enum_::op::operator +; \
-    using ::cmn::enum_::op::operator -; \
-    using ::cmn::enum_::op::operator <<; \
-    using ::cmn::enum_::op::operator >>;
 
 }
 

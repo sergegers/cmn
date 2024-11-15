@@ -50,8 +50,10 @@ constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
     using namespace boost::mp11;
     using int_type = underlying_type_t<Idx>;
 
+    auto const int_idx = static_cast<int_type>(idx);
     static constexpr auto size = mp_size<L>::value;
-    assert(("Index is out of bounds", idx < size));
+
+    assert(int_idx < size); // Index is out of bounds
 
     static auto const tbl = []<int_type... Indices>(std::integer_sequence<int_type, Indices...>)
     {
@@ -60,7 +62,7 @@ constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
     }
     (std::make_integer_sequence<int_type, size>());
 
-    decltype(auto) elem = tbl[static_cast<int_type>(idx)];
+    decltype(auto) elem = tbl[int_idx];
     return boost::apply_visitor(detail::result_{ std::forward<Visitor>(vis) }, elem);
 }
 

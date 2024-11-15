@@ -23,7 +23,7 @@ using bitfield_mask_manip =
     <
         struct bitfield_mask_
       , Enum
-      , static_cast<Enum>(std::numeric_limits<mask_type_t<Enum>>::max())
+      , static_cast<Enum>(std::numeric_limits<interop_type_t<Enum>>::max())
     >
 ;
 
@@ -116,13 +116,10 @@ consteval auto adapt_enum_info(print_t)
     return adapt_bitfield_info_helper<empty, tail, class_prefix>(op_bitwise | op_interoperable);
 }
 
-using op::operator &;
-using op::operator |;
-using op::operator ^;
-using op::operator ~;
+CMN_PP_INJECT_ENUM_OPS()
 
-//static_assert(ops_v<print_t> == (op_bitwise | op_interoperable));
-//static_assert(c::bitfield<print_t>);
+static_assert(ops_v<print_t> == (op_bitwise | op_interoperable));
+static_assert(c::bitfield<print_t>);
 
 ///////////////////////////////////////////////////////////////////////////////
 using print_manip =

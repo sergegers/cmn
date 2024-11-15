@@ -56,9 +56,9 @@ consteval auto default_ops(kind_t kind) -> unsigned int
 {
     using enum kind_t;
     return 
-        kind == enum_? op_comparable | op_steppable | op_io:
-        kind == bitfield? op_bitwise | op_io:
-        kind == combo? op_comparable | op_steppable | op_bitwise | op_io:
+        kind == enum_? (op_comparable | op_steppable | op_io):
+        kind == bitfield? (op_bitwise | op_io):
+        kind == combo? (op_comparable | op_steppable | op_bitwise | op_io):
             op_empty
     ;
 }
@@ -83,11 +83,11 @@ consteval auto default_ops(kind_t kind) -> unsigned int
 // get smallest enum value
 //
 template <typename Group, typename... Groups>
-consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_::enum_type_t<Group>
+consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_::record_enum_type_t<Group>
 {
     using group_::get_min_enum_value;
 
-    using enum_type = group_::enum_type_t<Group>;
+    using enum_type = group_::record_enum_type_t<Group>;
     using mask_type = group_::mask_type_t<Group>;
     return static_cast<enum_type>
     (
@@ -106,10 +106,10 @@ consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_
 // get largest enum value
 //
 template <typename Group, typename... Groups>
-consteval auto max_value(enum_info<Group, Groups...> const &enum_info) -> group_::enum_type_t<Group>
+consteval auto max_value(enum_info<Group, Groups...> const &enum_info) -> group_::record_enum_type_t<Group>
 {
     using group_::get_max_enum_value;
-    using enum_type = group_::enum_type_t<Group>;
+    using enum_type = group_::record_enum_type_t<Group>;
     using mask_type = group_::mask_type_t<Group>;
 
     return static_cast<enum_type>
@@ -129,7 +129,7 @@ template <c::enum_ Enum>
 class utils
 {
 public:
-    using mask_type = mask_type_t<Enum>;
+    using mask_type = interop_type_t<Enum>;
 
     struct record_type
     {
@@ -228,7 +228,7 @@ public:
             , std::index_sequence<Indices_...> 
         )
         {
-            auto const umask = (... | masks.at(Indices_));
+            //[[maybe_unused]] auto const umask = (... | masks.at(Indices_));
             return (... | (united_mask<Indices_>(masks) & masks.at(Indices_)));
         }
         (

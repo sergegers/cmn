@@ -191,16 +191,10 @@ using range::io::wrsaver;
 
 }
 
-//namespace ranges
-//{
-//
-//using cmn::range::io::operator <<;
-//
-//}
-//
-//namespace std
-//{
-//
-//using cmn::range::io::operator <<;
-//
-//}
+// inject to STL streams namespace for using ADL
+namespace std
+{
+
+using cmn::range::io::operator <<;
+
+}

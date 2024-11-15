@@ -32,6 +32,7 @@ auto operator >> (std::basic_istream<Char, CharTraits> &istr, Seq &seq) -> declt
 
 }
 
+// inject to STL streams namespace for using ADL
 namespace std
 {
 

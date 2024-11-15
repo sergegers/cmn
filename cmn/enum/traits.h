@@ -7,7 +7,7 @@
 #include <concepts>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/util/util.h>        // for bsr()
+#include <cmn/util/util.h>        // for bsr(), to_mask_type()
 #include <cmn/enum/util.h>
 
 namespace cmn::enum_
@@ -24,12 +24,12 @@ template <c::enum_ Enum, typename /*= void*/>
 struct traits
 {
     using underlying_type = std::underlying_type_t<Enum>;
-    using mask_type = underlying_type;
+    using mask_type = interop_type_t<Enum>;
+
+    static constexpr name_info<Enum> name_info{};
 
     static constexpr kind_t kind = kind_t::naive;
     static constexpr int   ops = op_empty;
-
-    static constexpr name_info<Enum> name_info{};
 };
 
 //-----------------------------------------------------------------------------
@@ -37,7 +37,7 @@ template <c::enum_ Enum>
 struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
 {
     using underlying_type = std::underlying_type_t<Enum>;
-    using mask_type = underlying_type;
+    using mask_type = interop_type_t<Enum>;
 
     static constexpr name_info<Enum> name_info{};
 
@@ -72,16 +72,16 @@ struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
     //    return rec.template get_str<Char>();
     //}
 
-    template <Enum Mask_, std::size_t Idx_ = 0>
-    static constexpr decltype(auto) group_by_mask()
-    {
-        static_assert(std::tuple_size_v<decltype(enum_info)> > 0, "Must be at least one group!");
+    //template <Enum Mask_, std::size_t Idx_ = 0>
+    //static constexpr decltype(auto) group_by_mask()
+    //{
+    //    static_assert(std::tuple_size_v<decltype(enum_info.m_groups)> > 0, "Must be at least one group!");
 
-        if constexpr (masks[Idx_] == Mask_)
-            return std::get<Idx_>(enum_info);
-        else
-            return group_by_mask<Mask_, Idx_ + 1>();
-    }
+    //    if constexpr (masks[Idx_] == to_mask_type(Mask_))
+    //        return std::get<Idx_>(enum_info.m_groups);
+    //    else
+    //        return group_by_mask<Mask_, Idx_ + 1>();
+    //}
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -132,15 +132,15 @@ constexpr auto to_basic_string_view(Enum en) -> std::string_view
 }
 
 template <std::integral Enum>
-constexpr auto to_mask(Enum en) -> mask_type_t<Enum>
+constexpr auto to_mask(Enum en) -> interop_type_t<Enum>
 {
-    return static_cast<mask_type_t<Enum>>(en);
+    return static_cast<interop_type_t<Enum>>(en);
 }
 
 template <c::enum_ Enum>
-constexpr auto to_mask(Enum en) -> mask_type_t<Enum>
+constexpr auto to_mask(Enum en) -> interop_type_t<Enum>
 {
-    return static_cast<mask_type_t<Enum>>(en);
+    return static_cast<interop_type_t<Enum>>(en);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

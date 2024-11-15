@@ -5,6 +5,7 @@
 #include <concepts>
 #include <string>
 
+#include <cmn/meta/concepts.h>
 #include <cmn/meta/symbols.h>
 #include <cmn/meta/type_traits.h>
 #include <cmn/util/fixed_string.h>
@@ -171,5 +172,17 @@ struct assert_type_complete
 {
     static_assert(c::complete<T>);
 };
+
+namespace enum_
+{
+
+//-----------------------------------------------------------------------------
+template <c::enumerable T>
+constexpr auto to_interop_type(T t) -> interop_type_t<T>
+{
+    return static_cast<interop_type_t<T>>(t);
+}
+
+}
 
 }
