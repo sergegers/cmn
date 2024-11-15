@@ -26,8 +26,8 @@ template <util::c::group_info... GroupInfos> using groups_info = std::tuple<Grou
 namespace groups_
 {
 
-template <typename /*util::c::group_info*/... Groups>
-consteval /*util::c::groups_info*/ auto make(Groups &&...groups)
+template <util::c::group_info... Groups>
+consteval util::c::groups_info auto make(Groups &&...groups)
 {
     return groups_info{ std::forward<Groups>(groups)... };
 }

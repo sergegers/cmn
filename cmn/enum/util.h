@@ -30,7 +30,7 @@ namespace cmn::enum_
 // combo: n groups with m records in each
 //
 ////////////////////////////////////////////////////////////////////////////////
-template <typename... Groups> consteval auto get_kind(enum_info<Groups...> const &) -> kind_t
+template <util::c::group_info... Groups> consteval auto get_kind(enum_info<Groups...> const &) -> kind_t
 {
     using enum kind_t;
     return sizeof... (Groups) == 1?
@@ -38,7 +38,7 @@ template <typename... Groups> consteval auto get_kind(enum_info<Groups...> const
         ((std::tuple_size_v<Groups> == 1) && ...)? bitfield: combo;
 }
 
-template <typename Group, typename... Groups>
+template <util::c::group_info Group, util::c::group_info... Groups>
 consteval auto calc_masks(enum_info<Group, Groups...> const &enum_info)
     -> std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1>
 {
@@ -82,7 +82,7 @@ consteval auto default_ops(kind_t kind) -> unsigned int
 //
 // get smallest enum value
 //
-template <typename Group, typename... Groups>
+template <util::c::group_info Group, util::c::group_info... Groups>
 consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_::record_enum_type_t<Group>
 {
     using group_::get_min_enum_value;
@@ -105,8 +105,8 @@ consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_
 //
 // get largest enum value
 //
-template <typename Group, typename... Groups>
-consteval auto max_value(enum_info<Group, Groups...> const &enum_info) -> group_::record_enum_type_t<Group>
+template <util::c::group_info Group, util::c::group_info... Groups>
+consteval auto max_value(enum_info<Group, Groups...> const &/*enum_info*/) -> group_::record_enum_type_t<Group>
 {
     using group_::get_max_enum_value;
     using enum_type = group_::record_enum_type_t<Group>;
