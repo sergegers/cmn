@@ -113,7 +113,7 @@ template <typename T>
 concept scoped_enum = enum_<T> && std::is_scoped_enum_v<T>;
 
 template <typename T>
-concept noscoped_enum = enum_<T> && !std::is_scoped_enum_v<T>;
+concept c_enum = enum_<T> && !std::is_scoped_enum_v<T>;
 
 ///////////////////////////////////////////////////////////////////////////////
 //

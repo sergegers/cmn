@@ -13,14 +13,10 @@ namespace cmn::enum_
 {
 
 
-template <typename... Groups>
-consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, unsigned int ops = default_ops(kind_t::combo))
+template <util::c::group_info... Groups>
+consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, interop_type_t<op_t> ops = default_ops(kind_t::combo))
 {
-    return enum_info
-    {
-        .m_ops = ops,
-        .m_groups = std::move(groups)
-    };
+    return enum_info { ops, std::move(groups) };
 }
 
 }

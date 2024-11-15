@@ -108,7 +108,7 @@ constexpr auto in(Enum en, Enums ...ens) -> bool
 
 // check enum constants consistency
 template <c::e_any_enum Enum>
-constexpr bool is_masks_overlapped_v = 0 != utils<Enum>::mask_overlap(traits<Enum>::masks);
+constexpr bool is_masks_overlapped_v = 0 != mask_overlap(traits<Enum>::masks);
 
 template <c::e_enum Enum>
 constexpr auto to_string_view(Enum en) -> std::string_view

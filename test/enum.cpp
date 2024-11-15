@@ -67,6 +67,7 @@ static_assert(std::is_same_v<interop_type_t<cl_cmb_t>, int>);
 static_assert(ops_v<cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
 static_assert(std::tuple_size_v<decltype(groups_v<cl_cmb_t>)> == 2);
 static_assert(kind_v<cl_cmb_t> == kind_t::combo);
+static_assert(c::bitfield<cl_cmb_t>);
 
 // magic get
 static_assert(magic_enum_name_v<cl_cmb_t> == "cmn::enum_::cl_cmb_t");
@@ -168,6 +169,8 @@ CMN_PP_DEFINE_COMBO
     (digit_mask,    0x3)
     (color_mask,    0xC)
 )
+
+static_assert(c::bitfield<cmb_t>);
 
 BOOST_AUTO_TEST_CASE(enum_out)
 {
@@ -328,6 +331,8 @@ CMN_PP_DEFINE_BITFIELD
 
 static_assert(kind_v<bf_t> == kind_t::bitfield);
 static_assert(std::tuple_size_v<decltype(groups_v<bf_t>)> == 4);
+static_assert(c::bitfield<bf_t>);
+//static_assert(!c::strong_bitfield<bf_t>);
 
 using namespace op;
 
@@ -488,6 +493,17 @@ BOOST_AUTO_TEST_CASE(inner_enum)
     tstr << e;
     BOOST_CHECK(tstr.is_equal("[i_a2]"));
 }
+
+CMN_PP_DEFINE_BITFIELD_CLASS
+(
+    bf2_t,
+    (bf2_1,     0x1)
+    (bf2_2,     0x2)
+    (bf2_4,     0x4)
+);
+
+static_assert(c::strong_bitfield<bf2_t>);
+static_assert(c::bitfield<bf2_t>);
 
 BOOST_AUTO_TEST_SUITE_END() // enum_
 BOOST_AUTO_TEST_SUITE_END() // cmn

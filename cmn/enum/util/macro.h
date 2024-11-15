@@ -68,9 +68,7 @@
 //    using ::cmn::enum_::op::operator ++; \
 //    using ::cmn::enum_::op::operator --; \
 //    using ::cmn::enum_::op::operator +; \
-//    using ::cmn::enum_::op::operator +=; \
 //    using ::cmn::enum_::op::operator -; \
-//    using ::cmn::enum_::op::operator -=; \
 //    using ::cmn::enum_::op::operator *; \
 //    using ::cmn::enum_::op::operator *=; \
 //    using ::cmn::enum_::op::operator /; \
@@ -97,7 +95,9 @@
     using ::cmn::enum_::op::operator ~; \
     using ::cmn::enum_::op::operator ++; \
     using ::cmn::enum_::op::operator --; \
+    using ::cmn::enum_::op::operator -=; \
     using ::cmn::enum_::op::operator +; \
+    using ::cmn::enum_::op::operator +=; \
     using ::cmn::enum_::op::operator -; \
     using ::cmn::enum_::op::operator <<; \
     using ::cmn::enum_::op::operator >>;

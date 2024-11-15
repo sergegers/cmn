@@ -63,51 +63,51 @@ namespace op
 //
 //-----------------------------------------------------------------------------
 
-#define CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
-    requires ((ops_v<Enum> & (OPS_)) == (OPS_))
+#define CMN_PP_ENUM_RQUIRES_CLAUSE(supported_ops)  \
+    requires ((ops_v<Enum> & (supported_ops)) == (supported_ops))
 
 
-#define CMN_PP_ENUM_BINARY_OP(OP_, OPS_, LHS_, RHS_, RES_)  \
-    template <c::enum_ Enum> [[nodiscard]] constexpr auto operator OP_ (LHS_ lhs, RHS_ rhs) noexcept -> RES_ \
-        CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
+#define CMN_PP_ENUM_BINARY_OP(op, supported_ops, lhs_type, rhs_type, result_type)  \
+    template <c::enum_ Enum> [[nodiscard]] constexpr auto operator op (lhs_type lhs, rhs_type rhs) noexcept -> result_type \
+        CMN_PP_ENUM_RQUIRES_CLAUSE(supported_ops)  \
     {   \
-        return static_cast<RES_>(to_mask(lhs) OP_ to_mask(rhs));  \
+        return static_cast<result_type>(to_mask(lhs) op to_mask(rhs));  \
     } 
 
-#define CMN_PP_ENUM_BINARY_OP_AUTO(OP_, OPS_, LHS_, RHS_)  \
-    template <c::enum_ Enum> [[nodiscard]] constexpr auto operator OP_ (LHS_ lhs, RHS_ rhs) noexcept    \
-        CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
+#define CMN_PP_ENUM_BINARY_OP_AUTO(op, supported_ops, lhs_type, rhs_type)  \
+    template <c::enum_ Enum> [[nodiscard]] constexpr auto operator op (lhs_type lhs, rhs_type rhs) noexcept    \
+        CMN_PP_ENUM_RQUIRES_CLAUSE(supported_ops)  \
     {   \
-        return to_mask(lhs) OP_ to_mask(rhs);  \
+        return to_mask(lhs) op to_mask(rhs);  \
     } 
 
-#define CMN_PP_ENUM_UNARY_OP(OP_, OPS_)  \
-    template <c::enum_ Enum> [[nodiscard]] constexpr auto operator OP_ (Enum f) noexcept -> Enum \
-        CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
+#define CMN_PP_ENUM_UNARY_OP(op, supported_ops)  \
+    template <c::enum_ Enum> [[nodiscard]] constexpr auto operator op (Enum f) noexcept -> Enum \
+        CMN_PP_ENUM_RQUIRES_CLAUSE(supported_ops)  \
     {   \
-        return static_cast<Enum>(OP_ to_mask(f));  \
+        return static_cast<Enum>(op to_mask(f));  \
     }
 
-#define CMN_PP_ENUM_MUTABLE_PREFIX_UNARY_OP(OP_, OPS_)  \
-    template <c::enum_ Enum> constexpr auto operator OP_ (Enum f) noexcept -> Enum \
-        CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
+#define CMN_PP_ENUM_MUTABLE_PREFIX_UNARY_OP(op, supported_ops)  \
+    template <c::enum_ Enum> constexpr auto operator op (Enum f) noexcept -> Enum \
+        CMN_PP_ENUM_RQUIRES_CLAUSE(supported_ops)  \
     {   \
-        return static_cast<Enum>(OP_ to_mask(f));  \
+        return static_cast<Enum>(op to_mask(f));  \
     }
 
-#define CMN_PP_ENUM_MUTABLE_POSTFIX_UNARY_OP(OP_, OPS_)  \
-    template <c::enum_ Enum> constexpr auto operator OP_ (Enum &f, int) noexcept -> Enum \
-        CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
+#define CMN_PP_ENUM_MUTABLE_POSTFIX_UNARY_OP(op, supported_ops)  \
+    template <c::enum_ Enum> constexpr auto operator op (Enum &f, int) noexcept -> Enum \
+        CMN_PP_ENUM_RQUIRES_CLAUSE(supported_ops)  \
     {   \
         auto const tmp = f;   \
-        return f = static_cast<Enum>(OP_ to_mask(f)), tmp;  \
+        return f = static_cast<Enum>(op to_mask(f)), tmp;  \
     }
 
-#define CMN_PP_ENUM_COMPOUND_OP(OP_, OPS_, LHS_, RHS_)  \
-    template <c::enum_ Enum> constexpr auto operator BOOST_PP_CAT(OP_, =) (LHS_ &lhs, RHS_ rhs) noexcept -> LHS_ & \
-        CMN_PP_ENUM_RQUIRES_CLAUSE(OPS_)  \
+#define CMN_PP_ENUM_COMPOUND_OP(op, supported_ops, lhs_type, rhs_type)  \
+    template <c::enum_ Enum> constexpr auto operator BOOST_PP_CAT(op, =) (lhs_type &lhs, rhs_type rhs) noexcept -> lhs_type & \
+        CMN_PP_ENUM_RQUIRES_CLAUSE(supported_ops)  \
     {   \
-        return lhs = static_cast<LHS_>(to_mask(lhs) OP_ to_mask(rhs));  \
+        return lhs = static_cast<lhs_type>(to_mask(lhs) op to_mask(rhs));  \
     }
 
 //-----------------------------------------------------------------------------
@@ -119,16 +119,19 @@ CMN_PP_ENUM_BINARY_OP(|, op_bitwise, Enum, Enum, Enum)
 CMN_PP_ENUM_BINARY_OP(|, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>, Enum)
 CMN_PP_ENUM_BINARY_OP(|, op_bitwise | op_interoperable, interop_type_t<Enum>, Enum, Enum)
 CMN_PP_ENUM_COMPOUND_OP(|, op_bitwise, Enum, Enum)
+CMN_PP_ENUM_COMPOUND_OP(|, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>)
 
 CMN_PP_ENUM_BINARY_OP(&, op_bitwise, Enum, Enum, Enum)
 CMN_PP_ENUM_BINARY_OP(&, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>, Enum)
 CMN_PP_ENUM_BINARY_OP(&, op_bitwise | op_interoperable, interop_type_t<Enum>, Enum, Enum)
 CMN_PP_ENUM_COMPOUND_OP(&, op_bitwise, Enum, Enum)
+CMN_PP_ENUM_COMPOUND_OP(&, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>)
 
 CMN_PP_ENUM_BINARY_OP(^, op_bitwise, Enum, Enum, Enum)
 CMN_PP_ENUM_BINARY_OP(^, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>, Enum)
 CMN_PP_ENUM_BINARY_OP(^, op_bitwise | op_interoperable, interop_type_t<Enum>, Enum, Enum)
 CMN_PP_ENUM_COMPOUND_OP(^, op_bitwise, Enum, Enum)
+CMN_PP_ENUM_COMPOUND_OP(^, op_bitwise | op_interoperable, Enum, interop_type_t<Enum>)
 
 CMN_PP_ENUM_UNARY_OP(~, op_bitwise)
 
@@ -148,7 +151,14 @@ CMN_PP_ENUM_MUTABLE_POSTFIX_UNARY_OP(--, op_steppable)
 //
 //-----------------------------------------------------------------------------
 CMN_PP_ENUM_BINARY_OP(+, op_ariphmetic, Enum, Enum, Enum)
+CMN_PP_ENUM_BINARY_OP(+, op_ariphmetic | op_interoperable, Enum, interop_type_t<Enum>, Enum)
+CMN_PP_ENUM_COMPOUND_OP(+, op_ariphmetic, Enum, Enum)
+CMN_PP_ENUM_COMPOUND_OP(+, op_ariphmetic | op_interoperable, Enum, interop_type_t<Enum>)
+
 CMN_PP_ENUM_BINARY_OP(-, op_ariphmetic, Enum, Enum, Enum)
+CMN_PP_ENUM_BINARY_OP(-, op_ariphmetic | op_interoperable, Enum, interop_type_t<Enum>, Enum)
+CMN_PP_ENUM_COMPOUND_OP(-, op_ariphmetic, Enum, Enum)
+CMN_PP_ENUM_COMPOUND_OP(-, op_ariphmetic | op_interoperable, Enum, interop_type_t<Enum>)
 
 //-----------------------------------------------------------------------------
 //
@@ -160,10 +170,22 @@ CMN_PP_ENUM_BINARY_OP(-, op_ariphmetic, Enum, Enum, Enum)
 //CMN_PP_ENUM_BINARY_OP_AUTO(<=>, op_comparable | op_interoperable, interop_type_t<Enum>, Enum)
 CMN_PP_ENUM_BINARY_OP_AUTO(==, op_comparable | op_interoperable, interop_type_t<Enum>, Enum)
 CMN_PP_ENUM_BINARY_OP_AUTO(!=, op_comparable | op_interoperable, interop_type_t<Enum>, Enum)
-//CMN_PP_ENUM_BINARY_OP(>, op_comparable, Enum, Enum, bool)
-//CMN_PP_ENUM_BINARY_OP(>=, op_comparable, Enum, Enum, bool)
-//CMN_PP_ENUM_BINARY_OP(<, op_comparable, Enum, Enum, bool)
-//CMN_PP_ENUM_BINARY_OP(<=, op_comparable, Enum, Enum, bool)
+
+CMN_PP_ENUM_BINARY_OP(>, op_comparable, Enum, Enum, bool)
+CMN_PP_ENUM_BINARY_OP(>, op_comparable | op_interoperable, Enum, interop_type_t<Enum>, bool)
+CMN_PP_ENUM_BINARY_OP(>, op_comparable | op_interoperable, interop_type_t<Enum>, Enum, bool)
+
+CMN_PP_ENUM_BINARY_OP(>=, op_comparable, Enum, Enum, bool)
+CMN_PP_ENUM_BINARY_OP(>=, op_comparable | op_interoperable, Enum, interop_type_t<Enum>, bool)
+CMN_PP_ENUM_BINARY_OP(>=, op_comparable | op_interoperable, interop_type_t<Enum>, Enum, bool)
+
+CMN_PP_ENUM_BINARY_OP(<, op_comparable, Enum, Enum, bool)
+CMN_PP_ENUM_BINARY_OP(<, op_comparable | op_interoperable, Enum, interop_type_t<Enum>, bool)
+CMN_PP_ENUM_BINARY_OP(<, op_comparable | op_interoperable, interop_type_t<Enum>, Enum, bool)
+
+CMN_PP_ENUM_BINARY_OP(<=, op_comparable, Enum, Enum, bool)
+CMN_PP_ENUM_BINARY_OP(<=, op_comparable | op_interoperable, Enum, interop_type_t<Enum>, bool)
+CMN_PP_ENUM_BINARY_OP(<=, op_comparable | op_interoperable, interop_type_t<Enum>, Enum, bool)
 
 //-----------------------------------------------------------------------------
 //

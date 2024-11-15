@@ -21,7 +21,8 @@
 namespace cmn::enum_
 {
 
-template <util::c::group_info... GroupInfos> using groups_info = std::tuple<GroupInfos...>;
+template <util::c::group_info... GroupInfos> requires (sizeof... (GroupInfos) > 0)
+using groups_info = std::tuple<GroupInfos...>;
 
 namespace groups_
 {

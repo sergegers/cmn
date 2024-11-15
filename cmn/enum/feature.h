@@ -84,16 +84,16 @@ template <c::bitfield Policy>
 }
 
 template <c::strong_bitfield Policy>
-[[nodiscard]] constexpr auto get_value(Policy pol, Policy mask) noexcept
-{
-    return pol & mask;
-}
+[[nodiscard]] constexpr auto get_value(Policy pol, Policy mask) noexcept -> Policy { return pol & mask; }
 
 template <c::strong_bitfield Policy>
-[[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat) noexcept { return feat | pol; }
+[[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat) noexcept -> Policy{ return feat | pol; }
+
+template <c::strong_bitfield Policy>
+[[nodiscard]] constexpr auto reset_feature(Policy pol, Policy feat) noexcept -> Policy { return ~feat & pol; }
 
 template <c::bitfield Policy>
-[[nodiscard]] constexpr auto reset_feature(Policy pol, Policy feat) noexcept { return ~feat & pol; }
+[[nodiscard]] constexpr auto reset_feature(interop_type_t<Policy> pol, Policy feat) noexcept -> interop_type_t<Policy> { return ~feat & pol; }
 
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto enable_feature(Policy pol, Policy feat, bool enable) noexcept

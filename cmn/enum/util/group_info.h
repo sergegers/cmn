@@ -16,7 +16,8 @@ namespace cmn::enum_
 {
 
 // sorted by value record infos
-template <util::c::record_info... RecordInfos> using group_info = std::tuple<RecordInfos...>;
+template <util::c::record_info... RecordInfos> requires (sizeof... (RecordInfos) > 0)
+using group_info = std::tuple<RecordInfos...>;
 
 namespace group_
 {
@@ -27,7 +28,7 @@ template <util::c::group_info T> using mask_type_t = interop_type_t<record_enum_
 template <typename Lhs, typename Rhs> using pred_t = std::bool_constant<(Lhs::enum_value < Rhs::enum_value)>;
 template <c::enum_ auto ... Ens_> using make_t = boost::mp11::mp_sort<group_info<record_info<Ens_>...>, pred_t>;
 
-template <c::enum_ auto ... Ens_> consteval /*util::c::group_info*/ auto make() { return make_t<Ens_...>{}; }
+template <c::enum_ auto ... Ens_> consteval util::c::group_info auto make() { return make_t<Ens_...>{}; }
 
 template <util::c::record_info... Records>
 consteval auto calc_mask(group_info<Records...> const &gr) -> mask_type_t<group_info<Records...>>

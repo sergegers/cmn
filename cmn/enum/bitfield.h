@@ -9,13 +9,9 @@ namespace cmn::enum_
 
 
 template <c::enum_ auto ... Ens_>
-consteval auto adapt_bitfield_info_helper(unsigned int ops = default_ops(kind_t::bitfield))
+consteval auto adapt_bitfield_info_helper(interop_type_t<op_t> ops = default_ops(kind_t::bitfield))
 {
-    return enum_info
-    {
-        .m_ops = ops,
-        .m_groups = groups_::make(group_::make<Ens_>()...)
-    };
+    return enum_info { ops, groups_::make(group_::make<Ens_>()...) };
 }
 
 }

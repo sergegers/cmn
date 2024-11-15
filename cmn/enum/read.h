@@ -162,7 +162,6 @@ template <typename Enum, typename Char, typename CharTraits>
 ) noexcept
     -> boost::optional<Enum>
 {
-    using utils_type = utils<Enum>;
     using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
     if (!detail::check_stream_state(istr)) return {};
