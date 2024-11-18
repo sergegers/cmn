@@ -1,7 +1,7 @@
 #pragma once
 
-#include <type_traits>
 #include <concepts>
+#include <type_traits>
 
 // boost
 #include <boost/operators.hpp>
@@ -114,7 +114,7 @@ public:
     constexpr auto operator == (T rhs) const noexcept -> bool { return m_t == rhs; }
 
     /* CRTP polymorphic */
-    constexpr auto     operator !() const noexcept -> bool { return !m_t; }
+    constexpr auto operator !() const noexcept -> bool { return !m_t; }
     constexpr explicit operator bool() const noexcept { return !!static_cast<U const &>(*this); }
 
     friend auto hash_value(U const &u) noexcept { return boost::hash<T>{}(u.m_t); }
@@ -189,7 +189,7 @@ template
 >
 class RS_PASS_BY_VALUE_ATTR strong_typedef_ptr_impl :
       public strong_typedef_impl<U, T, Default_>
-    , private boost::additive<U, Ptrdiff>
+    , private boost::integer_arithmetic<U, Ptrdiff>
     , private boost::unit_steppable<U>
 {
 private:
@@ -205,74 +205,19 @@ public:
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (T rhs) const noexcept { return inherited::operator<=>(rhs); }
 
-    constexpr auto operator += (Ptrdiff rhs) -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
-    constexpr auto operator -= (Ptrdiff rhs) -> U& { return this->m_t -= rhs, static_cast<U &>(*this); }
+    constexpr auto operator ++ () noexcept -> U & { return ++this->m_t, static_cast<U &>(*this); }
+    constexpr auto operator -- () noexcept -> U & { return --this->m_t, static_cast<U &>(*this); }
 
-    constexpr auto operator ++() -> U & { return ++this->m_t, static_cast<U &>(*this); }
-    constexpr auto operator --() -> U & { return --this->m_t, static_cast<U &>(*this); }
+    constexpr auto operator += (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator -= (Ptrdiff rhs) noexcept -> U& { return this->m_t -= rhs, static_cast<U &>(*this); }
+    constexpr auto operator *= (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator /= (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator %= (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
 
-    friend constexpr auto operator - (U const &lhs, U const &rhs) -> Ptrdiff { return static_cast<Ptrdiff>(lhs.m_t - rhs.m_t); }
-};
-
-//-----------------------------------------------------------------------------
-template
-<
-      typename U
-    , std::integral T
-    , T Default_ = {}
-    , std::signed_integral Ptrdiff = std::ptrdiff_t
->
-class RS_PASS_BY_VALUE_ATTR strong_typedef_ptr_interop_impl :
-      public strong_typedef_impl<U, T, Default_>
-    //, private boost::additive<U, Ptrdiff>
-    , private boost::unit_steppable<U>
-{
-private:
-    using inherited     = strong_typedef_impl<U, T, Default_>;
-    using itself        = strong_typedef_ptr_interop_impl;
-public:
-    using difference_type = Ptrdiff;
-
-    using inherited::inherited, inherited::operator =;
-
-#pragma warning(suppress: 26434)
-    constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator<=>(rhs); }
-#pragma warning(suppress: 26434)
-    constexpr auto operator <=> (c::int_convertible_to<T> auto rhs) const noexcept
+    friend constexpr auto operator - (U const &lhs, U const &rhs) noexcept -> Ptrdiff
     {
-        return inherited::operator <=> (static_cast<T>(rhs));
+        return static_cast<Ptrdiff>(lhs.m_t - rhs.m_t);
     }
-
-    // allow interop operations
-    constexpr auto operator += (c::int_convertible_to<Ptrdiff> auto rhs) -> U &
-    {
-        this->m_t += static_cast<Ptrdiff>(rhs);
-        return static_cast<U &>(*this);
-    }
-
-    friend constexpr auto operator + (U const &lhs, c::int_convertible_to<Ptrdiff> auto rhs) -> U
-    {
-        auto res = lhs;
-        return std::move(res += rhs);
-    }
-
-    constexpr auto operator -= (c::int_convertible_to<Ptrdiff> auto rhs) -> U &
-    {
-        this->m_t -= static_cast<Ptrdiff>(rhs);
-        return static_cast<U &>(*this);
-    }
-
-    friend constexpr auto operator - (U const &lhs, c::int_convertible_to<Ptrdiff> auto rhs) -> U
-    {
-        auto res = lhs;
-        return std::move(res -= rhs); 
-    }
-
-    constexpr auto operator ++ () -> U & { return ++this->m_t, static_cast<U &>(*this); }
-    constexpr auto operator -- () -> U & { return --this->m_t, static_cast<U &>(*this); }
-
-    friend constexpr auto operator - (U const &lhs, U const &rhs) -> Ptrdiff
-    { return static_cast<Ptrdiff>(lhs.m_t - rhs.m_t); }
 };
 
 //-----------------------------------------------------------------------------
@@ -290,10 +235,10 @@ public:
     constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator<=>(rhs); }
     constexpr auto operator <=> (T rhs) const noexcept { return inherited::operator<=>(rhs); }
 
-    constexpr auto operator ~ () const -> U { return U { ~this->m_t }; }
-    constexpr auto operator ^= (U const &rhs) -> U& { return this->m_t ^= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator &= (U const &rhs) -> U& { return this->m_t &= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator |= (U const &rhs) -> U& { return this->m_t |= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator ~ () const noexcept -> U { return U { ~this->m_t }; }
+    constexpr auto operator ^= (U const &rhs) noexcept -> U& { return this->m_t ^= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator &= (U const &rhs) noexcept -> U& { return this->m_t &= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator |= (U const &rhs) noexcept -> U& { return this->m_t |= rhs.m_t, static_cast<U &>(*this); }
 };
 
 //-----------------------------------------------------------------------------
@@ -313,9 +258,9 @@ public:
 
     using inherited::operator ^=, inherited::operator &=, inherited::operator |=;
 
-    constexpr auto operator ^= (T const &rhs) -> U& { return this->m_t ^= rhs, static_cast<U &>(*this); }
-    constexpr auto operator &= (T const &rhs) -> U& { return this->m_t &= rhs, static_cast<U &>(*this); }
-    constexpr auto operator |= (T const &rhs) -> U& { return this->m_t |= rhs, static_cast<U &>(*this); }
+    constexpr auto operator ^= (T const &rhs) noexcept -> U& { return this->m_t ^= rhs, static_cast<U &>(*this); }
+    constexpr auto operator &= (T const &rhs) noexcept -> U& { return this->m_t &= rhs, static_cast<U &>(*this); }
+    constexpr auto operator |= (T const &rhs) noexcept -> U& { return this->m_t |= rhs, static_cast<U &>(*this); }
 };
 
 //-----------------------------------------------------------------------------
@@ -336,13 +281,14 @@ public:
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (T rhs) const noexcept { return inherited::operator <=> (rhs); }
 
-    constexpr auto operator += (U const &rhs) -> U& { return this->m_t += rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator -= (U const &rhs) -> U& { return this->m_t -= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator *= (U const &rhs) -> U& { return this->m_t *= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator /= (U const &rhs) -> U& { return this->m_t /= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator %= (U const &rhs) -> U& { return this->m_t %= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator ++ () -> U& { return ++this->m_t, static_cast<U &>(*this); }
-    constexpr auto operator -- () -> U& { return --this->m_t, static_cast<U &>(*this); }
+    constexpr auto operator ++ () noexcept -> U& { return ++this->m_t, static_cast<U &>(*this); }
+    constexpr auto operator -- () noexcept -> U& { return --this->m_t, static_cast<U &>(*this); }
+
+    constexpr auto operator += (U const &rhs) noexcept -> U& { return this->m_t += rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator -= (U const &rhs) noexcept -> U& { return this->m_t -= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator *= (U const &rhs) noexcept -> U& { return this->m_t *= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator /= (U const &rhs) noexcept -> U& { return this->m_t /= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator %= (U const &rhs) noexcept -> U& { return this->m_t %= rhs.m_t, static_cast<U &>(*this); }
 };
 
 //-----------------------------------------------------------------------------
@@ -367,13 +313,13 @@ public:
 
     using inherited::operator +=, inherited::operator -=, inherited::operator *=, inherited::operator /=, inherited::operator %=;
 
-    constexpr auto operator += (c::int_convertible_to<T> auto const &rhs) -> U &
+    constexpr auto operator += (c::int_convertible_to<T> auto const &rhs) noexcept -> U &
     {
         this->m_t += static_cast<T>(rhs);
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator + (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator + (U const &lhs, c::int_convertible_to<T> auto rhs) noexcept -> U
     {
         auto res = lhs;
         return std::move(res += rhs);
@@ -385,7 +331,7 @@ public:
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator - (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator - (U const &lhs, c::int_convertible_to<T> auto rhs) noexcept -> U
     {
         auto res = lhs;
         return std::move(res -= rhs);
@@ -397,7 +343,7 @@ public:
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator * (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator * (U const &lhs, c::int_convertible_to<T> auto rhs) noexcept -> U
     {
         auto res = lhs;
         return std::move(res *= rhs);
@@ -409,7 +355,7 @@ public:
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator / (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator / (U const &lhs, c::int_convertible_to<T> auto rhs) noexcept -> U
     {
         auto res = lhs;
         return std::move(res /= rhs);
@@ -421,7 +367,7 @@ public:
         return static_cast<U &>(*this);
     }
 
-    friend constexpr auto operator % (U const &lhs, c::int_convertible_to<T> auto rhs) -> U
+    friend constexpr auto operator % (U const &lhs, c::int_convertible_to<T> auto rhs) noexcept -> U
     {
         auto res = lhs;
         return std::move(res %= rhs);

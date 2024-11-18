@@ -31,33 +31,70 @@ using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
 // Trait template <typename T> copy_const
 //
 //-----------------------------------------------------------------------------
-template <typename Src, typename Dest> struct copy_const: std::type_identity<Dest> {};
-template <typename Src, typename Dest> struct copy_const<Src, Dest const>: std::type_identity<Dest> {};
-template <typename Src, typename Dest> struct copy_const<Src const, Dest>: std::type_identity<Dest const> {};
+template <typename Src, typename Dst> struct copy_const: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_const<Src, Dst const>: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_const<Src const, Dst>: std::type_identity<Dst const> {};
 
-template <typename Src, typename Dest> using copy_const_t = typename copy_const<Src, Dest>::type;
+template <typename Src, typename Dst> using copy_const_t = typename copy_const<Src, Dst>::type;
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> copy_volatile
+//
+//-----------------------------------------------------------------------------
+template <typename Src, typename Dst> struct copy_volatile: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_volatile<Src, Dst volatile>: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_volatile<Src volatile, Dst>: std::type_identity<Dst volatile> {};
+
+template <typename Src, typename Dst> using copy_volatile_t = typename copy_volatile<Src, Dst>::type;
 
 //-----------------------------------------------------------------------------
 //
 // Trait template <typename T> copy_lvalue_reference
 //
 //-----------------------------------------------------------------------------
-template <typename Src, typename Dest> struct copy_lvalue_reference: std::type_identity<Dest> {};
-template <typename Src, typename Dest> struct copy_lvalue_reference<Src, Dest &>: std::type_identity<Dest> {};
-template <typename Src, typename Dest> struct copy_lvalue_reference<Src &, Dest>: std::type_identity<Dest &> {};
+template <typename Src, typename Dst> struct copy_lvalue_reference: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_lvalue_reference<Src, Dst &>: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_lvalue_reference<Src &, Dst>: std::type_identity<Dst &> {};
 
-template <typename Src, typename Dest> using copy_lvalue_reference_t = typename copy_lvalue_reference<Src, Dest>::type;
+template <typename Src, typename Dst> using copy_lvalue_reference_t = typename copy_lvalue_reference<Src, Dst>::type;
 
 //-----------------------------------------------------------------------------
 //
 // Trait template <typename T> copy_rvalue_reference
 //
 //-----------------------------------------------------------------------------
-template <typename Src, typename Dest> struct copy_rvalue_reference: std::type_identity<Dest> {};
-template <typename Src, typename Dest> struct copy_rvalue_reference<Src, Dest &&>: std::type_identity<Dest> {};
-template <typename Src, typename Dest> struct copy_rvalue_reference<Src &&, Dest>: std::type_identity<Dest &&> {};
+template <typename Src, typename Dst> struct copy_rvalue_reference: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_rvalue_reference<Src, Dst &&>: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_rvalue_reference<Src &&, Dst>: std::type_identity<Dst &&> {};
 
-template <typename Src, typename Dest> using copy_rvalue_reference_t = typename copy_rvalue_reference<Src, Dest>::type;
+template <typename Src, typename Dst> using copy_rvalue_reference_t = typename copy_rvalue_reference<Src, Dst>::type;
+
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> copy_reference
+//
+// NOTE: because references are collapsed to minimize type instantiation do not use
+// copy_lvalue_reference_t, copy_rvalue_reference_t, but reimplement trait
+//
+//-----------------------------------------------------------------------------
+template <typename Src, typename Dst> struct copy_reference: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_reference<Src, Dst &>: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_reference<Src &, Dst>: std::type_identity<Dst &> {};
+template <typename Src, typename Dst> struct copy_reference<Src, Dst &&>: std::type_identity<Dst> {};
+template <typename Src, typename Dst> struct copy_reference<Src &&, Dst>: std::type_identity<Dst &&> {};
+
+template <typename Src, typename Dst> using copy_reference_t = typename copy_reference<Src, Dst>::type;
+
+//-----------------------------------------------------------------------------
+//
+// Trait template <typename T> copy_cvr
+//
+//-----------------------------------------------------------------------------
+template <typename Src, typename Dst>
+using copy_cvr = copy_reference<Src, copy_volatile_t<Src, copy_const_t<Src, std::remove_reference_t<Dst>>>>;
+
+template <typename Src, typename Dst>
+using copy_cvr_t = typename copy_cvr<Src, Dst>::type;
 
 //-----------------------------------------------------------------------------
 //
@@ -89,31 +126,30 @@ using deep_remove_const_t = typename deep_remove_const<T>::type;
 // Trait template <typename T> deep_copy_const
 //
 //-----------------------------------------------------------------------------
-template <typename Src, typename Dest> struct deep_copy_const : copy_const<Src, Dest> {};
-template <typename Src, typename Dest> struct deep_copy_const<Src, Dest &> : std::add_lvalue_reference<copy_const_t<Src, Dest>> {};
-template <typename Src, typename Dest> struct deep_copy_const<Src, Dest *> : std::add_pointer<copy_const_t<Src, Dest>> {};
+template <typename Src, typename Dst> struct deep_copy_const : copy_const<Src, Dst> {};
+template <typename Src, typename Dst> struct deep_copy_const<Src, Dst &> : std::add_lvalue_reference<copy_const_t<Src, Dst>> {};
+template <typename Src, typename Dst> struct deep_copy_const<Src, Dst *> : std::add_pointer<copy_const_t<Src, Dst>> {};
 
-template <typename Src, typename Dest> using deep_copy_const_t = typename deep_copy_const<Src, Dest>::type;
+template <typename Src, typename Dst> using deep_copy_const_t = typename deep_copy_const<Src, Dst>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // extended underlying_type
 //
-template <typename T>
-struct underlying_type: std::type_identity<T> {};
 
+///////////////////////////////////////////////////////////////////////////////
 template <typename T>
-using underlying_type_t = typename underlying_type<T>::type;
+struct underlying_type : std::type_identity<T> {};
 
 // enum specialization
 template <c::enum_ T>
 struct underlying_type<T>: std::underlying_type<T> {};
 
 // unit specialization
-template <c::unit Unit>
-struct underlying_type<Unit>: std::type_identity<typename Unit::underlying_type> {};
+template <c::unit T>
+struct underlying_type<T>: std::type_identity<typename T::underlying_type> {};
 
-template <typename T>
+template <c::enumerable T>
 using underlying_type_t = typename underlying_type<T>::type;
 
 //-----------------------------------------------------------------------------

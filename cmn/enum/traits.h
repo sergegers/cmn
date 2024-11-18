@@ -2,7 +2,7 @@
 
 #include <string_view>
 #include <tuple>
-#include <bit>
+#include <array>
 #include <iosfwd>
 #include <concepts>
 
@@ -70,17 +70,6 @@ struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
 
     //    decltype(auto) rec = group[idx];
     //    return rec.template get_str<Char>();
-    //}
-
-    //template <Enum Mask_, std::size_t Idx_ = 0>
-    //static constexpr decltype(auto) group_by_mask()
-    //{
-    //    static_assert(std::tuple_size_v<decltype(enum_info.m_groups)> > 0, "Must be at least one group!");
-
-    //    if constexpr (masks[Idx_] == to_mask_type(Mask_))
-    //        return std::get<Idx_>(enum_info.m_groups);
-    //    else
-    //        return group_by_mask<Mask_, Idx_ + 1>();
     //}
 };
 
@@ -150,23 +139,64 @@ constexpr auto to_mask(Enum en) -> interop_type_t<Enum>
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enum_ En> constexpr kind_t kind_v = traits<En>::kind;
 template <c::enum_ En> constexpr int ops_v = traits<En>::ops;
+template <c::enum_ Enum> constexpr c::instance_of<name_info> auto name_info_v = traits<Enum>::name_info;
 
 template <c::e_any_enum Enum> constexpr Enum begin_v = traits<Enum>::begin;
 template <c::e_any_enum Enum> constexpr Enum last_v = traits<Enum>::last;
 template <c::e_any_enum Enum> constexpr Enum end_v = traits<Enum>::end;
-template <c::e_any_enum Enum> constexpr auto enum_info_v = traits<Enum>::enum_info;
-template <c::e_any_enum Enum> constexpr auto groups_v = enum_info_v<Enum>.m_groups;
+template <c::e_any_enum Enum> constexpr c::instance_of<enum_info> auto enum_info_v = traits<Enum>::enum_info;
+template <c::e_any_enum Enum> constexpr util::c::groups_info auto groups_v = enum_info_v<Enum>.m_groups;
 template <c::e_any_enum Enum, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<Enum>);
 template <c::e_any_enum Enum> constexpr auto masks_v = traits<Enum>::masks;
-template <c::e_any_enum Enum> constexpr auto name_info_v = traits<Enum>::name_info;
 
 template <c::enum_ Enum, typename Char, typename CharTraits>
 constexpr auto name(Enum, std::basic_ios<Char, CharTraits> const &) noexcept
 {
     if constexpr (std::is_same_v<Char, char>) 
-        return traits<Enum>::name_info.m_name;
+        return name_info_v<Enum>.m_name;
     else 
-        return traits<Enum>::m_wname;
+        return name_info_v<Enum>.m_wname;
+}
+
+namespace detail
+{
+
+template <c::e_any_enum auto Mask_>
+struct group_by_mask_
+{
+    using enum_type = decltype(Mask_);
+
+    template <std::size_t Idx_>
+    consteval auto const &operator ()() const
+    {
+        if constexpr (masks_v<enum_type>[Idx_] == to_interop_type(Mask_))
+            return std::get<Idx_>(groups_v<enum_type>);
+        else
+            return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
+    }
+
+    template <std::size_t Idx_>
+    consteval auto const &operator ()() const
+        requires (Idx_ == std::size(masks_v<enum_type>))
+    {
+        if constexpr (masks_v<enum_type>[Idx_] == to_interop_type(Mask_))
+            return std::get<Idx_>(groups_v<enum_type>);
+        else
+            return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
+    }
+};
+
+}
+
+template <c::e_any_enum auto Mask_, std::size_t Idx_ = 0>
+consteval auto const &group_by_mask()
+{
+    using enum_type = decltype(Mask_);
+
+    if constexpr (masks_v<enum_type>[Idx_] == to_interop_type(Mask_))
+        return std::get<Idx_>(groups_v<enum_type>);
+    else
+        return group_by_mask<Mask_, Idx_ + 1>();
 }
 
 }

@@ -146,7 +146,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/error.cpp"
   "test/algorithm.cpp"
   "test/enum.cpp" 
-   "test/io.cpp" 
+   "test/strong_typedef.cpp" 
    "test/tuple/tuple.cpp"
    "test/tuple/va.cpp"
    "test/util.cpp" 

@@ -119,6 +119,12 @@ BOOST_AUTO_TEST_CASE(xml_serialize_int_fmt)
     }
 }
 
+using my_ptr = strong_typedef_ptr<unsigned, struct my_strong_typedef_ptr_>;
+static_assert(c::ptr_ariphmetic<my_ptr>);
+
+using my_bitfield = strong_typedef_flag<unsigned int, struct my_strong_bitfield_>;
+static_assert(c::bitfield<my_bitfield>);
+
 BOOST_AUTO_TEST_SUITE_END() // util
 BOOST_AUTO_TEST_SUITE_END() // cmn
 

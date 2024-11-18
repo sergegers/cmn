@@ -205,6 +205,16 @@ concept fmt_unit =
  && io::strong_typedef_fmt_traits<T>::enable_luxury_io
 ;
 
+//-----------------------------------------------------------------------------
+template <typename T>
+concept interop_unit =
+    unit<T>
+ && requires
+    {
+        typename T::difference_type;
+    }
+;
+
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
 concept enumerable = std::integral<T> || std::is_enum_v<T> || unit<T>;
@@ -218,7 +228,7 @@ struct interop_type : std::type_identity<T> {};
 template <typename T> requires std::integral<T>
 struct interop_type<T> : boost::promote<T> {};
 
-template <typename T> requires c::enum_<T>
+template <typename T> requires c::c_enum<T>
 struct interop_type<T> : boost::promote<std::underlying_type_t<T>> {};
 
 template <typename T> requires c::scoped_enum<T>
@@ -226,6 +236,9 @@ struct interop_type<T> : std::underlying_type<T> {};
 
 template <typename T> requires c::unit<T>
 struct interop_type<T> : std::type_identity<typename T::underlying_type> {};
+
+template <typename T> requires c::interop_unit<T>
+struct interop_type<T> : std::type_identity<typename T::difference_type> {};
 
 template <c::enumerable T>
 using interop_type_t = typename interop_type<T>::type;
@@ -310,9 +323,9 @@ namespace detail
 template <typename Lhs, typename Rhs, typename Res>
 concept bit_ops_ = requires(Lhs lhs, Rhs rhs)
 {
-    { lhs & rhs } noexcept -> std::same_as<Res>;
-    { lhs | rhs } noexcept -> std::same_as<Res>;
-    { lhs ^ rhs } noexcept -> std::same_as<Res>;
+    { lhs & rhs } /*noexcept*/ -> std::same_as<Res>;
+    { lhs | rhs } /*noexcept*/ -> std::same_as<Res>;
+    { lhs ^ rhs } /*noexcept*/ -> std::same_as<Res>;
     { ~lhs } noexcept -> std::same_as<Res>;
 };
 
@@ -364,8 +377,8 @@ namespace detail
 template <typename Lhs, typename Rhs, typename Res>
 concept commutative_ariphmetic_ops__ = requires(Lhs lhs, Rhs rhs)
 {
-    { lhs + rhs } -> std::same_as<Res>;
-    { lhs * rhs } -> std::same_as<Res>;
+    { lhs + rhs } /*noexcept*/ -> std::same_as<Res>;
+    { lhs * rhs } /*noexcept*/ -> std::same_as<Res>;
 };
 
 template <typename Lhs, typename Rhs, typename Res>
@@ -377,12 +390,21 @@ concept commutative_ariphmetic_ops_ =
 template <typename Lhs, typename Rhs, typename Res>
 concept noncommutative_ariphmetic_ops_ = requires(Lhs lhs, Rhs rhs)
 {
-    { lhs - rhs } -> std::same_as<Res>;
-    { lhs / rhs } -> std::same_as<Res>;
-    { lhs % rhs } -> std::same_as<Res>;
+    { lhs - rhs } /*noexcept*/ -> std::same_as<Res>;
+    { lhs / rhs } /*noexcept*/ -> std::same_as<Res>;
+    { lhs % rhs } /*noexcept*/ -> std::same_as<Res>;
 };
 
 }
+
+template <typename T>
+concept ptr_ariphmetic = 
+    enumerable<T>
+ && std::equality_comparable<T>
+    // for integral, unit types or scoped enums with overloaded operators
+ && detail::commutative_ariphmetic_ops_<T, interop_type_t<T>, T>
+ && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, T>
+;
 
 template <typename T>
 concept strong_ariphmetic = 
@@ -393,22 +415,20 @@ concept strong_ariphmetic =
 ;
 
 template <typename T>
-concept ariphmetic =
+concept ariphmetic = 
     strong_ariphmetic<T>
- ||
+ || 
+    enumerable<T>
+ && std::equality_comparable<T>
+ && std::equality_comparable_with<T, interop_type_t<T>>
  (
-        enumerable<T>
-     && std::equality_comparable<T>
-     && std::equality_comparable_with<T, interop_type_t<T>>
-     (
-            // for integral types & C enums with implicit conversion to int types
-            detail::commutative_ariphmetic_ops_<T, interop_type_t<T>, interop_type_t<T>>
-         && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, interop_type_t<T>>
-         ||
-            // for integral types & scoped enums with overloaded operators
-            detail::commutative_ariphmetic_ops_<T, interop_type_t<T>, T>
-         && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, T>
-     )
+        // for integral types & C enums with implicit conversion to int types
+        detail::commutative_ariphmetic_ops_<T, interop_type_t<T>, interop_type_t<T>>
+     && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, interop_type_t<T>>
+     ||
+        // for integral, unit types or scoped enums with overloaded operators
+        detail::commutative_ariphmetic_ops_<T, interop_type_t<T>, T>
+     && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, T>
  )
 ;
 

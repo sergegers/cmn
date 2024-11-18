@@ -7,7 +7,6 @@ namespace cmn
 
 using namespace literals;
 
-// mf
 static_assert(log10(1ul) == 1, "log10(1)");
 static_assert(pow10(0ul) == 1, "pow10(0)");
 

@@ -4,6 +4,7 @@
 #include <bit>
 #include <concepts>
 #include <string>
+#include <tuple>
 
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/symbols.h>
@@ -172,6 +173,31 @@ struct assert_type_complete
 {
     static_assert(c::complete<T>);
 };
+
+//-----------------------------------------------------------------------------
+template <std::size_t Idx_, typename... Args>
+constexpr decltype(auto) forward_nth(Args &&... args)
+{
+    return [](c::instance_of<std::tuple> auto &&arg_tpl)
+    {
+        return std::get<Idx_>(std::move(arg_tpl));
+    }
+        (std::forward_as_tuple(std::forward<Args>(args)...))
+    ;
+}
+
+//-----------------------------------------------------------------------------
+//
+// static_cast<> to Dst but keep cvr modifiers
+//
+//-----------------------------------------------------------------------------
+template <typename Dst, typename Src>
+constexpr auto keep_cvr_cast(Src &&src) noexcept-> copy_cvr_t<Src, Dst>
+{
+    using result_type = copy_cvr_t<Src, Dst>;
+    return static_cast<result_type>(std::forward<Src>(src));
+}
+
 
 namespace enum_
 {
