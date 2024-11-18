@@ -136,34 +136,6 @@ struct is_instance_of_<TemplateT, TemplateT<Args...>>: std::true_type {};
 template <typename T, template <typename...> typename TemplateT>
 concept instance_of = detail::is_instance_of_<TemplateT, T>::value;
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// Integral constant concepts
-//
-///////////////////////////////////////////////////////////////////////////////
-namespace detail
-{
-
-template <std::integral I, typename T>
-struct instance_of_integral_: std::false_type {};
-
-template <std::integral I, I I_, template <typename, auto> typename IntConstntT>
-struct instance_of_integral_<I, IntConstntT<I, I_>>: std::true_type {};
-
-}
-
-template <typename T, typename I>
-concept instance_of_integral =
-    std::integral<I>
- && detail::instance_of_integral_<I, T>::value
-;
-
-template <typename T>
-concept instance_of_bool = instance_of_integral<T, bool>;
-
-template <typename T>
-concept instance_of_unsigned = instance_of_integral<T, unsigned>;
-
 //-----------------------------------------------------------------------------
 //
 // check if type is complete
@@ -218,6 +190,34 @@ concept interop_unit =
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
 concept enumerable = std::integral<T> || std::is_enum_v<T> || unit<T>;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Integral constant concepts
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+template <enumerable I, typename T>
+struct instance_of_enumerable_: std::false_type {};
+
+template <enumerable I, I I_, template <typename, auto> typename IntConstntT>
+struct instance_of_enumerable_<I, IntConstntT<I, I_>>: std::true_type {};
+
+}
+
+template <typename T, typename I>
+concept instance_of_enumerable =
+    enumerable<I>
+ && detail::instance_of_enumerable_<I, T>::value
+;
+
+template <typename T>
+concept instance_of_bool = instance_of_enumerable<T, bool>;
+
+template <typename T>
+concept instance_of_unsigned = instance_of_enumerable<T, unsigned>;
 
 }
 

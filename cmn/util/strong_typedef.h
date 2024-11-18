@@ -201,18 +201,18 @@ public:
     using inherited::inherited, inherited::operator =;
 
 #pragma warning(suppress: 26434)
-    constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator<=>(rhs); }
+    constexpr auto operator <=> (itself const &rhs) const noexcept { return inherited::operator <=> (rhs); }
 #pragma warning(suppress: 26434)
     constexpr auto operator <=> (T rhs) const noexcept { return inherited::operator<=>(rhs); }
 
     constexpr auto operator ++ () noexcept -> U & { return ++this->m_t, static_cast<U &>(*this); }
     constexpr auto operator -- () noexcept -> U & { return --this->m_t, static_cast<U &>(*this); }
 
-    constexpr auto operator += (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
-    constexpr auto operator -= (Ptrdiff rhs) noexcept -> U& { return this->m_t -= rhs, static_cast<U &>(*this); }
-    constexpr auto operator *= (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
-    constexpr auto operator /= (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
-    constexpr auto operator %= (Ptrdiff rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator += (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator -= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t -= rhs, static_cast<U &>(*this); }
+    constexpr auto operator *= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator /= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator %= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
 
     friend constexpr auto operator - (U const &lhs, U const &rhs) noexcept -> Ptrdiff
     {

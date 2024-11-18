@@ -1,4 +1,7 @@
 
+#include <type_traits>
+
+#include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
 
 namespace cmn
@@ -6,37 +9,35 @@ namespace cmn
 
 // TODO: enable
 
-///// type_traits
-//static_assert(std::is_same_v<add_const_on_t<int, char>, char>, "add_const_on failed 0");
-//static_assert(std::is_same_v<add_const_on_t<int const, char>, char const>, "add_const_on failed 1");
-//static_assert(std::is_same_v<add_const_on_t<int const, char, long>, long>, "add_const_on failed 2");
-//static_assert(std::is_same_v<add_const_on_t<int, char, long>, char>, "add_const_on failed 3");
-//static_assert(!std::is_same_v<add_const_on_t<int const, int &>, int const &>, "add_const_on failed 4");
-//static_assert(!std::is_same_v<add_const_on_t<int const, int *>, int const *>, "add_const_on failed 5");
-//static_assert(std::is_same_v<add_const_on_t<int const, int *>, int * const>, "add_const_on failed 6");
-//static_assert(std::is_same_v<add_const_on_t<int const, char const &>, char const &>, "add_const_on failed 7");
-//static_assert(std::is_same_v<add_const_on_t<int const, char const *>, char const * const>, "add_const_on failed 8");
-//
-//static_assert(std::is_same_v<deep_add_const_on_t<int, char>, char>, "add_const_on failed 0");
-//static_assert(std::is_same_v<deep_add_const_on_t<int const, char>, char const>, "add_const_on failed 1");
-//static_assert(std::is_same_v<deep_add_const_on_t<int const, char, long>, long>, "add_const_on failed 2");
-//static_assert(std::is_same_v<deep_add_const_on_t<int, char, long>, char>, "add_const_on failed 3");
-//static_assert(std::is_same_v<deep_add_const_on_t<int const, int &>, int const &>, "add_const_on failed 4");
-//static_assert(std::is_same_v<deep_add_const_on_t<int const, int *>, int const * const>, "add_const_on failed 5");
-//static_assert(!std::is_same_v<deep_add_const_on_t<int const, int *>, int * const>, "add_const_on failed 6");
-//static_assert(std::is_same_v<deep_add_const_on_t<int const, char const &>, char const &>, "add_const_on failed 7");
-//static_assert(std::is_same_v<deep_add_const_on_t<int const, char const *>, char const * const>, "add_const_on failed 8");
+// type_traits
+static_assert(std::is_same_v<copy_const_t<int, char>, char>, "copy_const failed 0");
+static_assert(std::is_same_v<copy_const_t<int const, char>, char const>, "copy_const failed 1");
+static_assert(!std::is_same_v<copy_const_t<int const, int &>, int const &>, "copy_const failed 2");
+static_assert(!std::is_same_v<copy_const_t<int const, int *>, int const *>, "copy_const failed 3");
+static_assert(std::is_same_v<copy_const_t<int const, int *>, int * const>, "copy_const failed 4");
+static_assert(std::is_same_v<copy_const_t<int const, char const &>, char const &>, "copy_const failed 5");
+static_assert(std::is_same_v<copy_const_t<int const, char const *>, char const * const>, "copy_const failed 6");
+
+//static_assert(std::is_same_v<deep_add_const_on_t<int, char>, char>, "copy_const failed 0");
+//static_assert(std::is_same_v<deep_add_const_on_t<int const, char>, char const>, "copy_const failed 1");
+//static_assert(std::is_same_v<deep_add_const_on_t<int const, char, long>, long>, "copy_const failed 2");
+//static_assert(std::is_same_v<deep_add_const_on_t<int, char, long>, char>, "copy_const failed 3");
+//static_assert(std::is_same_v<deep_add_const_on_t<int const, int &>, int const &>, "copy_const failed 4");
+//static_assert(std::is_same_v<deep_add_const_on_t<int const, int *>, int const * const>, "copy_const failed 5");
+//static_assert(!std::is_same_v<deep_add_const_on_t<int const, int *>, int * const>, "copy_const failed 6");
+//static_assert(std::is_same_v<deep_add_const_on_t<int const, char const &>, char const &>, "copy_const failed 7");
+//static_assert(std::is_same_v<deep_add_const_on_t<int const, char const *>, char const * const>, "copy_const failed 8");
 //
 //static_assert(std::is_same_v<add_volatile_on_t<int, char>, char>, "add_volatile_on failed 0");
 //static_assert(std::is_same_v<add_volatile_on_t<int volatile, char>, char volatile>, "add_volatile_on failed 1");
 //
-//static_assert(std::is_same_v<add_rvalue_reference_on_t<int, char>, char>, "add_rvalue_reference_on failed 0");
-//static_assert(std::is_same_v<add_rvalue_reference_on_t<int &&, char>, char &&>, "add_rvalue_reference_on failed 1");
-//
-//static_assert(std::is_same_v<add_lvalue_reference_on_t<int, char>, char>, "add_lvalue_reference_on failed 0");
-//static_assert(std::is_same_v<add_lvalue_reference_on_t<int &, char>, char &>, "add_lvalue_reference_on failed 1");
-//static_assert(std::is_same_v<add_lvalue_reference_on_t<int &, char const>, char const &>, "add_lvalue_reference_on failed 2");
-//
+static_assert(std::is_same_v<copy_rvalue_reference_t<int, char>, char>, "copy_rvalue_reference failed 0");
+static_assert(std::is_same_v<copy_rvalue_reference_t<int &&, char>, char &&>, "copy_rvalue_reference failed 1");
+
+static_assert(std::is_same_v<copy_lvalue_reference_t<int, char>, char>, "copy_lvalue_reference failed 0");
+static_assert(std::is_same_v<copy_lvalue_reference_t<int &, char>, char &>, "copy_lvalue_reference failed 1");
+static_assert(std::is_same_v<copy_lvalue_reference_t<int &, char const>, char const &>, "copy_lvalue_reference failed 2");
+
 //static_assert(std::is_same_v<add_cvref_on_t<int, float>, float>, "add_cvr_on_t 0 failed");
 //static_assert(std::is_same_v<add_cvref_on_t<int const, float>, float const>, "add_cvr_on_t 1 failed");
 //static_assert(std::is_same_v<add_cvref_on_t<int volatile, float>, float volatile>, "add_cvr_on_t 2 failed");
@@ -114,5 +115,10 @@ namespace cmn
 //static_assert(c::instance_of_any_integral<std::false_type>);
 //static_assert(c::instance_of_bool<std::true_type>);
 
+static_assert(c::instance_of_bool<std::bool_constant<false>>);
+
+enum class my_enum { e0, e1 };
+
+static_assert(c::instance_of_enumerable<std::integral_constant<my_enum, my_enum::e1>, my_enum>);
 
 }
