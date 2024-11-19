@@ -4,6 +4,7 @@
 #include <cassert>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/util/util.h>
 
 namespace cmn::enum_
 {

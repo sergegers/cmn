@@ -1,4 +1,5 @@
 
+#include <cmn/meta/concepts.h>
 #include <cmn/util/util.h>
 #include <cmn/util/fixed_string.h>
 
@@ -31,5 +32,7 @@ static_assert
     >,
     "swap_index_seq_t failed" 
 );
+
+static_assert(c::string<fixed_string<10>>);
 
 }

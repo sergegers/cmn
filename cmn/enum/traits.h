@@ -169,7 +169,7 @@ struct group_by_mask_
     template <std::size_t Idx_>
     consteval auto const &operator ()() const
     {
-        if constexpr (masks_v<enum_type>[Idx_] == to_interop_type(Mask_))
+        if constexpr (masks_v<enum_type>[Idx_] == to_interop(Mask_))
             return std::get<Idx_>(groups_v<enum_type>);
         else
             return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
@@ -179,7 +179,7 @@ struct group_by_mask_
     consteval auto const &operator ()() const
         requires (Idx_ == std::size(masks_v<enum_type>))
     {
-        if constexpr (masks_v<enum_type>[Idx_] == to_interop_type(Mask_))
+        if constexpr (masks_v<enum_type>[Idx_] == to_interop(Mask_))
             return std::get<Idx_>(groups_v<enum_type>);
         else
             return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
@@ -193,7 +193,7 @@ consteval auto const &group_by_mask()
 {
     using enum_type = decltype(Mask_);
 
-    if constexpr (masks_v<enum_type>[Idx_] == to_interop_type(Mask_))
+    if constexpr (masks_v<enum_type>[Idx_] == to_interop(Mask_))
         return std::get<Idx_>(groups_v<enum_type>);
     else
         return group_by_mask<Mask_, Idx_ + 1>();
