@@ -192,9 +192,9 @@ constexpr decltype(auto) forward_nth(Args &&... args)
 //
 //-----------------------------------------------------------------------------
 template <typename Dst, typename Src>
-constexpr auto keep_cvr_cast(Src &&src) noexcept-> copy_cvr_t<Src, Dst>
+constexpr auto keep_cvr_cast(Src &&src) noexcept-> copy_cvr_t<Src &&, Dst>
 {
-    using result_type = copy_cvr_t<Src, Dst>;
+    using result_type = copy_cvr_t<Src &&, Dst>;
     return static_cast<result_type>(std::forward<Src>(src));
 }
 

@@ -8,6 +8,7 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/enum/traits.h>
+#include <cmn/enum/util/adapt_print.h>
 #include <cmn/tuple/io.h>
 
 #include "manip.h"

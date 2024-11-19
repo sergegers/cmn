@@ -42,7 +42,7 @@ struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
     static constexpr name_info<Enum> name_info{};
 
     // "attempting to reference a deleted function" error here means
-    // that enum definition (macros family CMN_PP_DECLARE_ENUM_...) is not included
+    // that enum definition (macros family CMN_DECLARE_ENUM_...) is not included
     static constexpr auto enum_info = adapt_enum_info(Enum{});
 
     ////////////////////////////////////////////////////////////////////////////////////////////////

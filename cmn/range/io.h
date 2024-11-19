@@ -144,6 +144,7 @@ constexpr compact_table_out_ compact_table_out{};
 
 template <typename Char, typename CharTraits, std::ranges::range Range>
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Range rng) -> std::basic_ostream<Char, CharTraits> &
+    requires c::printable<std::ranges::range_value_t<Range>, Char, CharTraits>
     // BUG: VS 17.0.6 couldn't usr cmn::c::printable concept
     //requires requires(std::ranges::range_value_t<Range> const &val)
     //{

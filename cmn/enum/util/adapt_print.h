@@ -24,12 +24,12 @@ consteval auto adapt_enum_info(print_t)
     using enum print_t;
     return enum_info
     {
-        .m_ops = op_comparable | op_bitwise | op_interoperable,
-        .m_groups = groups_::make(group_::make<empty, tail, class_prefix>())
+        op_comparable | op_bitwise | op_interoperable,
+        groups_::make(group_::make<empty, tail, class_prefix>())
     };
 }
 
-CMN_PP_INJECT_ENUM_OPS()
+CMN_INJECT_ENUM_OPS()
 
 static_assert(ops_v<print_t> == (op_comparable | op_bitwise | op_interoperable));
 static_assert(c::bitfield<print_t>);

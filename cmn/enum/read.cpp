@@ -9,6 +9,7 @@
 #include <cmn/error/exception.h>
 #include <cmn/enum/manip.h>
 #include <cmn/enum/feature.h>
+#include <cmn/enum/util/adapt_print.h>
 #include <cmn/util/util.h>   // overloaded
 #include <cmn/util/lexical_cast.h>
 

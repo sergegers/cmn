@@ -83,7 +83,7 @@ consteval auto adapt_enum_info(int_fmt_t)
     );
 }
 
-CMN_PP_INJECT_ENUM_OPS()
+CMN_INJECT_ENUM_OPS()
 
 namespace manip
 {

@@ -3,11 +3,14 @@
 #include <cmn/meta/symbols.h>
 #include <cmn/meta/concepts.h> // print_t
 
+#include <cmn/enum/traits.h>
+#include <cmn/enum/op.h>
+#include <cmn/enum/util.h>
+#include <cmn/enum/util/macro.h>
+
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/util.h>
-
-#include <cmn/enum/bitfield.h>
 
 namespace cmn::enum_::io
 {
@@ -108,19 +111,6 @@ constexpr cmn::io::stream_slot_manip_forwarder<basic_bitfield_delim_manip> bitfi
 //
 // Print options manipulator
 //
-///////////////////////////////////////////////////////////////////////////////
-
-consteval auto adapt_enum_info(print_t)
-{
-    using enum print_t;
-    return adapt_bitfield_info_helper<empty, tail, class_prefix>(op_bitwise | op_interoperable);
-}
-
-CMN_PP_INJECT_ENUM_OPS()
-
-static_assert(ops_v<print_t> == (op_bitwise | op_interoperable));
-static_assert(c::bitfield<print_t>);
-
 ///////////////////////////////////////////////////////////////////////////////
 using print_manip =
     cmn::io::int_slot_manip
