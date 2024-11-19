@@ -1,7 +1,6 @@
 #pragma once
 
-#include <boost/fusion/sequence/io/out.hpp>
-#include <boost/fusion/sequence/io/in.hpp>
+#include <boost/fusion/algorithm/iteration/fold.hpp>
 
 #if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
@@ -10,25 +9,57 @@
 #   include <cmn/meta/concepts.h>
 #endif
 
-namespace boost::fusion::sequence
+#include <cmn/error/exception.h>
+
+#include "manip.h"
+
+namespace cmn::tuple_::io
 {
 
-namespace operators
-{
-
-template <typename Char, typename CharTraits, c::fus_sequence Seq>
+template <typename Char, typename CharTraits, boost::c::fus_sequence Seq>
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Seq const &seq) -> decltype(ostr)
 {
-    return fusion::out(ostr, seq);
+    using ostream_type = std::basic_ostream<Char, CharTraits>;
+
+    // NOTE: don't make it static
+    auto const open  = basic_open_manip<Char, CharTraits>::value(ostr);
+    auto const delim = basic_delim_manip<Char, CharTraits>::value(ostr);
+    auto const close = basic_close_manip<Char, CharTraits>::value(ostr);
+
+    ostr << open;
+
+    return boost::fusion::fold
+    (
+        seq,
+        ostr,
+        [&delim, first = true](ostream_type &ostr, auto item) mutable 
+            -> decltype(ostr)
+        {
+            if (!first)
+                ostr << delim;
+            else
+                first = false;
+
+            ostr << item;
+
+           return ostr; 
+        }
+    );
 }
 
-template <typename Char, typename CharTraits, c::fus_sequence Seq>
+template <typename Char, typename CharTraits, boost::c::fus_sequence Seq>
 auto operator >> (std::basic_istream<Char, CharTraits> &istr, Seq &seq) -> decltype(istr)
 {
-    return fusion::in(istr, seq);
+    throw not_implemented();
 }
 
 }
+
+namespace boost::fusion::sequence::operators
+{
+
+using cmn::tuple_::io::operator <<;
+using cmn::tuple_::io::operator >>;
 
 }
 
@@ -36,7 +67,7 @@ auto operator >> (std::basic_istream<Char, CharTraits> &istr, Seq &seq) -> declt
 namespace std
 {
 
-using boost::fusion::sequence::operators::operator <<;
-using boost::fusion::sequence::operators::operator >>;
+using cmn::tuple_::io::operator <<;
+using cmn::tuple_::io::operator >>;
 
 }

@@ -67,14 +67,17 @@ add_library (
  "cmn/io/manip/slot/concepts.h"
  "cmn/io/manip/slot/decoder.h"
  "cmn/io/manip/slot/forwarder.h"
- "cmn/io/manip/slot/manip.h"
+ "cmn/tuple/manip.h"
  "cmn/io/manip/slot/traits.h"
 
  "cmn/range/io.h"
+ "cmn/range/manip.h" 
 
  "cmn/tuple/tuple.h"
  "cmn/tuple/ops.h"
  "cmn/tuple/io.h"
+ "cmn/tuple/manip.h"
+ 
  "cmn/tuple/serialization.h"
  "cmn/tuple/va/concepts.h"
  "cmn/tuple/va/tuple.h"
