@@ -1,47 +1,200 @@
 #pragma once
 
+#include <concepts>
+#include <type_traits>
 #include <cstddef>
 #include <string>
 #include <format>
 #include <exception>
 #include <string>
+#include <string_view>
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <boost/exception/all.hpp>
+#include <boost/type_index.hpp>
+#include <boost/core/use_default.hpp>
+
+#include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
+#include <cmn/util/param.h>
 
 namespace cmn
 {
 
-template <typename Tag, typename Base = std::exception>
-class basic_error: public virtual Base, public virtual boost::exception 
+namespace error_
 {
-private:
-    using inherited = Base;
 
-    std::string m_what;
+enum class redirect_impl_t
+{
+    to_std_base,    // redirect ctor args to std::exception base
+    to_boost_base   // redirect ctor args to boost::exception base
+};
+
+using redirect_to_std_base = int_<redirect_impl_t::to_std_base>;
+using redirect_to_boost_base = int_<redirect_impl_t::to_boost_base>;
+
+}
+
+//-----------------------------------------------------------------------------
+// forward declaration
+template
+<
+      typename Tag  // to distinguish exception types generated with the same template arguments
+    , c::std_only_exception StdBase = std::exception
+    , c::boost_only_exception BoostBase = boost::exception
+    , error_::redirect_impl_t RedirectImpl = error_::redirect_impl_t::to_boost_base
+    , c::complete... Tags   // to catch exceptions with the same tag
+>
+class basic_error_;
+
+//-----------------------------------------------------------------------------
+//
+// implement exception
+//
+//-----------------------------------------------------------------------------
+template
+<
+      typename Tag
+    , c::std_only_exception StdBase
+    , c::boost_only_exception BoostBase
+    , c::complete... Tags
+>
+class basic_error_<Tag, StdBase, BoostBase, error_::redirect_impl_t::to_std_base, Tags...>:
+    public StdBase,
+    public virtual BoostBase,
+    public Tags...
+{
 public:
-    basic_error(): m_what{ "Unknown exception" } {}
-    basic_error(char const *what_): m_what{ what_ } {}
+    BOOST_TYPE_INDEX_REGISTER_CLASS
 
-    template <typename... Args>
-    basic_error(std::format_string<Args...> fmt, Args &&... args):
-        m_what{ std::format(fmt, std::forward<Args>(args)...) }
-    {}
+    using StdBase::StdBase;
+};
 
-    [[nodiscard]] auto what() const -> char const * final
+//-----------------------------------------------------------------------------
+template
+<
+      typename Tag
+    , c::std_only_exception StdBase
+    , c::boost_only_exception BoostBase
+    , c::complete... Tags
+>
+class basic_error_<Tag, StdBase, BoostBase, error_::redirect_impl_t::to_boost_base, Tags...>:
+    public StdBase,
+    public virtual BoostBase,
+    public Tags...
+{
+public:
+    BOOST_TYPE_INDEX_REGISTER_CLASS
+
+    using BoostBase::BoostBase;
+
+    auto what() const noexcept -> char const * override
     {
-        return m_what.c_str();
+        return BoostBase::what_();
     }
 };
 
-using not_implemented = basic_error<struct not_implemented_>;
-using unexpected = basic_error<struct unexpected_>;
-using io_error = basic_error<struct io_error_>;
-using format_error = basic_error<struct format_error_>;
+//-----------------------------------------------------------------------------
+template
+<
+      typename Tag
+    , c::std_only_exception StdBase
+    , c::boost_only_exception BoostBase
+    , c::instance_of_enumerable<error_::redirect_impl_t> RedirectImpl
+    , c::complete... Tags
+>
+using basic_error = basic_error_<Tag, StdBase, BoostBase, value_v<RedirectImpl>, Tags...>;
 
-namespace error
+///////////////////////////////////////////////////////////////////////////////
+
+class base_error: public virtual boost::exception
+{
+private:
+    std::string m_what;
+protected:
+    auto what_() const noexcept -> char const *
+    {
+        return m_what.c_str();
+    }
+public:
+    BOOST_TYPE_INDEX_REGISTER_CLASS
+
+    base_error(): m_what{ "Unknown exception" } {}
+    base_error(std::string_view what_): m_what{ what_ } {}
+
+    template <typename... Args>
+    base_error(std::format_string<Args...> fmt, Args &&... args):
+        m_what{ std::format(fmt, std::forward<Args>(args)...) }
+    {}
+};
+
+//-----------------------------------------------------------------------------
+template
+<
+      typename Tag
+    , typename StdBase = boost::use_default         // std::exception
+    , typename BoostBase = boost::use_default       // base_error
+    , typename RedirectImpl = boost::use_default    // error_::redirect_to_boost_base
+    , c::complete... Tags
+>
+using define_error = decoder_t
+<
+      basic_error
+    , Tag
+    , param<StdBase, std::exception>
+    , param<BoostBase, base_error>
+    , param<RedirectImpl, error_::redirect_to_boost_base>
+    , Tags...
+>;
+
+#define CMN_DEFINE_ERROR_WITH_TAG(tag)  \
+    template    \
+    <   \
+          typename Tag  \
+        , typename StdBase = ::boost::use_default \
+        , typename BoostBase = ::boost::use_default \
+        , typename RedirectImpl = ::boost::use_default  \
+        , ::cmn::c::complete... Tags    \
+    >   \
+    using define_error = ::cmn::decoder_t \
+    <   \
+          ::cmn::basic_error    \
+        , Tag   \
+        , ::cmn::param<StdBase, ::std::exception> \
+        , ::cmn::param<BoostBase, ::cmn::base_error>  \
+        , ::cmn::param<RedirectImpl, ::cmn::error_::redirect_to_boost_base> \
+        , tag   \
+        , Tags...   \
+    >
+
+
+//-----------------------------------------------------------------------------
+using not_implemented = define_error<struct not_implemented_>;
+using unexpected = define_error<struct unexpected_>;
+using io_error = define_error<struct io_error_>;
+using format_error = define_error<struct format_error_, std::format_error, boost::exception, error_::redirect_to_std_base>;
+
+namespace error_
 {
 
-[[nodiscard]] auto get_error_description(boost::exception const &ex) noexcept -> std::string;
+namespace detail
+{
+
+[[nodiscard]] auto get_description_(boost::exception const &ex) noexcept -> std::string;
+[[nodiscard]] auto get_description_(std::exception const &ex) noexcept -> std::string;
+
+}
+
+template <typename E>
+    requires (std::derived_from<E, std::exception> || std::derived_from<E, boost::exception>)
+[[nodiscard]] auto get_description(E const &ex) noexcept -> std::string
+{
+    // properly static dispatch by exception type
+    if constexpr (std::derived_from<E, boost::exception>)
+        return detail::get_description_(static_cast<boost::exception const &>(ex));
+    else
+        return detail::get_description_(static_cast<std::exception const &>(ex));
+}
 
 
 struct msg_

@@ -11,7 +11,7 @@ namespace
 
 auto boost_exception_translator(boost::exception const &e) -> void
 {
-    BOOST_ERROR(cmn::error::get_error_description(e));
+    BOOST_ERROR(cmn::error_::get_description(e));
 }
 
 }

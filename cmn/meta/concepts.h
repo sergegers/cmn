@@ -528,6 +528,19 @@ template <typename E> concept exception =
  && std::derived_from<E, boost::exception>
 ;
 
+template <typename E>
+concept std_only_exception =
+    std::derived_from<E, std::exception>
+ && !std::derived_from<E, boost::exception>
+;
+
+template <typename E>
+concept boost_only_exception =
+    !std::derived_from<E, std::exception>
+ && std::derived_from<E, boost::exception>
+;
+
+//-----------------------------------------------------------------------------
 template <typename T> concept error_info = instance_of<T, boost::error_info>;
 
 template <typename T>

@@ -101,7 +101,7 @@ auto check_result
         BOOST_THROW_EXCEPTION
         ((
             io_error{ "Text is not parsed" }
-            << error::errinfo_msg
+            << error_::errinfo_msg
               {
                 {
                         .m_msg = to_string(text),

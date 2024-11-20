@@ -1,7 +1,7 @@
 
 #include "exception.h"
 
-namespace cmn::error
+namespace cmn::error_
 {
 
 auto operator << (std::ostream &ostr, msg_ const &msg) -> std::ostream &
@@ -46,7 +46,10 @@ auto operator << (std::ostream &ostr, msg_ const &msg) -> std::ostream &
     return ostr;
 }
 
-auto get_error_description(boost::exception const &ex) noexcept -> std::string
+namespace detail
+{
+
+auto get_description_(boost::exception const &ex) noexcept -> std::string
 {
     using namespace std::string_literals;
 
@@ -60,6 +63,16 @@ auto get_error_description(boost::exception const &ex) noexcept -> std::string
     }
 
     // also see https://stackoverflow.com/questions/48191012/how-to-iterate-over-all-error-infos-in-boostexception
+}
+
+auto get_description_(std::exception const &ex) noexcept -> std::string
+{
+    if (auto const *bex = dynamic_cast<boost::exception const *>(&ex))
+        return get_description(*bex);
+    else
+        return ex.what();
+}
+
 }
 
 }

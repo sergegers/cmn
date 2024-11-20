@@ -82,7 +82,7 @@ using basic_delim_manip =
 using delim_manip = basic_delim_manip<char>;
 using wdelim_manip = basic_delim_manip<wchar_t>;
 
-constexpr cmn::io::stream_slot_manip_forwarder<basic_range_delim_manip> rdelim {};
+constexpr cmn::io::stream_slot_manip_forwarder<basic_delim_manip> rdelim {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //

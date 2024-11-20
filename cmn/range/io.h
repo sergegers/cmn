@@ -10,7 +10,7 @@
 
 #include "manip.h"
 
-namespace cmn::range::io
+namespace cmn::range_::io
 {
 
 //-----------------------------------------------------------------------------
@@ -100,11 +100,11 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Range rng) -> std:
 namespace cmn::io
 {
 
-using range::io::ropen;
-using range::io::rclose;
-using range::io::rdelim;
-using range::io::rsaver;
-using range::io::wrsaver;
+using range_::io::ropen;
+using range_::io::rclose;
+using range_::io::rdelim;
+using range_::io::rsaver;
+using range_::io::wrsaver;
 
 }
 
@@ -112,6 +112,6 @@ using range::io::wrsaver;
 namespace std
 {
 
-using cmn::range::io::operator <<;
+using cmn::range_::io::operator <<;
 
 }

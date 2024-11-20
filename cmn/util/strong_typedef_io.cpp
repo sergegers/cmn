@@ -91,7 +91,7 @@ auto make_steam_err_info
     if (line.length() > length) line.erase(length);
     istr.seekg(old_pos);
 
-    return error::errinfo_msg
+    return error_::errinfo_msg
     {
         {
             .m_msg = boost::lexical_cast<std::string>(std::move(line)),
@@ -291,7 +291,7 @@ struct sign_pfx final
                 case  1: ostr << plus; break;
 
                 default:
-                    BOOST_THROW_EXCEPTION(cmn::format_error{});
+                    BOOST_THROW_EXCEPTION(cmn::unexpected{});
                 }
             }
             else if (enum_::has_feature(pfx_.m_fmt, forcesign))
@@ -303,7 +303,7 @@ struct sign_pfx final
                 case  1: ostr << plus; break;
 
                 default:
-                    BOOST_THROW_EXCEPTION(cmn::format_error{});
+                    BOOST_THROW_EXCEPTION(cmn::unexpected{});
                 }
             }
 
@@ -325,7 +325,7 @@ struct sign_pfx final
                 case plus: pfx_.m_unit = 1; break;
 
                 default:
-                    throw unexpected{};
+                    BOOST_THROW_EXCEPTION(cmn::unexpected{});
                 }
             }
             else if (enum_::has_feature(pfx_.m_fmt, forcesign))
@@ -339,7 +339,7 @@ struct sign_pfx final
                 case plus: pfx_.m_unit = 1; break;
 
                 default:
-                    throw unexpected{};
+                    BOOST_THROW_EXCEPTION(cmn::unexpected{});
                 }
             }
             return istr;
@@ -411,7 +411,7 @@ struct c_pfx final
                 {
                     std::basic_string_view<Char, CharTraits> buf_{ buf };
                     if (buf_ != symbols_type::hex_prefix) 
-                        BOOST_THROW_EXCEPTION(cmn::format_error{});
+                        BOOST_THROW_EXCEPTION(cmn::format_error{ "Stream read operation failed" });
 
                     break;                    
                 }
@@ -468,7 +468,7 @@ struct asm_pfx final
                 Char h;
                 istr >> h;
                 if (h != to_char(symbols_type::hex_postfix)) 
-                    BOOST_THROW_EXCEPTION(cmn::format_error{});
+                    BOOST_THROW_EXCEPTION(cmn::format_error{ "Stream read operation failed" });
             }
             return istr;
         }

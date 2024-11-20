@@ -13,7 +13,7 @@
 #   include <cmn/meta/concepts.h>
 #endif
 
-#include <cmn/meta/type_traits.h>         // make_index_sequence_reverse
+#include <cmn/util/util.h>         // make_index_sequence_reverse
 
 namespace cmn
 {

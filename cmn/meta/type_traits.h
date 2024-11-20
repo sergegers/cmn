@@ -155,6 +155,8 @@ using underlying_type_t = typename underlying_type<T>::type;
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enumerable auto Int_> using int_ = std::integral_constant<decltype(Int_), Int_>;
 
+template <typename Int> constexpr auto value_v = Int::value;
+
 ///////////////////////////////////////////////////////////////////////////////
 namespace detail
 {
