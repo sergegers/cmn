@@ -70,15 +70,15 @@ consteval auto adapt_enum_info(int_fmt_t)
 
     return adapt_combo_info_helper
     (
-        groups_info
-        {
+        groups_::make
+        (
               group_::make<dec, hex>()
             , group_::make<showbase, hidebase>()
             , group_::make<asm_, c>()
             , group_::make<short_, long_>()
             , group_::make<uppercase, lowercase>()
             , group_::make<sign, nosign, forcesign>()
-        },
+        ),
          default_ops(kind_t::combo) | op_interoperable
     );
 }

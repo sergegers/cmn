@@ -18,10 +18,43 @@
 #include <cmn/enum/traits.h>
 #include <cmn/enum/util.h>
 
-#include <cmn/tuple/io.h>
+//#include <cmn/tuple/io.h>
 
-#pragma warning(push)
-#pragma warning(disable: 4002)
+//====================================================================
+/// Debugger return codes.
+/// Success if positive (> DRC_NONE).
+enum drc_t
+{
+  DRC_EVENTS = 3,   ///< success, there are pending events
+  DRC_CRC    = 2,   ///< success, but the input file crc does not match
+  DRC_OK     = 1,   ///< success
+  DRC_NONE   = 0,   ///< reaction to the event not implemented
+  DRC_FAILED = -1,  ///< failed or false
+  DRC_NETERR = -2,  ///< network error
+  DRC_NOFILE = -3,  ///< file not found
+  DRC_IDBSEG = -4,  ///< use idb segmentation
+  DRC_NOPROC = -5,  ///< the process does not exist anymore
+  DRC_NOCHG  = -6,  ///< no changes
+  DRC_ERROR  = -7,  ///< unclassified error, may be complemented by errbuf
+};
+
+CMN_ADAPT_ENUM
+(
+    ::drc_t,
+    (DRC_ERROR)     // = -7,  ///< unclassified error, may be complemented by errbuf
+    (DRC_NOCHG)     // = -6,  ///< no changes
+    (DRC_NOPROC)    // = -5,  ///< the process does not exist anymore
+    (DRC_IDBSEG)    // = -4,  ///< use idb segmentation
+    (DRC_NOFILE)    // = -3,  ///< file not found
+    (DRC_NETERR)    // = -2,  ///< network error
+    (DRC_FAILED)    // = -1,  ///< failed or false
+    (DRC_NONE)      // = 0,   ///< reaction to the event not implemented
+    (DRC_OK)        // = 1,   ///< success
+    (DRC_CRC)       // = 2,   ///< success, but the input file crc does not match
+    (DRC_EVENTS)    // = 3,   ///< success, there are pending events
+);
+
+static_assert(cmn::c::e_enum< ::drc_t>);
 
 BOOST_AUTO_TEST_SUITE(cmn)
 
@@ -90,8 +123,14 @@ BOOST_AUTO_TEST_CASE(masks)
 
     static_assert
     (
-        std::is_same_v<group_::make_t<zero, one, three, two>, 
-        group_info<record_info<zero>, record_info<one>, record_info<two>, record_info<three>>>
+        group_::make<zero, one, three, two>() ==
+        group_info
+        {
+              record_info{ int_<zero>{} }
+            , record_info{ int_<one>{} }
+            , record_info{ int_<two>{} }
+            , record_info{ int_<three>{} }
+        }
     );
 
     constexpr decltype(auto) enum_info = traits_type::enum_info;
@@ -99,8 +138,8 @@ BOOST_AUTO_TEST_CASE(masks)
 
     BOOST_TEST(boost::lexical_cast<std::string>(std::get<1>(std::get<1>(enum_info.m_groups))) == "green");
 
-    static_assert(group_::get_enum_values(std::get<0>(enum_info.m_groups)) == std::array { zero, one, two, three });
-    static_assert(group_::get_enum_values(std::get<1>(enum_info.m_groups)) == std::array { red, green, blue });
+    static_assert(group_::get_values(std::get<0>(enum_info.m_groups)) == std::array { zero, one, two, three });
+    static_assert(group_::get_values(std::get<1>(enum_info.m_groups)) == std::array { red, green, blue });
 
     constexpr auto masks = calc_masks(enum_info);
     static_assert(masks.size() == 2, "size mismatch");
@@ -440,7 +479,7 @@ BOOST_AUTO_TEST_CASE(unsorted_enum)
     BOOST_TEST(begin_v<uns_en_t> == uns_en_t::minus_one);
     BOOST_TEST(last_v<uns_en_t> == uns_en_t::seventeen);
 
-    constexpr auto lhs = group_::get_enum_values(std::get<0>(traits<uns_en_t>::enum_info.m_groups));
+    constexpr auto lhs = group_::get_values(std::get<0>(traits<uns_en_t>::enum_info.m_groups));
     constexpr auto rhs = std::array{ minus_one, one, four, five, six, seventeen };
     BOOST_CHECK_EQUAL_COLLECTIONS
     (
@@ -505,7 +544,12 @@ CMN_DEFINE_BITFIELD_CLASS
 static_assert(c::strong_bitfield<bf2_t>);
 static_assert(c::bitfield<bf2_t>);
 
+BOOST_AUTO_TEST_CASE(adapt_global_ns)
+{
+    std::ostringstream ostr;
+    ostr << ::DRC_NOCHG;
+    BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
+}
+
 BOOST_AUTO_TEST_SUITE_END() // enum_
 BOOST_AUTO_TEST_SUITE_END() // cmn
-
-#pragma warning(pop)

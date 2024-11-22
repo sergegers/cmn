@@ -30,11 +30,11 @@ namespace groups_
 template <util::c::group_info... Groups>
 consteval util::c::groups_info auto make(Groups &&...groups)
 {
-    return groups_info{ std::forward<Groups>(groups)... };
+    return groups_info<Groups...> { std::forward<Groups>(groups)... };
 }
 
 template <typename Op, util::c::group_info Group, util::c::group_info... Groups>
-auto fold
+auto exec
 (
     groups_info<Group, Groups...> const &groups, 
     std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1> const &group_masks,
@@ -58,7 +58,7 @@ auto fold
             mask_type const current_mask = at_c<1>(group_mask);
 
             if (current_mask & addditional_mask)
-                return group_::find(current_group, current_mask, remainder, op);
+                return group_::exec(current_group, current_mask, remainder, op);
             else
                 return remainder;
         }

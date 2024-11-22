@@ -11,7 +11,7 @@
 #include <boost/preprocessor/seq/variadic_seq_to_seq.hpp>
 #include <boost/preprocessor/tuple/rem.hpp>
 
-#pragma warning(disable:4003)
+#pragma warning(disable: 4002 4003)
 
 #define CMN_DEFINE_ENUM_HEADER(class_postfix, name, base)  \
     enum class_postfix name base\

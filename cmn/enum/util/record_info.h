@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <compare>
 
 #include <cmn/meta/concepts.h>
 
@@ -10,24 +11,25 @@ namespace cmn::enum_
 {
 
 ///////////////////////////////////////////////////////////////////////////////
-template <c::enum_ auto En_>
+template <c::enum_ En>
 struct record_info
 {
-    using enum_type = decltype(En_);
+    using enum_type = En;
     using mask_type = interop_type_t<enum_type>;
 
-    static constexpr auto enum_value = En_;
-
+    enum_type                   m_value;
     qualified_member_name       m_name;
     wqualified_member_name      m_wname;
 
-    consteval record_info():
+    template <En En_>
+    consteval record_info(std::integral_constant<En, En_>) noexcept:
+        m_value{ En_ },
         m_name{ int_<En_>{} },
         m_wname{ int_<En_>{} }
     {}
 
     template <typename Char, typename CharTraits>
-    auto &get_name() const
+    constexpr auto &get_name() const noexcept
     {
         if constexpr (std::is_same_v<Char, char>)
             return m_name;
@@ -37,8 +39,20 @@ struct record_info
             static_assert(!std::is_same_v<Char, Char>, "Not implemented");
     }
 
-    static constexpr enum_type value = En_;
-    static constexpr mask_type value_as_mask = static_cast<mask_type>(En_);
+    constexpr auto as_mask() const noexcept -> interop_type_t<En>
+    {
+        return static_cast<mask_type>(m_value);
+    }
+
+    constexpr auto operator <=> (record_info const &other) const noexcept -> std::strong_ordering
+    {
+        return as_mask() <=> other.as_mask();
+    }
+
+    constexpr auto operator == (record_info const &other) const noexcept
+    {
+        return (*this <=> other) == std::strong_ordering::equivalent;
+    }
 };
 
 namespace record_
@@ -46,18 +60,6 @@ namespace record_
 
 template <util::c::record_info T> using enum_type_t = typename T::enum_type;
 template <util::c::record_info T> using mask_type_t = interop_type_t<enum_type_t<T>>;
-
-template <c::enum_ auto En_>
-constexpr auto get_value(record_info<En_> const &rec) -> decltype(En_)
-{
-    return rec.value;
-}
-
-template <c::enum_ auto En_>
-constexpr auto get_value_as_mask(record_info<En_> const &rec) -> interop_type_t<decltype(En_)>
-{
-    return rec.value_as_mask;
-}
 
 }
 

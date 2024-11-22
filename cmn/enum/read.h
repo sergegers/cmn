@@ -97,8 +97,7 @@ template <typename Enum, typename Char, typename CharTraits>
       , []<typename Item>(Item &&item, auto const &rec) 
         {
             auto const lit = rec.template get_str<Char, CharTraits>();
-            auto const val = rec.m_val;
-            item.add(lit, static_cast<std::ptrdiff_t>(val));
+            item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
             return std::forward<Item>(item);
         }
     );
@@ -137,8 +136,7 @@ template <typename Enum, typename Char, typename CharTraits>
 
             auto const& rec = group[0];
             auto const lit = rec.template get_str<Char, CharTraits>();
-            auto const val = rec.m_val;
-            item.add(lit, static_cast<std::ptrdiff_t>(val));
+            item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
             return std::forward<Item>(item);
         }
@@ -224,8 +222,7 @@ struct reader<Enum, kind_t::enum_>
           , []<typename Item>(Item &&item, auto const &rec) 
             {
                 auto const lit = boost::lexical_cast<string_type>(rec);
-                auto const val = rec.value;
-                item.add(lit, static_cast<std::ptrdiff_t>(val));
+                item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
                 return std::forward<Item>(item);
             }
         );
@@ -265,8 +262,7 @@ struct reader<Enum, kind_t::bitfield>
 
                 auto const &rec = boost::fusion::front(group);
                 auto const lit = boost::lexical_cast<string_type>(rec);
-                auto const val = rec.value;
-                item.add(lit, static_cast<std::ptrdiff_t>(val));
+                item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
                 return std::forward<Item>(item);
             }
@@ -310,8 +306,7 @@ struct reader<Enum, kind_t::combo>
                         using string_type = std::basic_string<Char, CharTraits>;
 
                         auto const lit = boost::lexical_cast<string_type>(rec);
-                        auto const val = rec.value;
-                        item.add(lit, static_cast<std::ptrdiff_t>(val));
+                        item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
                         return std::forward<Item>(item);
                     }

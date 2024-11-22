@@ -21,8 +21,8 @@ namespace cmn::enum_
 {
 
 // keep print operations here to avoid circular dependencies
-template <typename Char, typename CharTraits, c::enum_ auto En_>
-auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En_> const &rec) -> decltype(ostr)
+template <typename Char, typename CharTraits, c::enum_ En>
+auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
 {
     using enum io::print_t;
 
@@ -58,8 +58,8 @@ public:
     ) noexcept
         : m_ostr{ ostr }, m_first_time{ first_time } {}
 
-    template <c::enum_ auto En_>
-    auto operator ()(record_info<En_> const &rec) const -> void
+    template <c::enum_ En>
+    auto operator ()(record_info<En> const &rec) const -> void
     {
         using enum print_t;
 
@@ -120,7 +120,7 @@ struct printer<Enum, kind_t::enum_>
         // ReSharper disable CppLocalVariableMayBeConst
         bool first_time = true;
         // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = group_::find
+        auto const remain = group_::exec
         (
             group,
             to_mask(m_val),
@@ -171,13 +171,13 @@ struct printer<Enum, kind_t::bitfield>
                 );
                 decltype(auto) rec = boost::fusion::front(group);
                 
-                if (rec.value_as_mask & val)
+                if (rec.as_mask() & val)
                 {
                     print_record_type prt { ostr, first_time };
 	                prt(rec);
                 }
 
-                return val & ~record_::get_value_as_mask(rec);
+                return val & ~rec.as_mask();
             }
         );
         detail::print_tail(remain, ostr);
@@ -214,7 +214,7 @@ struct printer<Enum, kind_t::combo>
         // ReSharper disable CppLocalVariableMayBeConst
         bool first_time = true;
         // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = groups_::fold
+        auto const remain = groups_::exec
         (
             groups,
             masks,
