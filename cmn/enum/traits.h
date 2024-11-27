@@ -52,7 +52,7 @@ struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
     // combo: n groups with m records in each
     //
     ////////////////////////////////////////////////////////////////////////////////
-    static constexpr kind_t kind = enum_info.get_kind();
+    static constexpr kind_t kind = enum_info.kind();
     static constexpr int    ops = enum_info.m_ops;
 
     // std::array<mask_type, group_size>

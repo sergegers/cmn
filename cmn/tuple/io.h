@@ -71,3 +71,11 @@ using cmn::tuple_::io::operator <<;
 using cmn::tuple_::io::operator >>;
 
 }
+
+namespace cmn::io
+{
+
+using tuple_::io::operator <<;
+using tuple_::io::operator >>;
+
+}

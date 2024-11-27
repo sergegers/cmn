@@ -9,3 +9,11 @@
 
 #include "print.h"
 #include "read.h"
+
+namespace cmn::io
+{
+
+using enum_::io::operator <<;
+using enum_::io::operator >>;
+
+}

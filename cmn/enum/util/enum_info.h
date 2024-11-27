@@ -121,7 +121,7 @@ public:
     // combo: n groups with m records in each
     //
     ////////////////////////////////////////////////////////////////////////////////
-    consteval auto get_kind() const-> kind_t
+    consteval auto kind() const-> kind_t
     {
         using enum kind_t;
         return sizeof... (Szs_) == 1?
