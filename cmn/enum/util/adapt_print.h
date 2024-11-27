@@ -25,7 +25,7 @@ consteval auto adapt_enum_info(print_t)
     return enum_info
     {
         op_comparable | op_bitwise | op_interoperable,
-        groups_::make(group_::make<empty, tail, class_prefix>())
+        group_::make<empty, tail, class_prefix>()
     };
 }
 

@@ -11,18 +11,18 @@ namespace cmn::enum_
 {
 
 ///////////////////////////////////////////////////////////////////////////////
-template <c::enum_ En>
+template <c::enum_ E>
 struct record_info
 {
-    using enum_type = En;
+    using enum_type = E;
     using mask_type = interop_type_t<enum_type>;
 
     enum_type                   m_value;
     qualified_member_name       m_name;
     wqualified_member_name      m_wname;
 
-    template <En En_>
-    consteval record_info(std::integral_constant<En, En_>) noexcept:
+    template <E En_>
+    consteval record_info(std::integral_constant<E, En_>) noexcept:
         m_value{ En_ },
         m_name{ int_<En_>{} },
         m_wname{ int_<En_>{} }
@@ -39,7 +39,7 @@ struct record_info
             static_assert(!std::is_same_v<Char, Char>, "Not implemented");
     }
 
-    constexpr auto as_mask() const noexcept -> interop_type_t<En>
+    constexpr auto as_mask() const noexcept -> interop_type_t<E>
     {
         return static_cast<mask_type>(m_value);
     }

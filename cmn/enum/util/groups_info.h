@@ -18,53 +18,21 @@
 #include "group_info.h"
 #include "concepts.h"
 
-namespace cmn::enum_
-{
-
-template <util::c::group_info... GroupInfos> requires (sizeof... (GroupInfos) > 0)
-using groups_info = std::tuple<GroupInfos...>;
-
-namespace groups_
-{
-
-template <util::c::group_info... Groups>
-consteval util::c::groups_info auto make(Groups &&...groups)
-{
-    return groups_info<Groups...> { std::forward<Groups>(groups)... };
-}
-
-template <typename Op, util::c::group_info Group, util::c::group_info... Groups>
-auto exec
-(
-    groups_info<Group, Groups...> const &groups, 
-    std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1> const &group_masks,
-    group_::mask_type_t<Group> en, 
-    Op const &op,
-    group_::mask_type_t<Group> addditional_mask = no_mask<group_::record_enum_type_t<Group>>
-    
-) -> group_::mask_type_t<Group> // return remainder
-{
-    using mask_type = group_::mask_type_t<Group>;
-    using sequences_type = boost::fusion::vector<decltype(groups), decltype(group_masks)>;
-
-    return boost::fusion::fold
-    (
-        boost::fusion::zip_view<sequences_type>{ sequences_type{ groups, group_masks } },
-        en & addditional_mask,
-        [&op, addditional_mask](mask_type remainder, auto const &group_mask)
-        {
-            using boost::fusion::at_c;
-            auto const &current_group = at_c<0>(group_mask);
-            mask_type const current_mask = at_c<1>(group_mask);
-
-            if (current_mask & addditional_mask)
-                return group_::exec(current_group, current_mask, remainder, op);
-            else
-                return remainder;
-        }
-    );
-}
-
-}
-
-}
+//namespace cmn::enum_
+//{
+//
+//template <util::c::group_info... GroupInfos> requires (sizeof... (GroupInfos) > 0)
+//using groups_info = std::tuple<GroupInfos...>;
+//
+//namespace groups_
+//{
+//
+//template <util::c::group_info... Groups>
+//consteval util::c::groups_info auto make(Groups &&...groups)
+//{
+//    return groups_info<Groups...> { std::forward<Groups>(groups)... };
+//}
+//
+//}
+//
+//}

@@ -4,6 +4,7 @@
 #include <string>
 #include <type_traits>
 #include <cstddef>
+#include <ranges>
 
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
@@ -215,15 +216,15 @@ struct reader<Enum, kind_t::enum_>
 
         auto const po = print_manip::value(istr);
 
-        static auto const item = boost::fusion::fold
+        static auto const item = std::ranges::fold_left
         (
-            std::get<0>(groups_v<Enum>)
+            std::get<0>(groups_v<Enum>).m_records
           , enum_item_type{}
-          , []<typename Item>(Item &&item, auto const &rec) 
+          , [](auto &&item, auto const &rec) 
             {
                 auto const lit = boost::lexical_cast<string_type>(rec);
                 item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
-                return std::forward<Item>(item);
+                return item;
             }
         );
 
@@ -254,17 +255,17 @@ struct reader<Enum, kind_t::bitfield>
         (
             groups_v<Enum>,
             enum_item_type{},
-            []<typename Item, typename Group>(Item &&item, Group const &group)
+            []<typename Group>(auto &&item, Group const &group)
             {
                 using string_type = std::basic_string<Char, CharTraits>;
 
-                static_assert(std::tuple_size_v<Group> == 1);
+                static_assert(group_::size_v<Group> == 1);
 
-                auto const &rec = boost::fusion::front(group);
+                auto const &rec = group.m_records.front();
                 auto const lit = boost::lexical_cast<string_type>(rec);
                 item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
-                return std::forward<Item>(item);
+                return item;
             }
         );
 
@@ -297,18 +298,18 @@ struct reader<Enum, kind_t::combo>
             enum_item_type{},
             []<typename Item>(Item &&item, auto const &group)
             {
-                return boost::fusion::fold
+                return std::ranges::fold_left
                 (
-                    group,
+                    group.m_records,
                     std::forward<Item>(item),
-                    [](Item &&item, auto const &rec)
+                    [](auto &&item, auto const &rec)
                     {
                         using string_type = std::basic_string<Char, CharTraits>;
 
                         auto const lit = boost::lexical_cast<string_type>(rec);
                         item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
-                        return std::forward<Item>(item);
+                        return item;
                     }
                 );
             }

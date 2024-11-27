@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/preprocessor/cat.hpp>
-#include <boost/preprocessor/punctuation/comma_if.hpp>
+#include <boost/preprocessor/punctuation/comma.hpp>
 #include <boost/preprocessor/seq/for_each_i.hpp>
 #include <boost/preprocessor/seq/cat.hpp>
 
@@ -13,25 +13,26 @@ namespace cmn::enum_
 {
 
 
-template <util::c::group_info... Groups>
-consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, interop_type_t<op_t> ops = default_ops(kind_t::combo))
-{
-    return enum_info { ops, std::move(groups) };
-}
+//template <util::c::group_info... Groups>
+//consteval auto adapt_combo_info_helper(groups_info<Groups...> &&groups, interop_type_t<op_t> ops = default_ops(kind_t::combo))
+//{
+//    return enum_info { ops, std::move(groups) };
+//}
 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 
 #define CMN_MARKUP_GROUP_INFO(r, data, i, group_nvp_seq) \
-    BOOST_PP_COMMA_IF(i) ::cmn::enum_::group_::make<CMN_EXTRACT_GROUP_SEQ(group_nvp_seq)>()
+    BOOST_PP_COMMA() ::cmn::enum_::group_::make<CMN_EXTRACT_GROUP_SEQ(group_nvp_seq)>()
 
 #define CMN_ADAPT_COMBO_INFO(name, groups_seq) \
     consteval auto adapt_enum_info(name)    \
     {   \
         using enum name;    \
-        return ::cmn::enum_::adapt_combo_info_helper(   \
-            ::cmn::enum_::groups_::make( BOOST_PP_SEQ_FOR_EACH_I(CMN_MARKUP_GROUP_INFO, data, groups_seq) ));    \
+        return ::cmn::enum_::enum_info{   \
+            ::cmn::enum_::default_ops( ::cmn::enum_::kind_t::combo) \
+            BOOST_PP_SEQ_FOR_EACH_I(CMN_MARKUP_GROUP_INFO, data, groups_seq) };    \
     }
 
 ////////////////////////////////////////////////////////////////////////////////

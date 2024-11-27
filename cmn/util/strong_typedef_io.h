@@ -68,18 +68,15 @@ consteval auto adapt_enum_info(int_fmt_t)
     using namespace cmn::enum_;
     using enum int_fmt_t;
 
-    return adapt_combo_info_helper
+    return enum_info
     (
-        groups_::make
-        (
-              group_::make<dec, hex>()
-            , group_::make<showbase, hidebase>()
-            , group_::make<asm_, c>()
-            , group_::make<short_, long_>()
-            , group_::make<uppercase, lowercase>()
-            , group_::make<sign, nosign, forcesign>()
-        ),
-         default_ops(kind_t::combo) | op_interoperable
+          default_ops(kind_t::combo) | op_interoperable
+        , group_::make<dec, hex>()
+        , group_::make<showbase, hidebase>()
+        , group_::make<asm_, c>()
+        , group_::make<short_, long_>()
+        , group_::make<uppercase, lowercase>()
+        , group_::make<sign, nosign, forcesign>()
     );
 }
 

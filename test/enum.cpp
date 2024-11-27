@@ -87,10 +87,10 @@ enum class cl_cmb_t
 consteval auto adapt_enum_info(cl_cmb_t)
 {
     using enum cl_cmb_t;
-    return adapt_combo_info_helper
+    return enum_info
     (
-          groups_info{ group_::make<zero, one, two, three>(), group_::make<red, green, blue>() }
-        , default_ops(kind_t::combo) | op_interoperable
+          default_ops(kind_t::combo) | op_interoperable
+        , group_::make<zero, one, two, three>(), group_::make<red, green, blue>()
     );
 }
 
@@ -124,24 +124,18 @@ BOOST_AUTO_TEST_CASE(masks)
     static_assert
     (
         group_::make<zero, one, three, two>() ==
-        group_info
-        {
-              record_info{ int_<zero>{} }
-            , record_info{ int_<one>{} }
-            , record_info{ int_<two>{} }
-            , record_info{ int_<three>{} }
-        }
+        group_info{ int_<zero>{}, int_<one>{}, int_<two>{}, int_<three>{} }
     );
 
     constexpr decltype(auto) enum_info = traits_type::enum_info;
     static_assert(std::tuple_size_v<decltype(enum_info.m_groups)> == 2, "Enum group count mismatch");
 
-    BOOST_TEST(boost::lexical_cast<std::string>(std::get<1>(std::get<1>(enum_info.m_groups))) == "green");
+    BOOST_TEST(boost::lexical_cast<std::string>(std::get<1>(enum_info.m_groups).m_records[1]) == "green");
 
-    static_assert(group_::get_values(std::get<0>(enum_info.m_groups)) == std::array { zero, one, two, three });
-    static_assert(group_::get_values(std::get<1>(enum_info.m_groups)) == std::array { red, green, blue });
+    static_assert(std::get<0>(enum_info.m_groups).get_values() == std::array { zero, one, two, three });
+    static_assert(std::get<1>(enum_info.m_groups).get_values() == std::array { red, green, blue });
 
-    constexpr auto masks = calc_masks(enum_info);
+    constexpr auto masks = enum_info.m_masks;
     static_assert(masks.size() == 2, "size mismatch");
     static_assert(std::get<0>(masks) == digit_mask, "digit mask mismatch");
     static_assert(std::get<1>(masks) == color_mask, "color mask mismatch");
@@ -479,7 +473,7 @@ BOOST_AUTO_TEST_CASE(unsorted_enum)
     BOOST_TEST(begin_v<uns_en_t> == uns_en_t::minus_one);
     BOOST_TEST(last_v<uns_en_t> == uns_en_t::seventeen);
 
-    constexpr auto lhs = group_::get_values(std::get<0>(traits<uns_en_t>::enum_info.m_groups));
+    constexpr auto lhs = std::get<0>(traits<uns_en_t>::enum_info.m_groups).get_values();
     constexpr auto rhs = std::array{ minus_one, one, four, five, six, seventeen };
     BOOST_CHECK_EQUAL_COLLECTIONS
     (

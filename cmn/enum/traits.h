@@ -52,14 +52,14 @@ struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
     // combo: n groups with m records in each
     //
     ////////////////////////////////////////////////////////////////////////////////
-    static constexpr kind_t kind = get_kind(enum_info);
+    static constexpr kind_t kind = enum_info.get_kind();
     static constexpr int    ops = enum_info.m_ops;
 
-    // std::array<underlying_type, group_size>
-    static constexpr auto masks = calc_masks(enum_info);
+    // std::array<mask_type, group_size>
+    static constexpr auto masks = enum_info.m_masks;
 
-    static constexpr Enum begin = min_value(enum_info);
-    static constexpr Enum last = max_value(enum_info);
+    static constexpr Enum begin = enum_info.min_value();
+    static constexpr Enum last = enum_info.max_value();
     static constexpr Enum end = static_cast<Enum>(static_cast<underlying_type>(last) + 1);
 
     //template <typename Char, std::size_t Size_>
@@ -144,8 +144,8 @@ template <c::enum_ Enum> constexpr c::instance_of<name_info> auto name_info_v = 
 template <c::e_any_enum Enum> constexpr Enum begin_v = traits<Enum>::begin;
 template <c::e_any_enum Enum> constexpr Enum last_v = traits<Enum>::last;
 template <c::e_any_enum Enum> constexpr Enum end_v = traits<Enum>::end;
-template <c::e_any_enum Enum> constexpr c::instance_of<enum_info> auto enum_info_v = traits<Enum>::enum_info;
-template <c::e_any_enum Enum> constexpr util::c::groups_info auto groups_v = enum_info_v<Enum>.m_groups;
+template <c::e_any_enum Enum> constexpr /*c::instance_of<enum_info>*/ auto enum_info_v = traits<Enum>::enum_info;
+template <c::e_any_enum Enum> constexpr /*util::c::groups_info*/ auto groups_v = enum_info_v<Enum>.m_groups;
 template <c::e_any_enum Enum, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<Enum>);
 template <c::e_any_enum Enum> constexpr auto masks_v = traits<Enum>::masks;
 

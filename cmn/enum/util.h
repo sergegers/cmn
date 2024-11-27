@@ -23,40 +23,6 @@
 namespace cmn::enum_
 {
 
-////////////////////////////////////////////////////////////////////////////////////////////////
-//
-// enum: 1 group with n records
-// bitfield: n groups with 1 record in each
-// combo: n groups with m records in each
-//
-////////////////////////////////////////////////////////////////////////////////
-template <util::c::group_info... Groups> consteval auto get_kind(enum_info<Groups...> const &) -> kind_t
-{
-    using enum kind_t;
-    return sizeof... (Groups) == 1?
-        enum_:
-        ((std::tuple_size_v<Groups> == 1) && ...)? bitfield: combo;
-}
-
-namespace detail
-{
-
-template <util::c::group_info Group, util::c::group_info... Groups, std::size_t... Idss_>
-consteval auto calc_masks_impl(groups_info<Group, Groups...> const &groups, std::index_sequence<Idss_...>)
-    -> std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1>
-{
-    return { group_::calc_mask(std::get<Idss_>(groups))... };
-}
-
-}
-
-template <util::c::group_info Group, util::c::group_info... Groups>
-consteval auto calc_masks(enum_info<Group, Groups...> const &enum_info)
-    -> std::array<group_::mask_type_t<Group>, sizeof... (Groups) + 1>
-{
-    return detail::calc_masks_impl(enum_info.m_groups, std::index_sequence_for<Group, Groups...>{});
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 consteval auto default_ops(kind_t kind) -> unsigned int
 {
@@ -83,57 +49,6 @@ consteval auto default_ops(kind_t kind) -> unsigned int
 //            op_empty
 //    ;
 //}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// get smallest enum value
-//
-namespace detail
-{
-
-template <typename EnumType, std::size_t... Idss_>
-consteval auto get_min_enum_value_impl(util::c::groups_info auto const &groups, std::index_sequence<Idss_...>)
-    -> EnumType
-{
-    using mask_type = interop_type_t<EnumType>;
-
-    return static_cast<EnumType>(std::min({ static_cast<mask_type>(group_::get_min_value(std::get<Idss_>(groups)))... }));
-}
-
-
-}
-
-template <util::c::group_info Group, util::c::group_info... Groups>
-consteval auto min_value(enum_info<Group, Groups...> const &enum_info) -> group_::record_enum_type_t<Group>
-{
-    using enum_type = group_::record_enum_type_t<Group>;
-    return detail::get_min_enum_value_impl<enum_type>(enum_info.m_groups, std::index_sequence_for<Group, Groups...>{});
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// get largest enum value
-//
-namespace detail
-{
-
-template <typename EnumType, std::size_t... Idss_>
-consteval auto get_max_value_impl(util::c::groups_info auto const &groups, std::index_sequence<Idss_...>)
-    -> EnumType
-{
-    using mask_type = interop_type_t<EnumType>;
-
-    return static_cast<EnumType>(std::max({ static_cast<mask_type>(group_::get_max_value(std::get<Idss_>(groups)))... }));
-}
-
-}
-
-template <util::c::group_info Group, util::c::group_info... Groups>
-consteval auto max_value(enum_info<Group, Groups...> const &enum_info) -> group_::record_enum_type_t<Group>
-{
-    using enum_type = group_::record_enum_type_t<Group>;
-    return detail::get_max_value_impl<enum_type>(enum_info.m_groups, std::index_sequence_for<Group, Groups...>{});
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace detail

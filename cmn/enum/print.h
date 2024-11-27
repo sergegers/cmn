@@ -120,13 +120,7 @@ struct printer<Enum, kind_t::enum_>
         // ReSharper disable CppLocalVariableMayBeConst
         bool first_time = true;
         // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = group_::exec
-        (
-            group,
-            to_mask(m_val),
-            to_mask(m_val),
-            print_record_type{ ostr, first_time }
-        );
+        auto const remain = group.exec(to_mask(m_val), to_mask(m_val), print_record_type{ ostr, first_time });
         detail::print_tail(remain, ostr);
 
         return ostr << close;
@@ -166,10 +160,10 @@ struct printer<Enum, kind_t::bitfield>
             {
                 static_assert
                 (
-                    std::tuple_size_v<Group> == 1, 
+                    group_::size_v<Group> == 1, 
                     "Bitfield group must contain the one and only one record"
                 );
-                decltype(auto) rec = boost::fusion::front(group);
+                decltype(auto) rec = group.m_records.front();
                 
                 if (rec.as_mask() & val)
                 {
@@ -208,20 +202,13 @@ struct printer<Enum, kind_t::combo>
 
         ostr << open;
 
-        static auto groups = groups_v<Enum>;
+        static auto enum_info = enum_info_v<Enum>;
         static auto masks = masks_v<Enum>;
 
         // ReSharper disable CppLocalVariableMayBeConst
         bool first_time = true;
         // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = groups_::exec
-        (
-            groups,
-            masks,
-            to_mask(m_val) & mask_,
-            print_record_type{ ostr, first_time },
-            mask_
-        );
+        auto const remain = enum_info.exec(m_val, print_record_type{ ostr, first_time }, mask_);
 
         detail::print_tail(remain, ostr);
 

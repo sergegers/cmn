@@ -10,7 +10,7 @@ namespace cmn::enum_
 template <c::enum_ auto ... Ens_>
 consteval auto adapt_enum_info_helper(interop_type_t<op_t> ops = default_ops(kind_t::enum_))
 {
-    return enum_info { ops, groups_::make(group_::make<Ens_...>()) };
+    return enum_info { ops, group_::make<Ens_...>() };
 }
 
 }
