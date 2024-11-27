@@ -4,7 +4,7 @@
 #include <cmn/error/exception.h>
 
 BOOST_AUTO_TEST_SUITE(cmn)
-BOOST_AUTO_TEST_SUITE(error)
+BOOST_AUTO_TEST_SUITE(error_)
 
 BOOST_AUTO_TEST_CASE(ctor)
 {

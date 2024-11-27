@@ -112,10 +112,8 @@ class base_error: public virtual boost::exception
 private:
     std::string m_what;
 protected:
-    auto what_() const noexcept -> char const *
-    {
-        return m_what.c_str();
-    }
+    auto what_() const noexcept -> char const * { return m_what.c_str(); }
+
 public:
     BOOST_TYPE_INDEX_REGISTER_CLASS
 
@@ -169,9 +167,11 @@ using define_error = decoder_t
 
 
 //-----------------------------------------------------------------------------
+using error = define_error<struct cmn_error_>;
 using not_implemented = define_error<struct not_implemented_>;
 using unexpected = define_error<struct unexpected_>;
 using io_error = define_error<struct io_error_>;
+
 using format_error = define_error<struct format_error_, std::format_error, boost::exception, error_::redirect_to_std_base>;
 
 namespace error_
