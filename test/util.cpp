@@ -35,4 +35,20 @@ static_assert
 
 static_assert(c::string<fixed_string<10>>);
 
+static_assert(std::same_as<copy_const_t<int, char>, char>);
+static_assert(std::same_as<copy_const_t<int const, char>, char const>);
+static_assert(std::same_as<copy_const_t<int, char const>, char>);
+static_assert(std::same_as<copy_const_t<int const, char const>, char const>);
+
+static_assert(std::same_as<copy_reference_t<int, char>, char>);
+static_assert(std::same_as<copy_reference_t<int &, char>, char &>);
+static_assert(std::same_as<copy_reference_t<int &, char const>, char const &>);
+static_assert(std::same_as<copy_reference_t<int &, char &>, char &>);
+static_assert(std::same_as<copy_reference_t<int const &, char const>, char const &>);
+static_assert(std::same_as<copy_reference_t<int &&, char>, char &&>);
+static_assert(std::same_as<copy_reference_t<int, char &&>, char>);
+
+static_assert(std::same_as<copy_cvr_t<int &, char>, char &>);
+static_assert(std::same_as<copy_cvr_t<int const &, char const>, char const &>);
+
 }

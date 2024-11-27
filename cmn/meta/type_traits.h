@@ -34,6 +34,7 @@ using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
 template <typename Src, typename Dst> struct copy_const: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_const<Src, Dst const>: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_const<Src const, Dst>: std::type_identity<Dst const> {};
+template <typename Src, typename Dst> struct copy_const<Src const, Dst const>: std::type_identity<Dst const> {};
 
 template <typename Src, typename Dst> using copy_const_t = typename copy_const<Src, Dst>::type;
 //-----------------------------------------------------------------------------
@@ -44,6 +45,7 @@ template <typename Src, typename Dst> using copy_const_t = typename copy_const<S
 template <typename Src, typename Dst> struct copy_volatile: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_volatile<Src, Dst volatile>: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_volatile<Src volatile, Dst>: std::type_identity<Dst volatile> {};
+template <typename Src, typename Dst> struct copy_volatile<Src volatile, Dst volatile>: std::type_identity<Dst volatile> {};
 
 template <typename Src, typename Dst> using copy_volatile_t = typename copy_volatile<Src, Dst>::type;
 
@@ -55,6 +57,7 @@ template <typename Src, typename Dst> using copy_volatile_t = typename copy_vola
 template <typename Src, typename Dst> struct copy_lvalue_reference: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_lvalue_reference<Src, Dst &>: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_lvalue_reference<Src &, Dst>: std::type_identity<Dst &> {};
+template <typename Src, typename Dst> struct copy_lvalue_reference<Src &, Dst &>: std::type_identity<Dst &> {};
 
 template <typename Src, typename Dst> using copy_lvalue_reference_t = typename copy_lvalue_reference<Src, Dst>::type;
 
@@ -66,6 +69,7 @@ template <typename Src, typename Dst> using copy_lvalue_reference_t = typename c
 template <typename Src, typename Dst> struct copy_rvalue_reference: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_rvalue_reference<Src, Dst &&>: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_rvalue_reference<Src &&, Dst>: std::type_identity<Dst &&> {};
+template <typename Src, typename Dst> struct copy_rvalue_reference<Src &&, Dst &&>: std::type_identity<Dst &&> {};
 
 template <typename Src, typename Dst> using copy_rvalue_reference_t = typename copy_rvalue_reference<Src, Dst>::type;
 
@@ -74,14 +78,16 @@ template <typename Src, typename Dst> using copy_rvalue_reference_t = typename c
 // Trait template <typename T> copy_reference
 //
 // NOTE: because references are collapsed to minimize type instantiation do not use
-// copy_lvalue_reference_t, copy_rvalue_reference_t, but reimplement trait
+// copy_lvalue_reference_t, copy_rvalue_reference_t, but reimplement the trait
 //
 //-----------------------------------------------------------------------------
 template <typename Src, typename Dst> struct copy_reference: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_reference<Src, Dst &>: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_reference<Src &, Dst>: std::type_identity<Dst &> {};
+template <typename Src, typename Dst> struct copy_reference<Src &, Dst &>: std::type_identity<Dst &> {};
 template <typename Src, typename Dst> struct copy_reference<Src, Dst &&>: std::type_identity<Dst> {};
 template <typename Src, typename Dst> struct copy_reference<Src &&, Dst>: std::type_identity<Dst &&> {};
+template <typename Src, typename Dst> struct copy_reference<Src &&, Dst &&>: std::type_identity<Dst &&> {};
 
 template <typename Src, typename Dst> using copy_reference_t = typename copy_reference<Src, Dst>::type;
 
@@ -91,7 +97,19 @@ template <typename Src, typename Dst> using copy_reference_t = typename copy_ref
 //
 //-----------------------------------------------------------------------------
 template <typename Src, typename Dst>
-using copy_cvr = copy_reference<Src, copy_volatile_t<Src, copy_const_t<Src, std::remove_reference_t<Dst>>>>;
+using copy_cvr = copy_reference
+<
+    Src,
+    copy_volatile_t
+    <
+        std::remove_reference_t<Src>,
+        copy_const_t
+        <
+            std::remove_reference_t<Src>,
+            std::remove_reference_t<Dst>
+        >
+    >
+>;
 
 template <typename Src, typename Dst>
 using copy_cvr_t = typename copy_cvr<Src, Dst>::type;
