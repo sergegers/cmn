@@ -5,9 +5,10 @@
 #include <type_traits>
 
 #include <cmn/meta/symbols.h>
-#include <cmn/enum/util/magic_get.h>
 
-namespace cmn::enum_
+#include "magic_get.h"
+
+namespace cmn::enum_::detail
 {
 
 ///////////////////////////////////////////////////////////////////////////////

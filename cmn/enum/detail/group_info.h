@@ -11,7 +11,7 @@
 #include "record_info.h"
 //#include "concepts.h"
 
-namespace cmn::enum_
+namespace cmn::enum_::detail
 {
 
 // sorted by value record infos

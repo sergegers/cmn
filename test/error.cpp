@@ -19,7 +19,20 @@ BOOST_AUTO_TEST_CASE(ctor)
     }
 
     {
-        io_error const err{ "error message with args: [{0} {1}]", 0, "and one"};
+        io_error const err{ "error message with args: [{0} {1}]", 0, "and one" };
+        BOOST_TEST(err.what() == "error message with args: [0 and one]");
+    }
+}
+
+BOOST_AUTO_TEST_CASE(throw_)
+{
+    try
+    {
+        BOOST_THROW_EXCEPTION((io_error{ "error message with args: [{0} {1}]", 0, "and one" }));
+        
+    }
+    catch (std::exception const &err)
+    {
         BOOST_TEST(err.what() == "error message with args: [0 and one]");
     }
 }

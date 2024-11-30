@@ -163,7 +163,7 @@ concept complete = detail::is_complete<T>::value;
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
 concept unit = 
-    std::is_base_of_v<strong_typedef_tag, T>
+    std::derived_from<T, strong_typedef_tag>
  && requires
     {
         typename T::underlying_type;
@@ -189,7 +189,7 @@ concept interop_unit =
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
-concept enumerable = std::integral<T> || std::is_enum_v<T> || unit<T>;
+concept enumerable = std::integral<T> || enum_<T> || unit<T>;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -244,79 +244,9 @@ template <c::enumerable T>
 using interop_type_t = typename interop_type<T>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
-//
-// ext enum concepts
-//
-///////////////////////////////////////////////////////////////////////////////
-namespace enum_
-{
-
-enum class kind_t
-{
-    naive,  // enum w/o adaptation
-    enum_,
-    bitfield,
-    combo
-};
-
-template <kind_t Kind_>
-using kkind_t = std::integral_constant<kind_t, Kind_>;
-
-//-----------------------------------------------------------------------------
-enum op_t
-{
-    op_empty           = 0x00,
-    op_bitwise         = 0x01,
-    op_steppable       = 0x02,
-    op_comparable      = 0x04,
-    op_ariphmetic      = 0x08,
-    op_io              = 0x10,
-    op_interoperable   = 0x20
-};
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// Print options
-//
-///////////////////////////////////////////////////////////////////////////////
-namespace io
-{
-
-enum class print_t
-{
-      empty         = 0x0
-    , tail          = 0x1
-    , ns            = 0x2
-    , class_prefix  = 0x4
-};
-
-}
-
-//-----------------------------------------------------------------------------
-template <c::enum_ Enum, typename = void>
-struct traits;
-
-}
-
 namespace c
 {
 
-template <typename Enum>
-concept e_naive = enum_::traits<Enum>::kind == enum_::kind_t::naive;
-
-template <typename Enum>
-concept e_enum = enum_::traits<Enum>::kind == enum_::kind_t::enum_;
-
-template <typename Enum>
-concept e_bitfield = enum_::traits<Enum>::kind == enum_::kind_t::bitfield;
-
-template <typename Enum>
-concept e_combo = enum_::traits<Enum>::kind == enum_::kind_t::combo;
-
-template <typename Enum>
-concept e_any_enum = e_enum<Enum> || e_bitfield<Enum> || e_combo<Enum>;
-
-///////////////////////////////////////////////////////////////////////////////
 namespace detail
 {
 
@@ -432,14 +362,7 @@ concept ariphmetic =
  )
 ;
 
-//-----------------------------------------------------------------------------
-
-}
-
 ////////////////////////////////////////////////////////////////////////////////
-
-namespace c
-{
 
 template <typename T, typename Char, typename CharTraits>
 concept basic_string = requires (T const &ct, std::size_t idx)

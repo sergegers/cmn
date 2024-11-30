@@ -1,8 +1,12 @@
 #pragma once
 
+#include <cmn/enum/detail/macro.h>
+
+#include <cmn/enum/traits.h>
+#include <cmn/enum/info.h>
+#include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
-#include <cmn/enum/util.h>
 
 namespace cmn::enum_
 {
@@ -16,16 +20,16 @@ consteval auto adapt_enum_info_helper(interop_type_t<op_t> ops = default_ops(kin
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_ADAPT_ENUM_INFO(name, group_nvp_seq) \
+#define CMN_ENUM_ADAPT_ENUM_INFO(name, group_nvp_seq) \
     consteval auto adapt_enum_info(name)    \
     {   \
         using enum name;    \
-        return ::cmn::enum_::adapt_enum_info_helper<CMN_EXTRACT_GROUP_SEQ(group_nvp_seq)>();  \
+        return ::cmn::enum_::adapt_enum_info_helper<CMN_ENUM_EXTRACT_GROUP_SEQ(group_nvp_seq)>();  \
     }
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// CHT_PP_ADAPT_ENUM()
+// CMN_ENUM_ADAPT_ENUM()
 //
 // usage:
 // enum en_t
@@ -37,7 +41,7 @@ consteval auto adapt_enum_info_helper(interop_type_t<op_t> ops = default_ops(kin
 //     , mask2 = five
 // };
 // 
-// CHT_PP_ADAPT_ENUM
+// CMN_ENUM_ADAPT_ENUM
 // (
 //     en_t,
 //     (one)
@@ -46,17 +50,16 @@ consteval auto adapt_enum_info_helper(interop_type_t<op_t> ops = default_ops(kin
 // )
 //
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_ADAPT_ENUM(name, group_nvp_seq)                                        \
-    CMN_ADAPT_ENUM_INFO(name, group_nvp_seq)                                       \
-    CMN_INJECT_ENUM_OPS()
-
+#define CMN_ENUM_ADAPT_ENUM(name, group_nvp_seq)                                        \
+    CMN_ENUM_ADAPT_ENUM_INFO(name, group_nvp_seq)                                       \
+    CMN_ENUM_INJECT_OPS()
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// CMN_DEFINE_ENUM()
+// CMN_ENUM_DEFINE_ENUM()
 //
 // usage:
-// CMN_DEFINE_ENUM
+// CMN_ENUM_DEFINE_ENUM
 // (
 //    en_t,
 //    (one)
@@ -69,45 +72,45 @@ consteval auto adapt_enum_info_helper(interop_type_t<op_t> ops = default_ops(kin
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#define CMN_DEFINE_ENUM(name, group_nvp_seq, ...)                                        \
-    CMN_DEFINE_ENUM_HEADER(, name, )                                                     \
-        CMN_DEFINE_GROUP_BODY(group_nvp_seq)                                             \
-        CMN_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
-    CMN_DEFINE_ENUM_FOOTER()                                                             \
-    CMN_ADAPT_ENUM_INFO(name, group_nvp_seq)                                             \
-    CMN_INJECT_ENUM_OPS()
+#define CMN_ENUM_DEFINE_ENUM(name, group_nvp_seq, ...)                                  \
+    CMN_ENUM_DEFINE_HEADER(, name, )                                                    \
+        CMN_ENUM_DEFINE_GROUP_BODY(group_nvp_seq)                                       \
+        CMN_ENUM_DEFINE_MASK_BODY(__VA_ARGS__)                                          \
+    CMN_ENUM_DEFINE_FOOTER()                                                            \
+    CMN_ENUM_ADAPT_ENUM_INFO(name, group_nvp_seq)                                       \
+    CMN_ENUM_INJECT_OPS()
 
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_DEFINE_ENUM_BASE(name, base, group_nvp_seq, ...)                             \
-    CMN_DEFINE_ENUM_HEADER(, name, : base)                                               \
-        CMN_DEFINE_GROUP_BODY(group_nvp_seq)                                             \
-        CMN_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
-    CMN_DEFINE_ENUM_FOOTER()                                                             \
-    CMN_ADAPT_ENUM_INFO(name, group_nvp_seq)                                             \
-    CMN_INJECT_ENUM_OPS()
+#define CMN_ENUM_DEFINE_ENUM_BASE(name, base, group_nvp_seq, ...)                       \
+    CMN_ENUM_DEFINE_HEADER(, name, : base)                                              \
+        CMN_ENUM_DEFINE_GROUP_BODY(group_nvp_seq)                                       \
+        CMN_ENUM_DEFINE_MASK_BODY(__VA_ARGS__)                                          \
+    CMN_ENUM_DEFINE_FOOTER()                                                            \
+    CMN_ENUM_ADAPT_ENUM_INFO(name, group_nvp_seq)                                       \
+    CMN_ENUM_INJECT_OPS()
 
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_ADAPT_ENUM_CLASS(name, group_nvp_seq)                                        \
-    CMN_ADAPT_ENUM(name, group_nvp_seq)
+#define CMN_ENUM_ADAPT_ENUM_CLASS(name, group_nvp_seq)                                  \
+    CMN_ENUM_ADAPT_ENUM(name, group_nvp_seq)
 
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_DEFINE_ENUM_CLASS(name, group_nvp_seq, ...)                                  \
-    CMN_DEFINE_ENUM_HEADER(class, name, )                                                \
-        CMN_DEFINE_GROUP_BODY(group_nvp_seq)                                             \
-        CMN_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
-    CMN_DEFINE_ENUM_FOOTER()                                                             \
-    CMN_ADAPT_ENUM_INFO(name, group_nvp_seq)                                             \
-    CMN_INJECT_ENUM_OPS()
+#define CMN_ENUM_DEFINE_ENUM_CLASS(name, group_nvp_seq, ...)                            \
+    CMN_ENUM_DEFINE_HEADER(class, name, )                                               \
+        CMN_ENUM_DEFINE_GROUP_BODY(group_nvp_seq)                                       \
+        CMN_ENUM_DEFINE_MASK_BODY(__VA_ARGS__)                                          \
+    CMN_ENUM_DEFINE_FOOTER()                                                            \
+    CMN_ENUM_ADAPT_ENUM_INFO(name, group_nvp_seq)                                       \
+    CMN_ENUM_INJECT_OPS()
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_DEFINE_ENUM_CLASS_BASE(name, base, group_nvp_seq, ...)                       \
-    CMN_DEFINE_ENUM_HEADER(class, name, : base)                                          \
-        CMN_DEFINE_GROUP_BODY(group_nvp_seq)                                             \
-        CMN_DEFINE_MASK_BODY(__VA_ARGS__)                                                \
-    CMN_DEFINE_ENUM_FOOTER()                                                             \
-    CMN_ADAPT_ENUM_INFO(name, group_nvp_seq)                                             \
-    CMN_INJECT_ENUM_OPS()
+#define CMN_ENUM_DEFINE_ENUM_CLASS_BASE(name, base, group_nvp_seq, ...)                 \
+    CMN_ENUM_DEFINE_HEADER(class, name, : base)                                         \
+        CMN_ENUM_DEFINE_GROUP_BODY(group_nvp_seq)                                       \
+        CMN_ENUM_DEFINE_MASK_BODY(__VA_ARGS__)                                          \
+    CMN_ENUM_DEFINE_FOOTER()                                                            \
+    CMN_ENUM_ADAPT_ENUM_INFO(name, group_nvp_seq)                                       \
+    CMN_ENUM_INJECT_OPS()
 
 #ifdef UNITY_BUILD
 #   include "io.h"

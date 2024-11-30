@@ -38,7 +38,7 @@ enum drc_t
   DRC_ERROR  = -7,  ///< unclassified error, may be complemented by errbuf
 };
 
-CMN_ADAPT_ENUM
+CMN_ENUM_ADAPT_ENUM
 (
     ::drc_t,
     (DRC_ERROR)     // = -7,  ///< unclassified error, may be complemented by errbuf
@@ -94,7 +94,7 @@ consteval auto adapt_enum_info(cl_cmb_t)
     );
 }
 
-CMN_INJECT_ENUM_OPS()
+CMN_ENUM_INJECT_OPS()
 
 static_assert(std::is_same_v<interop_type_t<cl_cmb_t>, int>);
 static_assert(ops_v<cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
@@ -185,7 +185,7 @@ BOOST_AUTO_TEST_CASE(enum_class_out)
     }
 }
 
-CMN_DEFINE_COMBO
+CMN_ENUM_DEFINE_COMBO
 (
     cmb_t,
     (
@@ -353,7 +353,7 @@ BOOST_AUTO_TEST_CASE(read_combo)
     }
 }
 
-CMN_DEFINE_BITFIELD
+CMN_ENUM_DEFINE_BITFIELD
 (
     bf_t,
     (bf_zero,  0x0)
@@ -377,7 +377,7 @@ BOOST_AUTO_TEST_CASE(read_bitfield)
     BOOST_TEST((bf_two | bf_four) == boost::lexical_cast<bf_t>("[bf_two bf_four]"s));
 }
 
-CMN_DEFINE_ENUM
+CMN_ENUM_DEFINE_ENUM
 (
     en_t,
     (en_apple, 4)
@@ -413,7 +413,7 @@ BOOST_AUTO_TEST_CASE(read_enum)
     BOOST_TEST(out == en_carrot);
 }
 
-CMN_DEFINE_ENUM_CLASS
+CMN_ENUM_DEFINE_ENUM_CLASS
 (
     cl_en_t,
     (apple, 4)
@@ -455,7 +455,7 @@ BOOST_AUTO_TEST_CASE(class_prefix_)
     }
 }
 
-CMN_DEFINE_ENUM_CLASS
+CMN_ENUM_DEFINE_ENUM_CLASS
 (
     uns_en_t,
     (four, 4)
@@ -497,7 +497,7 @@ struct outer_t
     };
 };
 
-CMN_ADAPT_ENUM
+CMN_ENUM_ADAPT_ENUM
 (
     outer_t::inner_t,
     (i_a0)
@@ -527,7 +527,7 @@ BOOST_AUTO_TEST_CASE(inner_enum)
     BOOST_CHECK(tstr.is_equal("[i_a2]"));
 }
 
-CMN_DEFINE_BITFIELD_CLASS
+CMN_ENUM_DEFINE_BITFIELD_CLASS
 (
     bf2_t,
     (bf2_1,     0x1)
@@ -691,7 +691,7 @@ consteval auto adapt_enum_info(large_enum_t)
     >();
 }
 
-CMN_INJECT_ENUM_OPS()
+CMN_ENUM_INJECT_OPS()
 
 // only 256 enum items supported through preprocessor
 

@@ -7,7 +7,7 @@
 
 #include "qualified_name.h"
 
-namespace cmn::enum_
+namespace cmn::enum_::detail
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -29,14 +29,11 @@ struct record_info
     {}
 
     template <typename Char, typename CharTraits>
-    constexpr auto &get_name() const noexcept
+    constexpr auto &name(std::basic_ios<Char, CharTraits> const &) const noexcept
     {
-        if constexpr (std::is_same_v<Char, char>)
-            return m_name;
-        else if constexpr (std::is_same_v<Char, wchar_t>)
-            return m_wname;
-        else
-            static_assert(!std::is_same_v<Char, Char>, "Not implemented");
+        if constexpr (std::is_same_v<Char, char>) return m_name;
+        else if constexpr (std::is_same_v<Char, wchar_t>) return m_wname;
+        else static_assert(!std::is_same_v<Char, Char>, "Not implemented");
     }
 
     constexpr auto as_mask() const noexcept -> interop_type_t<E>
@@ -58,8 +55,8 @@ struct record_info
 namespace record_
 {
 
-template <util::c::record_info T> using enum_type_t = typename T::enum_type;
-template <util::c::record_info T> using mask_type_t = interop_type_t<enum_type_t<T>>;
+template <typename T> using enum_type_t = typename T::enum_type;
+template <typename T> using mask_type_t = interop_type_t<enum_type_t<T>>;
 
 }
 

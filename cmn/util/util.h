@@ -178,9 +178,9 @@ struct assert_type_complete
 template <std::size_t Idx_, typename... Args>
 constexpr decltype(auto) forward_nth(Args &&... args)
 {
-    return [](c::instance_of<std::tuple> auto &&arg_tpl)
+    return []<c::instance_of<std::tuple> ArgTpl>(ArgTpl &&arg_tpl) -> decltype(auto)
     {
-        return std::get<Idx_>(std::move(arg_tpl));
+        return std::get<Idx_>(std::forward<ArgTpl>(arg_tpl));
     }
         (std::forward_as_tuple(std::forward<Args>(args)...))
     ;
@@ -413,6 +413,39 @@ struct mp_from_sequence_impl<integer_sequence<I, Idss_...>>
 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// same as boost::mp11::mp_from_sequence but supports c::enumerable types
+//
+///////////////////////////////////////////////////////////////////////////////
 template <typename Seq> using mp_from_sequence = typename detail::mp_from_sequence_impl<Seq>::type;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// from_std_to_mp_sequence<>
+//
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+using namespace boost::mp11;
+
+template <typename T> struct from_std_to_mp_sequence_impl;
+
+template <c::enumerable I, I... Idss_>
+struct from_std_to_mp_sequence_impl<std::integer_sequence<I, Idss_...>>
+{
+    using type = integer_sequence<I, Idss_...>;
+};
+
+template <c::enumerable I, I... Idss_>
+struct from_std_to_mp_sequence_impl<integer_sequence<I, Idss_...>>
+{
+    using type = integer_sequence<I, Idss_...>;
+};
+
+}
+
+template <typename T> using from_std_to_mp_sequence = typename detail::from_std_to_mp_sequence_impl<T>::type;
 
 }

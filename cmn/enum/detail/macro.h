@@ -13,51 +13,51 @@
 
 #pragma warning(disable: 4002 4003)
 
-#define CMN_DEFINE_ENUM_HEADER(class_postfix, name, base)  \
+#define CMN_ENUM_DEFINE_HEADER(class_postfix, name, base)  \
     enum class_postfix name base\
     {
 
-#define CMN_DEFINE_ENUM_FOOTER() \
+#define CMN_ENUM_DEFINE_FOOTER() \
     };
     
 
 //-----------------------------------------------------------------------------
 //
-// CMN_DEFINE_NVP(...)
+// CMN_ENUM_DEFINE_NVP(...)
 //
 // input (enum_member_name) or (enum_member_name, value)
 // output enum_member_name or enum_member_name = value
 //
 //-----------------------------------------------------------------------------
-#define CMN_DEFINE_NVP_1(enum_member_name)              enum_member_name
-#define CMN_DEFINE_NVP_2(enum_member_name, value)       enum_member_name = value
+#define CMN_ENUM_DEFINE_NVP_1(enum_member_name)              enum_member_name
+#define CMN_ENUM_DEFINE_NVP_2(enum_member_name, value)       enum_member_name = value
 
-#define CMN_DEFINE_NVP(...) \
-     BOOST_PP_CAT(BOOST_PP_OVERLOAD(CMN_DEFINE_NVP_,__VA_ARGS__)(__VA_ARGS__),BOOST_PP_EMPTY())
+#define CMN_ENUM_DEFINE_NVP(...) \
+     BOOST_PP_CAT(BOOST_PP_OVERLOAD(CMN_ENUM_DEFINE_NVP_,__VA_ARGS__)(__VA_ARGS__),BOOST_PP_EMPTY())
 
-
-///////////////////////////////////////////////////////////////////////////////
-#define CMN_MARKUP_ENUM_ITEM(r, data, i, nvp)   \
-    BOOST_PP_COMMA_IF(i)    CMN_DEFINE_NVP(BOOST_PP_TUPLE_REM() nvp)
-
-#define CMN_DEFINE_GROUP_BODY(group_nvp_seq)  \
-    BOOST_PP_SEQ_FOR_EACH_I(CMN_MARKUP_ENUM_ITEM, data, BOOST_PP_VARIADIC_SEQ_TO_SEQ(group_nvp_seq))
 
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_MARKUP_MASK_ITEM(r, data, nvp)   \
-    BOOST_PP_COMMA() CMN_DEFINE_NVP(BOOST_PP_TUPLE_REM() nvp)
+#define CMN_ENUM_MARKUP_ITEM(r, data, i, nvp)   \
+    BOOST_PP_COMMA_IF(i)    CMN_ENUM_DEFINE_NVP(BOOST_PP_TUPLE_REM() nvp)
 
-#define CMN_DEFINE_MASK_BODY(mask_nvp_seq)  \
-    BOOST_PP_SEQ_FOR_EACH(CMN_MARKUP_MASK_ITEM, data, BOOST_PP_VARIADIC_SEQ_TO_SEQ(mask_nvp_seq))
+#define CMN_ENUM_DEFINE_GROUP_BODY(group_nvp_seq)  \
+    BOOST_PP_SEQ_FOR_EACH_I(CMN_ENUM_MARKUP_ITEM, data, BOOST_PP_VARIADIC_SEQ_TO_SEQ(group_nvp_seq))
+
+///////////////////////////////////////////////////////////////////////////////
+#define CMN_ENUM_MARKUP_MASK_ITEM(r, data, nvp)   \
+    BOOST_PP_COMMA() CMN_ENUM_DEFINE_NVP(BOOST_PP_TUPLE_REM() nvp)
+
+#define CMN_ENUM_DEFINE_MASK_BODY(mask_nvp_seq)  \
+    BOOST_PP_SEQ_FOR_EACH(CMN_ENUM_MARKUP_MASK_ITEM, data, BOOST_PP_VARIADIC_SEQ_TO_SEQ(mask_nvp_seq))
 
 ///////////////////////////////////////////////////////////////////////////////
 
 // simply eats value arguments
-#define CMN_EXTRACT_GROUP_SEQ(group_nvp_seq) \
+#define CMN_ENUM_EXTRACT_GROUP_SEQ(group_nvp_seq) \
     BOOST_PP_SEQ_ENUM(group_nvp_seq)
 
 ///////////////////////////////////////////////////////////////////////////////
-//#define CMN_INJECT_ENUM_OPS()   \
+//#define CMN_ENUM_INJECT_OPS()   \
 //    using ::cmn::enum_::op::operator |; \
 //    using ::cmn::enum_::op::operator |=; \
 //    using ::cmn::enum_::op::operator &; \
@@ -83,7 +83,7 @@
 //    using ::cmn::enum_::op::operator <=; \
 //    using ::cmn::enum_::op::operator <<; \
 //    using ::cmn::enum_::op::operator >>;
-#define CMN_INJECT_ENUM_OPS()   \
+#define CMN_ENUM_INJECT_OPS()   \
     using ::cmn::enum_::op::operator ==; \
     using ::cmn::enum_::op::operator !=; \
     using ::cmn::enum_::op::operator &; \
@@ -107,10 +107,10 @@
 // generate enum item pair from macro definition
 //
 // #define item 5
-// CMN_DEFINE_ENUM_CONST(item) ->
+// CMN_ENUM_DEFINE_CONST(item) ->
 // (item_, item) ->
 // item_ = item after preprocessing
 //
 ///////////////////////////////////////////////////////////////////////////////
-#define CMN_DEFINE_ENUM_CONST(item)              (item##_ BOOST_PP_COMMA() item)
-#define CMN_DEFINE_ENUM_CONST_CAST(item, to)     (item##_ BOOST_PP_COMMA() static_cast<to>(item))
+#define CMN_ENUM_DEFINE_CONST(item)              (item##_ BOOST_PP_COMMA() item)
+#define CMN_ENUM_DEFINE_CONST_CAST(item, to)     (item##_ BOOST_PP_COMMA() static_cast<to>(item))

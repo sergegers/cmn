@@ -6,11 +6,12 @@
 #include <cmn/enum/traits.h>
 #include <cmn/enum/op.h>
 #include <cmn/enum/util.h>
-#include <cmn/enum/util/macro.h>
 
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/util.h>
+
+#include <cmn/enum/print_t.h>
 
 namespace cmn::enum_::io
 {

@@ -10,9 +10,11 @@
 #include <boost/spirit/include/qi_symbols.hpp>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <boost/optional/optional_fwd.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include <cmn/meta/concepts.h>
+
+#include <cmn/enum/print_t.h>
+#include <cmn/enum/info.h>
 
 #include "feature.h"
 #include "traits.h"
@@ -78,14 +80,15 @@ template <typename Enum, typename Char, typename CharTraits>
 [[nodiscard]] auto try_read_
 (
     std::basic_istream<Char, CharTraits> &istr, 
-    Enum,
+    Enum en,
     kkind_t<kind_t::enum_>
 ) noexcept
     -> boost::optional<Enum>
 {
     using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+    using string_type = std::basic_string<Char, CharTraits>;
 
-    static_assert(std::tuple_size_v<decltype(traits<Enum>::groups)> == 1);
+    static_assert(std::tuple_size_v<decltype(groups_v<Enum>)> == 1);
 
     if (!detail::check_stream_state(istr)) return {};
 
@@ -93,13 +96,13 @@ template <typename Enum, typename Char, typename CharTraits>
 
     static auto const item = std::ranges::fold_left
     (
-        std::get<0>(traits<Enum>::groups)
+        std::get<0>(groups_v<Enum>).m_records
       , enum_item_type{}
-      , []<typename Item>(Item &&item, auto const &rec) 
+      , [&istr](auto &&item, auto const &rec) 
         {
-            auto const lit = rec.template get_str<Char, CharTraits>();
+            auto const lit = rec.name(istr).m_enum_member_name;
             item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
-            return std::forward<Item>(item);
+            return item;
         }
     );
 
@@ -107,8 +110,8 @@ template <typename Enum, typename Char, typename CharTraits>
     (
           istr
         , item
-        , traits<Enum>::template get_name<Char>()
-        , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
+        , enum_::name(en, istr)
+        , po
     ).map([](std::ptrdiff_t res) { return static_cast<Enum>(res); });
 }
 
@@ -131,15 +134,15 @@ template <typename Enum, typename Char, typename CharTraits>
     (
         traits<Enum>::groups,
         enum_item_type{},
-        []<typename Item, typename Group>(Item && item, Group const& group)
+        []<typename Group>(auto && item, Group const& group)
         {
-            static_assert(std::tuple_size_v<Group> == 1);
+            static_assert(group_::size_v<Group> == 1);
 
             auto const& rec = group[0];
             auto const lit = rec.template get_str<Char, CharTraits>();
             item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
-            return std::forward<Item>(item);
+            return item;
         }
     );
 
@@ -189,7 +192,7 @@ template <typename Enum, typename Char, typename CharTraits>
           istr
         , item
         , traits<Enum>::template get_name<Char>()
-        , std::is_scoped_enum_v<Enum> && has_feature(po, print_t::class_prefix)
+        , po
     ).map([](std::ptrdiff_t res) { return static_cast<Enum>(res); });
 }
 
@@ -210,7 +213,6 @@ struct reader<Enum, kind_t::enum_>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
         using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
-        using string_type = std::basic_string<Char, CharTraits>;
 
         static_assert(std::tuple_size_v<decltype(groups_v<Enum>)> == 1);
 
@@ -220,9 +222,9 @@ struct reader<Enum, kind_t::enum_>
         (
             std::get<0>(groups_v<Enum>).m_records
           , enum_item_type{}
-          , [](auto &&item, auto const &rec) 
+          , [&istr](auto &&item, auto const &rec) 
             {
-                auto const lit = boost::lexical_cast<string_type>(rec);
+                auto const lit = rec.name(istr).m_enum_member_name;
                 item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
                 return item;
             }
@@ -255,14 +257,14 @@ struct reader<Enum, kind_t::bitfield>
         (
             groups_v<Enum>,
             enum_item_type{},
-            []<typename Group>(auto &&item, Group const &group)
+            [&istr]<typename Group>(auto &&item, Group const &group)
             {
                 using string_type = std::basic_string<Char, CharTraits>;
 
                 static_assert(group_::size_v<Group> == 1);
 
                 auto const &rec = group.m_records.front();
-                auto const lit = boost::lexical_cast<string_type>(rec);
+                auto const lit = rec.name(istr).m_enum_member_name;
                 item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
                 return item;
@@ -296,17 +298,15 @@ struct reader<Enum, kind_t::combo>
         (
             groups_v<Enum>,
             enum_item_type{},
-            []<typename Item>(Item &&item, auto const &group)
+            [&istr]<typename Item>(Item &&item, auto const &group)
             {
                 return std::ranges::fold_left
                 (
                     group.m_records,
                     std::forward<Item>(item),
-                    [](auto &&item, auto const &rec)
+                    [&istr](auto &&item, auto const &rec)
                     {
-                        using string_type = std::basic_string<Char, CharTraits>;
-
-                        auto const lit = boost::lexical_cast<string_type>(rec);
+                        auto const lit = rec.name(istr).m_enum_member_name;
                         item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
 
                         return item;

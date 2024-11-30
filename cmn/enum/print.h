@@ -7,8 +7,11 @@
 #include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
+
 #include <cmn/enum/traits.h>
-#include <cmn/enum/util/adapt_print.h>
+#include <cmn/enum/print_t.h>
+#include <cmn/enum/info.h>
+
 #include <cmn/tuple/io.h>
 
 #include "manip.h"
@@ -20,19 +23,24 @@
 namespace cmn::enum_
 {
 
+namespace detail
+{
+
 // keep print operations here to avoid circular dependencies
 template <typename Char, typename CharTraits, c::enum_ En>
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
 {
     using enum io::print_t;
 
-    auto const &name = rec.template get_name<Char, CharTraits>();
+    auto const &name = rec.name(ostr);
     static auto const scope_resolution = symbols<Char, CharTraits>::scope_resolution;
 
     auto const po = io::print_manip::value(ostr);
     if (has_feature(po, ns)) ostr << name.m_ns << scope_resolution;
     if (has_feature(po, class_prefix)) ostr << name.m_enum_name << scope_resolution;
     return ostr << name.m_enum_member_name;
+}
+
 }
 
 using boost::fusion::sequence::operators::operator <<;

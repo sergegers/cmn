@@ -5,8 +5,9 @@
 
 #include <boost/mp11.hpp>
 
-#include <cmn/meta/concepts.h>       // c::enumerable<>
-#include <cmn/meta/type_traits.h>    // underlying_type_t<>
+#include <cmn/meta/concepts.h>      // c::enumerable<>
+#include <cmn/meta/type_traits.h>   // underlying_type_t<>
+#include <cmn/util/util.h>          // cmn::mp_from_sequence<>
 
 #include <cmn/algorithm/at.h>
 #include <cmn/algorithm/detail/result.h>
@@ -36,14 +37,14 @@ constexpr auto sequenced_switch_
 {
     using namespace boost::mp11;
 
-    using mp_list_type = mp_from_sequence<integer_sequence<T, Idss_...>>;
-    using int_type = underlying_type_t<T>;
+    using mp_list_type = cmn::mp_from_sequence<integer_sequence<T, Idss_...>>;
+    using int_type = interop_type_t<T>;
 
     // convert to int_type to cover the case when the enum doesn't support arithmetic operations
     auto const idx = static_cast<int_type>(index);
     static constexpr auto min = static_cast<int_type>(mp_front<mp_list_type>::value);
     static constexpr auto max = static_cast<int_type>(mp_back<mp_list_type>::value);
-    static constexpr auto step = static_cast<int_type>(mp_at_c<mp_list_type, 1>::value - min);
+    static constexpr auto step = static_cast<int_type>(mp_at_c<mp_list_type, 1>::value) - min;
 
     // index is outside case label interval or between two case labels
     if (idx < min || idx > max || (idx - min) % step != 0)  

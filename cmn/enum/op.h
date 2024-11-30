@@ -6,7 +6,7 @@
 #include <boost/preprocessor/cat.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/enum/traits.h>
+#include <cmn/enum/util.h>  // ops_v<>, to_mask()
 
 namespace cmn::enum_
 {

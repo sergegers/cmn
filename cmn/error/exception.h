@@ -61,7 +61,7 @@ template
 >
 class basic_error_<Tag, StdBase, BoostBase, error_::redirect_impl_t::to_std_base, Tags...>:
     public StdBase,
-    public virtual BoostBase,
+    public BoostBase,
     public Tags...
 {
 public:
@@ -80,7 +80,7 @@ template
 >
 class basic_error_<Tag, StdBase, BoostBase, error_::redirect_impl_t::to_boost_base, Tags...>:
     public StdBase,
-    public virtual BoostBase,
+    public BoostBase,
     public Tags...
 {
 public:
@@ -107,7 +107,7 @@ using basic_error = basic_error_<Tag, StdBase, BoostBase, value_v<RedirectImpl>,
 
 ///////////////////////////////////////////////////////////////////////////////
 
-class base_error: public virtual boost::exception
+class base_error: public boost::exception
 {
 private:
     std::string m_what;

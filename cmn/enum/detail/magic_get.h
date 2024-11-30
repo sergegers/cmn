@@ -3,15 +3,14 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include <string_view>
 
+#include <cmn/meta/type_traits.h>   // int
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // "magic get" utilities
 //
 ////////////////////////////////////////////////////////////////////////////////////////////////
-namespace cmn::enum_
-{
-
-namespace detail
+namespace cmn::enum_ ::detail
 {
 
 #define CMN_WIDE2(x) L##x
@@ -95,12 +94,10 @@ consteval auto magic_get_enum_member_name(int_<En_>, wchar_t, std::char_traits<w
     return res;
 }
 
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 
 template <c::enum_ Enum, typename Char, typename CharTraits>
-constexpr auto basic_magic_enum_name_v = detail::magic_get_enum_name(Enum{}, Char{}, CharTraits{});
+constexpr auto basic_magic_enum_name_v = magic_get_enum_name(Enum{}, Char{}, CharTraits{});
 
 template <c::enum_ Enum>
 constexpr auto magic_enum_name_v = basic_magic_enum_name_v<Enum, char, std::char_traits<char>>;
@@ -111,7 +108,7 @@ constexpr auto magic_enum_wname_v = basic_magic_enum_name_v<Enum, wchar_t, std::
 
 //-----------------------------------------------------------------------------
 template <c::enum_ auto En_, typename Char, typename CharTraits>
-constexpr auto basic_magic_enum_member_name_v = detail::magic_get_enum_member_name(int_<En_>{}, Char{}, CharTraits{});
+constexpr auto basic_magic_enum_member_name_v = magic_get_enum_member_name(int_<En_>{}, Char{}, CharTraits{});
 
 template <c::enum_ auto En_>
 constexpr auto magic_enum_member_name_v = basic_magic_enum_member_name_v<En_, char, std::char_traits<char>>;

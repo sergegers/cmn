@@ -3,6 +3,7 @@
 #include <tuple>
 #include <array>
 #include <type_traits>
+#include <algorithm>
 
 #include <boost/fusion/container/vector.hpp>
 #include <boost/fusion/algorithm/iteration/fold.hpp>
@@ -14,11 +15,11 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/enum/feature.h>
-#include "group_info.h"
-//#include "groups_info.h"
-//#include "concepts.h"
+#include <cmn/enum/kind.h>  // op_t
 
-namespace cmn::enum_
+#include "group_info.h"
+
+namespace cmn::enum_::detail
 {
 
 template <c::enum_ E, std::size_t... Szs_>
