@@ -13,9 +13,9 @@
 #include <boost/fusion/adapted/std_array.hpp>
 // ReSharper restore CppUnusedIncludeDirective
 
+#include <cmn/fwd.h>  // kind_t, op_t
 #include <cmn/meta/concepts.h>
-#include <cmn/enum/feature.h>
-#include <cmn/enum/kind.h>  // op_t
+#include <cmn/util/feature.h>
 
 #include "group_info.h"
 
@@ -31,57 +31,41 @@ struct enum_info
     using groups_type = std::tuple<group_info<E, Szs_>...>;
     using mask_type = typename record_type::mask_type;
     using masks_type = std::array<mask_type, sizeof... (Szs_)>;
-
-    op_type                 m_ops;
-    groups_type             m_groups;
-    masks_type              m_masks;
+    using interop_type = typename record_type::interop_type;
 
     template <typename... Groups>
     consteval enum_info(op_type ops, Groups &&... groups):
         m_ops { ops },
         m_groups{ std::forward<Groups>(groups)... },
         m_masks{ calc_masks() }
-    {
-        if constexpr (c::c_enum<enum_type>)
-            // tune operations, drop interoperable flag
-            m_ops = reset_feature(ops, op_interoperable);
-    }
-private:
-    template <std::size_t... Idss_>
-    consteval auto calc_masks_impl(std::index_sequence<Idss_...>) const -> masks_type
-    {
-        return { std::get<Idss_>(m_groups).calc_mask()... };
-    }
+    {}
 
-    consteval auto calc_masks() const -> masks_type
+    //-----------------------------------------------------------------------------
+    //
+    // enum_info concept
+
+    op_type                 m_ops;
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // enum: 1 group with n records
+    // bitfield: n groups with 1 record in each
+    // combo: n groups with m records in each
+    //
+    ////////////////////////////////////////////////////////////////////////////////
+    static consteval auto kind() -> kind_t
     {
-        return calc_masks_impl(std::make_index_sequence<sizeof... (Szs_)>{});
-    }
-
-public:
-    constexpr auto exec(enum_type en, auto const &op, mask_type addditional_mask = no_mask<enum_type>) noexcept
-        -> mask_type // return remainder
-    {
-        namespace fus = boost::fusion;
-        using sequences_type = fus::vector<std::add_lvalue_reference_t<groups_type>, std::add_lvalue_reference_t<masks_type>>;
-
-        return fus::fold
-        (
-            fus::zip_view<sequences_type>{ sequences_type{ m_groups, m_masks } },
-            static_cast<mask_type>(en) & addditional_mask,
-            [&op, addditional_mask](mask_type remainder, auto const &group_mask)
-            {
-                auto const &current_group = fus::at_c<0>(group_mask);
-                mask_type const current_mask = fus::at_c<1>(group_mask);
-
-                if (current_mask & addditional_mask)
-                    return current_group.exec(current_mask, remainder, op);
-                else
-                    return remainder;
-            }
-        );
+        using enum kind_t;
+        return sizeof... (Szs_) == 1?
+            enum_:
+            ((Szs_ == 1) && ...)? bitfield: combo;
     }
 
+    groups_type             m_groups;
+    masks_type              m_masks;
+
+    //
+    //-----------------------------------------------------------------------------
 private:
     ///////////////////////////////////////////////////////////////////////////////
     //
@@ -115,19 +99,42 @@ public:
         return this->max_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
     //
-    // enum: 1 group with n records
-    // bitfield: n groups with 1 record in each
-    // combo: n groups with m records in each
-    //
-    ////////////////////////////////////////////////////////////////////////////////
-    consteval auto kind() const-> kind_t
+    //-----------------------------------------------------------------------------
+private:
+    template <std::size_t... Idss_>
+    consteval auto calc_masks_impl(std::index_sequence<Idss_...>) const -> masks_type
     {
-        using enum kind_t;
-        return sizeof... (Szs_) == 1?
-            enum_:
-            ((Szs_ == 1) && ...)? bitfield: combo;
+        return { std::get<Idss_>(m_groups).calc_mask()... };
+    }
+
+    consteval auto calc_masks() const -> masks_type
+    {
+        return calc_masks_impl(std::make_index_sequence<sizeof... (Szs_)>{});
+    }
+
+public:
+    constexpr auto exec(enum_type en, auto const &op, mask_type addditional_mask = no_mask<enum_type>) noexcept
+        -> interop_type // return remainder
+    {
+        namespace fus = boost::fusion;
+        using sequences_type = fus::vector<std::add_lvalue_reference_t<groups_type>, std::add_lvalue_reference_t<masks_type>>;
+
+        return fus::fold
+        (
+            fus::zip_view<sequences_type>{ sequences_type{ m_groups, m_masks } },
+            lazy_to_interop(en) & lazy_to_interop(addditional_mask),
+            [&op, addditional_mask](interop_type remainder, auto const &group_mask_pair)
+            {
+                auto const &current_group = fus::at_c<0>(group_mask_pair);
+                mask_type const current_mask = fus::at_c<1>(group_mask_pair);
+
+                if (!empty(lazy_to_interop(current_mask) & lazy_to_interop(addditional_mask)))
+                    return current_group.exec(static_cast<enum_type>(remainder), op, current_mask);
+                else
+                    return remainder;
+            }
+        );
     }
 };
 
@@ -139,6 +146,5 @@ consteval enum_info(interop_type_t<op_t> ops, Group &&, Groups &&... groups) ->
           group_::enum_type_t<std::remove_reference_t<Group>>
         , group_::size_v<std::remove_reference_t<Group>>, group_::size_v<std::remove_reference_t<Groups>>...
     >;
-
 
 }

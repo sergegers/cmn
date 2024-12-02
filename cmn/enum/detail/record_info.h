@@ -15,7 +15,8 @@ template <c::enum_ E>
 struct record_info
 {
     using enum_type = E;
-    using mask_type = interop_type_t<enum_type>;
+    using mask_type = mask_type_t<enum_type>;
+    using interop_type = interop_type_t<enum_type>;
 
     enum_type                   m_value;
     qualified_member_name       m_name;
@@ -36,14 +37,19 @@ struct record_info
         else static_assert(!std::is_same_v<Char, Char>, "Not implemented");
     }
 
-    constexpr auto as_mask() const noexcept -> interop_type_t<E>
+    constexpr auto as_mask() const noexcept -> mask_type
     {
         return static_cast<mask_type>(m_value);
     }
 
+    constexpr auto as_interop() const noexcept -> interop_type
+    {
+        return static_cast<interop_type>(m_value);
+    }
+
     constexpr auto operator <=> (record_info const &other) const noexcept -> std::strong_ordering
     {
-        return as_mask() <=> other.as_mask();
+        return as_interop() <=> other.as_interop();
     }
 
     constexpr auto operator == (record_info const &other) const noexcept
@@ -56,7 +62,8 @@ namespace record_
 {
 
 template <typename T> using enum_type_t = typename T::enum_type;
-template <typename T> using mask_type_t = interop_type_t<enum_type_t<T>>;
+template <typename T> using mask_type_t = typename T::mask_type;
+template <typename T> using interop_type_t = typename T::interop_type;
 
 }
 

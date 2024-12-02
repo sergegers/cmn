@@ -7,16 +7,15 @@
 #include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>   // int_<>
 
 #include <cmn/enum/traits.h>
 #include <cmn/enum/print_t.h>
-#include <cmn/enum/info.h>
 
 #include <cmn/tuple/io.h>
+#include <cmn/util/feature.h>
 
 #include "manip.h"
-#include "feature.h"
-#include "util.h"
 
 #define CHT_HEX_OUT()   ::std::hex << ::std::showbase << ::std::uppercase
 
@@ -83,7 +82,7 @@ auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
 {
     auto const po = print_manip::value(ostr);
 
-    if (has_feature(po, print_t::tail) && tail_)
+    if (has_feature(po, print_t::tail) && !empty(tail_))
     {
         boost::io::ios_flags_saver const ifs{ ostr };
         auto const delim = basic_bitfield_delim_manip<Char, CharTraits>::value(ostr);
@@ -98,7 +97,7 @@ auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
 template<c::enum_ Enum>
 struct printer<Enum, kind_t::enum_>
 {
-    using kkind_type = kkind_t<kind_t::enum_>;
+    using kkind_type = int_<kind_t::enum_>;
 
     Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
@@ -128,7 +127,7 @@ struct printer<Enum, kind_t::enum_>
         // ReSharper disable CppLocalVariableMayBeConst
         bool first_time = true;
         // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = group.exec(to_mask(m_val), to_mask(m_val), print_record_type{ ostr, first_time });
+        auto const remain = group.exec(m_val, print_record_type{ ostr, first_time });
         detail::print_tail(remain, ostr);
 
         return ostr << close;
@@ -138,7 +137,7 @@ struct printer<Enum, kind_t::enum_>
 template<c::enum_ Enum>
 struct printer<Enum, kind_t::bitfield>
 {
-    using kkind_type = kkind_t<kind_t::bitfield>;
+    using kkind_type = int_<kind_t::bitfield>;
 
     Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
@@ -150,7 +149,7 @@ struct printer<Enum, kind_t::bitfield>
     {
         using print_record_type = detail::print_record<Char, CharTraits>;
 
-        auto const mask_ = to_mask(bitfield_mask_manip<Enum>::value(ostr));
+        auto const mask_ = to_interop(bitfield_mask_manip<Enum>::value(ostr));
 
         // NOTE: don't make it static
         auto const open = basic_open_manip<Char, CharTraits>::value(ostr);
@@ -163,7 +162,7 @@ struct printer<Enum, kind_t::bitfield>
         auto const remain = boost::fusion::fold
         (
             groups,
-            to_mask(m_val) & mask_,
+            to_interop(m_val) & mask_,
             [&ostr, &first_time]<typename Group>(auto val, Group const &group)
             {
                 static_assert
@@ -173,13 +172,13 @@ struct printer<Enum, kind_t::bitfield>
                 );
                 decltype(auto) rec = group.m_records.front();
                 
-                if (rec.as_mask() & val)
+                if (rec.as_interop() & val)
                 {
                     print_record_type prt { ostr, first_time };
 	                prt(rec);
                 }
 
-                return val & ~rec.as_mask();
+                return val & ~rec.as_interop();
             }
         );
         detail::print_tail(remain, ostr);
@@ -191,7 +190,7 @@ struct printer<Enum, kind_t::bitfield>
 template<c::enum_ Enum>
 struct printer<Enum, kind_t::combo>
 {
-    using kkind_type = kkind_t<kind_t::combo>;
+    using kkind_type = int_<kind_t::combo>;
 
     Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;

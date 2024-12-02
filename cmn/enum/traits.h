@@ -1,70 +1,204 @@
 #pragma once
 
-#include <string_view>
+#include <cstddef>
+#include <utility>
+#include <array>
 
+#include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
 
-#include <cmn/enum/kind.h>
-#include <cmn/enum/info.h>
+#include <cmn/enum/detail/qualified_name.h>
+#include <cmn/enum/detail/name_info.h>
+#include <cmn/enum/detail/enum_info.h>
+#include <cmn/enum/detail/group_info.h>
+#include <cmn/enum/detail/record_info.h>
+#include <cmn/enum/detail/enum_info.h>
 
 namespace cmn::enum_
 {
 
-////////////////////////////////////////////////////////////////////////////////
-// naive enum
-template <c::enum_ Enum, typename = void>
-struct traits
+using detail::basic_qualified_name;
+using detail::qualified_name;
+using detail::wqualified_name;
+
+using detail::basic_magic_enum_name_v;
+using detail::magic_enum_name_v;
+using detail::magic_enum_wname_v;
+using detail::basic_magic_enum_member_name_v;
+using detail::magic_enum_member_name_v;
+using detail::magic_enum_member_wname_v;
+
+using detail::basic_qualified_member_name;
+using detail::qualified_member_name;
+using detail::wqualified_member_name;
+
+using detail::name_info;
+using detail::enum_info;
+using detail::record_info;
+using detail::group_info;
+
+namespace group_
 {
-    using underlying_type = std::underlying_type_t<Enum>;
-    using mask_type = interop_type_t<Enum>;
 
-    static constexpr name_info<Enum> name_info{};
+using detail::group_::make;
+using detail::group_::size_v;
 
-    static constexpr kind_t kind = kind_t::naive;
-    static constexpr int   ops = op_empty;
-};
+}
 
 //-----------------------------------------------------------------------------
-template <c::enum_ Enum>
-struct traits<Enum, std::void_t<decltype(adapt_enum_info(Enum{}))>>
+template <c::enumerable E>
+constexpr auto to_mask(E en) -> mask_type_t<E>
 {
-    using enum_type = Enum;
-    using underlying_type = std::underlying_type_t<enum_type>;
-    using mask_type = interop_type_t<enum_type>;
+    return static_cast<mask_type_t<E>>(en);
+}
 
-    static constexpr name_info<enum_type> name_info{};
+//-----------------------------------------------------------------------------
+template <c::enum_ E, typename Char, typename CharTraits>
+constexpr auto name(E, std::basic_ios<Char, CharTraits> const &) noexcept
+{
+    return basic_qualified_name<Char, CharTraits>{ E{} };
+}
 
-    // "attempting to reference a deleted function" error here means
-    // that enum definition (macros family CMN_ENUM_DECLARE_ENUM_...) is not included
-    static constexpr auto enum_info = adapt_enum_info(enum_type{});
+///////////////////////////////////////////////////////////////////////////////
+//
+// enum_info shortcuts
+//
+///////////////////////////////////////////////////////////////////////////////
+template <c::adapted_enum E> constexpr c::enum_info auto enum_info_v = adapt_enum_info(E{});
+template <c::adapted_enum E> constexpr kind_t kind_v = enum_info_v<E>.kind();
+template <c::adapted_enum E> constexpr interop_type_t<op_t> ops_v = enum_info_v<E>.m_ops;
+template <c::adapted_enum E> constexpr E begin_v = enum_info_v<E>.min_value();
+template <c::adapted_enum E> constexpr E last_v = enum_info_v<E>.max_value();
+template <c::adapted_enum E> constexpr E end_v = static_cast<E>(to_interop(last_v<E>) + 1);
+template <c::adapted_enum E> constexpr auto groups_v = enum_info_v<E>.m_groups;
+template <c::adapted_enum E, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<E>);
+template <c::adapted_enum E> constexpr auto masks_v = enum_info_v<E>.m_masks;
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    // enum: 1 group with n records
-    // bitfield: n groups with 1 record in each
-    // combo: n groups with m records in each
-    //
-    ////////////////////////////////////////////////////////////////////////////////
-    static constexpr kind_t kind = enum_info.kind();
-    static constexpr int    ops = enum_info.m_ops;
+namespace detail
+{
 
-    // std::array<mask_type, group_size>
-    static constexpr auto masks = enum_info.m_masks;
+template <c::adapted_enum auto Mask_>
+struct group_by_mask_
+{
+    using enum_type = decltype(Mask_);
 
-    static constexpr enum_type begin = enum_info.min_value();
-    static constexpr enum_type last = enum_info.max_value();
-    static constexpr enum_type end = static_cast<enum_type>(static_cast<underlying_type>(last) + 1);
+    template <std::size_t Idx_>
+    consteval auto const &operator ()() const
+    {
+        if constexpr (lazy_to_interop(masks_v<enum_type>[Idx_]) == lazy_to_interop(Mask_))
+            return std::get<Idx_>(groups_v<enum_type>);
+        else
+            return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
+    }
 
-    //template <typename Char, std::size_t Size_>
-    //static constexpr auto get_str(typename utils_type::template group_t<Size_> const &group, Enum en)
-    //{
-    //    auto const idx = utils_type::get_index(group, en);
-    //    assert(idx >= 0);
-
-    //    decltype(auto) rec = group[idx];
-    //    return rec.template get_str<Char>();
-    //}
+    template <std::size_t Idx_>
+    consteval auto const &operator ()() const
+        requires (Idx_ == std::size(masks_v<enum_type>))
+    {
+        if constexpr (lazy_to_interop(masks_v<enum_type>[Idx_]) == lazy_to_interop(Mask_))
+            return std::get<Idx_>(groups_v<enum_type>);
+        else
+            return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
+    }
 };
+
+}
+
+template <c::adapted_enum auto Mask_, std::size_t Idx_ = 0>
+constexpr auto const &group_by_mask()
+{
+    using enum_type = decltype(Mask_);
+
+    if constexpr (lazy_to_interop(masks_v<enum_type>[Idx_]) == lazy_to_interop(Mask_))
+        return std::get<Idx_>(groups_v<enum_type>);
+    else
+        return group_by_mask<Mask_, Idx_ + 1>();
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// first enum constant value in next group based on previous mask
+//
+template <c::enumerable E> 
+constexpr auto next_on_mask(E prev_mask) -> E
+{
+    using mask_type = std::make_unsigned_t<underlying_type_t<E>>;
+    return E{ 1 } << (bsr(static_cast<mask_type>(prev_mask)) + 1);
+}
+
+template 
+<
+      c::enumerable Enum
+    , c::enumerable... Enums
+>
+    requires (std::same_as<Enum, Enums> && ...)
+constexpr auto in(Enum en, Enums ...ens) -> bool
+{
+    return ((en == ens) || ...);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+template <c::enum_ E>
+consteval auto default_ops(E, kind_t kind) -> interop_type_t<kind_t>
+{
+    using enum kind_t;
+    if constexpr (c::scoped_enum<E>)
+        return 
+            kind == enum_? (op_comparable | op_steppable | op_io):
+            kind == bitfield? (op_bitwise | op_io):
+            kind == combo? (op_comparable | op_steppable | op_bitwise | op_io):
+                op_empty
+        ;
+    else
+        // by default use builtin operators for C enums
+        return in(kind, enum_, bitfield, combo)? op_io: op_empty;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+template <std::size_t Idx_, c::enumerable Mask, std::size_t Size_>
+static constexpr auto united_mask(std::array<Mask, Size_> const &masks)
+{
+    return []<std::size_t... LeftIndices_, std::size_t... RightIndices_>
+    (
+          std::array<Mask, sizeof... (LeftIndices_) + sizeof... (RightIndices_) + 1> const &masks
+        , std::index_sequence<LeftIndices_...> 
+        , std::index_sequence<RightIndices_...> 
+    )
+    {
+        return (0ul | ... | lazy_to_interop(masks.at(LeftIndices_))) | (0ul | ... | lazy_to_interop(masks.at(RightIndices_)));
+    }
+    (
+          masks
+        , std::make_index_sequence<Idx_>{}
+        , make_index_sequence<Idx_ + 1, Size_>{}
+    );
+}
+
+}
+
+template <c::enumerable Mask, std::size_t Size_> requires (Size_ > 0)
+static constexpr auto mask_overlap(std::array<Mask, Size_> const &masks)
+{
+    return []<std::size_t... Indices_>
+    (
+          std::array<Mask, sizeof... (Indices_)> const &masks
+        , std::index_sequence<Indices_...> 
+    )
+    {
+        //[[maybe_unused]] auto const umask = (... | masks.at(Indices_));
+        return (... | (detail::united_mask<Indices_>(masks) & lazy_to_interop(masks.at(Indices_))));
+    }
+    (
+          masks
+        , std::make_index_sequence<Size_>{}
+    );
+}     
+
+// check enum constants consistency
+template <c::adapted_enum E> constexpr bool is_masks_overlapped_v = 0 != mask_overlap(masks_v<E>);
 
 }
 

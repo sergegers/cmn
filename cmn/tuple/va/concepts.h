@@ -5,21 +5,10 @@
 #include <tuple>
 #include <cstdint>
 
-#include <boost/mp11.hpp>
-#include <boost/type_traits/promote.hpp>
-
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
-#include <cmn/util/strong_typedef.h>
 
-// specialize unit promotion
-namespace boost
-{
-
-template <cmn::c::unit T>
-struct promote<T>: promote<cmn::underlying_type_t<T>> {};
-
-}
+#include <cmn/tuple/va/detail/promote.h>
 
 namespace cmn
 {
@@ -71,7 +60,7 @@ concept int_ = std::integral<T> || std::same_as<T, bool> || enum_<T>;
 template <typename T>
 concept float_ = std::same_as<T, float> || std::same_as<T, double>;
 
-// may be there will be a more complex check
+// maybe there will be a more complex check
 template <typename T>
 concept va_arg_ = 
     int_<T>

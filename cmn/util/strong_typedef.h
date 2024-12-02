@@ -12,7 +12,6 @@
 #include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
 #include <cmn/meta/macro.h>
 
 namespace cmn
@@ -67,16 +66,14 @@ protected:
 
     // unary plus (+) here to promote char types to int ones
     // https://isocpp.org/wiki/faq/input-output#print-char-or-ptr-as-number
-    template <typename Char, typename CharTraits>
-        requires is_char_v<T>
+    template <c::char_ Char, typename CharTraits>
     /* CRTP polymorphic*/ auto out(std::basic_ostream<Char, CharTraits> &ostr) const -> void { ostr << +m_t; }
 
     //-----------------------------------------------------------------------------
     template <typename Char, typename CharTraits>
     /* CRTP polymorphic*/ auto in(std::basic_istream<Char, CharTraits> &istr) -> void { istr >> m_t; }
 
-    template <typename Char, typename CharTraits>
-        requires is_char_v<T>
+    template <c::char_ Char, typename CharTraits>
     /* CRTP polymorphic*/ auto in(std::basic_istream<Char, CharTraits> &istr) -> void
     {
         decltype(+m_t) t;   // to be consistent with char output

@@ -5,18 +5,16 @@
 #include <cmn/enum/detail/macro.h>
 
 #include <cmn/enum/traits.h>
-#include <cmn/enum/info.h>
-#include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
 
 namespace cmn::enum_
 {
 
-template <c::enum_ auto ... Ens_>
-consteval auto adapt_bitfield_info_helper(interop_type_t<op_t> ops = default_ops(kind_t::bitfield))
+template <c::enum_ auto En_, decltype(En_) ... Ens_>
+consteval auto adapt_bitfield_info_helper(interop_type_t<op_t> ops = default_ops(En_, kind_t::bitfield))
 {
-    return enum_info { ops, group_::make<Ens_>()... };
+    return enum_info { ops, group_::make<En_>(), group_::make<Ens_>()... };
 }
 
 }

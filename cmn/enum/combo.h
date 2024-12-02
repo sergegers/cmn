@@ -8,8 +8,6 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/detail/macro.h>
 #include <cmn/enum/traits.h>
-#include <cmn/enum/info.h>
-#include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
 
@@ -23,7 +21,7 @@
     {   \
         using enum name;    \
         return ::cmn::enum_::enum_info{   \
-            ::cmn::enum_::default_ops( ::cmn::enum_::kind_t::combo) \
+            ::cmn::enum_::default_ops(name{}, ::cmn::enum_::kind_t::combo) \
             BOOST_PP_SEQ_FOR_EACH(CMN_ENUM_MARKUP_COMBO_GROUP_INFO, data, groups_seq) };    \
     }
 

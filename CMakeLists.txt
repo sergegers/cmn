@@ -48,8 +48,9 @@ add_library (
  cmn 
  STATIC
 
+ "cmn/fwd.h"
+
  "cmn/meta/macro.h"
- "cmn/meta/concepts.h"
  "cmn/meta/type_traits.h"
  "cmn/meta/function_traits.h"
  
@@ -63,6 +64,7 @@ add_library (
  "cmn/util/strong_typedef.h" 
  "cmn/util/strong_typedef_io.h" 
  "cmn/util/strong_typedef_io.cpp" 
+ "cmn/util/feature.h"
 
  "cmn/io/manip/slot/concepts.h"
  "cmn/io/manip/slot/decoder.h"
@@ -89,18 +91,14 @@ add_library (
  "cmn/tuple/va/adapt/fusion.h" 
  "cmn/tuple/va/adapt/mpl.h"
  "cmn/tuple/va/adapt.h"
- "cmn/tuple/va/detail/util.h"
-
+ 
  "cmn/enum/detail/magic_get.h"
  "cmn/enum/detail/qualified_name.h" 
  "cmn/enum/detail/name_info.h" 
  "cmn/enum/detail/record_info.h"  
  "cmn/enum/detail/group_info.h" 
- "cmn/enum/detail/enum_info.h"
  "cmn/enum/detail/macro.h"  
- "cmn/enum/concepts.h"
- "cmn/enum/info.h"
- "cmn/enum/util.h"
+
  "cmn/enum/op.h" 
  "cmn/enum/traits.h" 
  "cmn/enum/enum.h" 
@@ -111,7 +109,6 @@ add_library (
  "cmn/enum/read.h" 
  "cmn/enum/read.cpp" 
  "cmn/enum/manip.h" 
- "cmn/enum/feature.h"
  
  "cmn/algorithm/detail/result.h"
  "cmn/algorithm/detail/visitor.h"
@@ -131,7 +128,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-)
+ )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

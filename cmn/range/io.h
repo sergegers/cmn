@@ -7,6 +7,7 @@
 #include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
 
 #include "manip.h"
 
@@ -60,12 +61,9 @@ constexpr compact_table_out_ compact_table_out{};
 
 template <typename Char, typename CharTraits, std::ranges::range Range>
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Range rng) -> std::basic_ostream<Char, CharTraits> &
-    requires c::printable<std::ranges::range_value_t<Range>, Char, CharTraits>
-    // BUG: VS 17.0.6 couldn't usr cmn::c::printable concept
-    //requires requires(std::ranges::range_value_t<Range> const &val)
-    //{
-    //    ostr << val;    
-    //}
+    requires
+        c::printable<std::ranges::range_value_t<Range>, Char, CharTraits>
+     && !is_string_v<Range, Char, CharTraits>   // skip any type of string
 {
     using ostream_type = std::basic_ostream<Char, CharTraits>;
 

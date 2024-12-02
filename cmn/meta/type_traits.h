@@ -2,9 +2,8 @@
 
 #include <type_traits>
 #include <utility>
-#include <limits>
-
-#include <boost/mp11.hpp>
+#include <string>
+#include <string_view>
 
 #include <cmn/meta/concepts.h>
 
@@ -176,42 +175,25 @@ template <c::enumerable auto Int_> using int_ = std::integral_constant<decltype(
 template <typename Int> constexpr auto value_v = Int::value;
 
 ///////////////////////////////////////////////////////////////////////////////
-namespace detail
-{
-
-using namespace boost::mp11;
-
-using char_types_t = mp_list
-<
-      char
-    , unsigned char
-    , signed char
-    , wchar_t
->;
-
-template <typename T>
-consteval auto is_char() -> bool
-{
-    return mp_find<char_types_t, std::remove_cvref_t<T>>::value < mp_size<char_types_t>::value;
-}
-
-}
-
-template <typename T> constexpr bool is_char_v = detail::is_char<T>();
-
-///////////////////////////////////////////////////////////////////////////////
 //
 // Usable with 'if constexpr' expression for conditional compilation
 //
 template <bool Val_, typename...>
 constexpr bool dependent_v = Val_;
 
-namespace enum_
-{
+///////////////////////////////////////////////////////////////////////////////
+//
+// is_string<> type trait
+//
+///////////////////////////////////////////////////////////////////////////////
+template <typename T, typename Char, typename CharTraits> struct is_string: std::false_type {};
 
-template <c::enumerable T>
-static constexpr auto no_mask = std::numeric_limits<interop_type_t<T>>::max();
+template <typename Char, typename CharTraits, std::size_t N_> struct is_string<Char[N_], Char, CharTraits>: std::true_type {};
+template <typename Char, typename CharTraits, std::size_t N_> struct is_string<Char const[N_], Char, CharTraits>: std::true_type {};
 
-}
+template <typename Char, typename CharTraits> struct is_string<std::basic_string<Char, CharTraits>, Char, CharTraits>: std::true_type {};
+template <typename Char, typename CharTraits> struct is_string<std::basic_string_view<Char, CharTraits>, Char, CharTraits>: std::true_type {};
+
+template <typename T, typename Char, typename CharTraits> constexpr bool is_string_v= is_string<T, Char, CharTraits>::value;
 
 }

@@ -1,4 +1,6 @@
 
+#if !__has_include(<boost/lexical_cast/string.hpp>)
+
 #include <ranges>
 
 #include "lexical_cast.h"
@@ -44,3 +46,4 @@ auto lexical_cast<std::string, std::wstring_view>(std::wstring_view const &sourc
 
 }
 
+#endif

@@ -15,10 +15,6 @@
 #include <cmn/enum/enum.h>
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/combo.h>
-#include <cmn/enum/traits.h>
-#include <cmn/enum/util.h>
-
-//#include <cmn/tuple/io.h>
 
 //====================================================================
 /// Debugger return codes.
@@ -54,7 +50,8 @@ CMN_ENUM_ADAPT_ENUM
     (DRC_EVENTS)    // = 3,   ///< success, there are pending events
 );
 
-static_assert(cmn::c::e_enum< ::drc_t>);
+static_assert(cmn::enum_::kind_v< ::drc_t> == cmn::enum_::kind_t::enum_);
+static_assert(cmn::enum_::ops_v< ::drc_t> == cmn::enum_::op_io);
 
 BOOST_AUTO_TEST_SUITE(cmn)
 
@@ -80,23 +77,24 @@ enum class cl_cmb_t
     green      = 0x8,
     blue       = 0xC,
 
-    digit_mask = 0x3,
-    color_mask = 0xC
+    digit_mask = zero | one | two | three,
+    color_mask = red | green | blue
 };
 
-consteval auto adapt_enum_info(cl_cmb_t)
+consteval auto adapt_enum_info(cl_cmb_t en)
 {
     using enum cl_cmb_t;
     return enum_info
-    (
-          default_ops(kind_t::combo) | op_interoperable
+    {
+          default_ops(en, kind_t::combo) | op_interoperable
         , group_::make<zero, one, two, three>(), group_::make<red, green, blue>()
-    );
+    };
 }
 
 CMN_ENUM_INJECT_OPS()
 
 static_assert(std::is_same_v<interop_type_t<cl_cmb_t>, int>);
+static_assert(c::adapted_enum<cl_cmb_t>);
 static_assert(ops_v<cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
 static_assert(std::tuple_size_v<decltype(groups_v<cl_cmb_t>)> == 2);
 static_assert(kind_v<cl_cmb_t> == kind_t::combo);
@@ -118,7 +116,6 @@ static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_member_nam
 
 BOOST_AUTO_TEST_CASE(masks)
 {
-    using traits_type = traits<cl_cmb_t>;
     using enum cl_cmb_t;
 
     static_assert
@@ -127,15 +124,15 @@ BOOST_AUTO_TEST_CASE(masks)
         group_info{ int_<zero>{}, int_<one>{}, int_<two>{}, int_<three>{} }
     );
 
-    constexpr decltype(auto) enum_info = traits_type::enum_info;
-    static_assert(std::tuple_size_v<decltype(enum_info.m_groups)> == 2, "Enum group count mismatch");
+    constexpr decltype(auto) enum_info_ = enum_info_v<cl_cmb_t>;
+    static_assert(std::tuple_size_v<decltype(enum_info_.m_groups)> == 2, "Enum group count mismatch");
 
-    BOOST_TEST(boost::lexical_cast<std::string>(std::get<1>(enum_info.m_groups).m_records[1]) == "green");
+    BOOST_TEST(boost::lexical_cast<std::string>(std::get<1>(enum_info_.m_groups).m_records[1]) == "green");
 
-    static_assert(std::get<0>(enum_info.m_groups).get_values() == std::array { zero, one, two, three });
-    static_assert(std::get<1>(enum_info.m_groups).get_values() == std::array { red, green, blue });
+    static_assert(std::get<0>(enum_info_.m_groups).get_values() == std::array { zero, one, two, three });
+    static_assert(std::get<1>(enum_info_.m_groups).get_values() == std::array { red, green, blue });
 
-    constexpr auto masks = enum_info.m_masks;
+    constexpr auto masks = enum_info_.m_masks;
     static_assert(masks.size() == 2, "size mismatch");
     static_assert(std::get<0>(masks) == digit_mask, "digit mask mismatch");
     static_assert(std::get<1>(masks) == color_mask, "color mask mismatch");
@@ -185,29 +182,56 @@ BOOST_AUTO_TEST_CASE(enum_class_out)
     }
 }
 
-CMN_ENUM_DEFINE_COMBO
-(
-    cmb_t,
-    (
-        (one,       0x0)
-        (two,       0x1)
-        (three,     0x2)
-    )
-    (
-        (red,       0x0)
-        (green,     0x4)
-        (blue,      0x8)
-    ),
+//CMN_ENUM_DEFINE_COMBO
+//(
+//    cmb_t,
+//    (
+//        (one,       0x0)
+//        (two,       0x1)
+//        (three,     0x2)
+//    )
+//    (
+//        (red,       0x0)
+//        (green,     0x4)
+//        (blue,      0x8)
+//    ),
+//
+//    (digit_mask,    0x3)
+//    (color_mask,    0xC)
+//)
 
-    (digit_mask,    0x3)
-    (color_mask,    0xC)
-)
+enum cmb_t
+{
+    one = 0x0,
+    two = 0x1,
+    three = 0x2,
 
+    red = 0x0,
+    green   = 0x4,
+    blue = 0x8,
+
+    digit_mask = 0x3,
+    color_mask = 0xC
+};
+
+consteval auto adapt_enum_info(cmb_t en)
+{
+    return enum_info
+    {
+          default_ops(en, kind_t::combo)
+        , group_::make<one, two, three>()
+        , group_::make<red, green, blue>()
+    };
+}
+
+static_assert(c::adapted_enum<cmb_t>);
 static_assert(c::bitfield<cmb_t>);
+static_assert(kind_v<cmb_t> == kind_t::combo);
+static_assert(ops_v<cmb_t> == op_io);
 
 BOOST_AUTO_TEST_CASE(enum_out)
 {
-    cmb_t e { one | green };
+    auto const e = static_cast<cmb_t>(one | green);
 
     {
         output_test_stream tstr;
@@ -233,7 +257,7 @@ BOOST_AUTO_TEST_CASE(open_close)
     using namespace std::string_literals;
 
     std::ostringstream ostr;
-    constexpr auto val = two | blue;
+    auto const val = static_cast<cmb_t>(two | blue);
     ostr << val;
     BOOST_CHECK_MESSAGE(ostr.str() == "[two blue]", ostr.str());
     BOOST_TEST(open_manip::value(ostr) == "[");
@@ -272,7 +296,7 @@ BOOST_AUTO_TEST_CASE(save_flags)
     using namespace std::string_literals;
 
     std::ostringstream ostr;
-    constexpr auto val = two | blue;
+    constexpr auto val = static_cast<cmb_t>(two | blue);
 
     BOOST_TEST(open_manip::value(ostr) == "[");
     BOOST_TEST(close_manip::value(ostr) == "]");
@@ -394,7 +418,7 @@ static_assert(qualified_member_name{ int_<en_apple>{} }.m_ns == "cmn::enum_");
 static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_name == "en_t");
 static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_member_name == "en_apple");
 static_assert(kind_v<en_t> == kind_t::enum_);
-static_assert(ops_v<en_t> == (op_comparable | op_steppable | op_io));
+static_assert(ops_v<en_t> == (op_io));
 
 BOOST_AUTO_TEST_CASE(read_enum)
 {
@@ -473,7 +497,7 @@ BOOST_AUTO_TEST_CASE(unsorted_enum)
     BOOST_TEST(begin_v<uns_en_t> == uns_en_t::minus_one);
     BOOST_TEST(last_v<uns_en_t> == uns_en_t::seventeen);
 
-    constexpr auto lhs = std::get<0>(traits<uns_en_t>::enum_info.m_groups).get_values();
+    constexpr auto lhs = std::get<0>(groups_v<uns_en_t>).get_values();
     constexpr auto rhs = std::array{ minus_one, one, four, five, six, seventeen };
     BOOST_CHECK_EQUAL_COLLECTIONS
     (
@@ -616,7 +640,7 @@ enum class large_enum_t
     e1056, e1057, e1058, e1059, e1060, e1061, e1062, e1063, e1064, e1065, e1066, e1067, e1068, e1069, e1070, e1071
 };
 
-consteval auto adapt_enum_info(large_enum_t)
+consteval auto adapt_enum_info(large_enum_t en)
 {
     using enum large_enum_t;
     return adapt_enum_info_helper

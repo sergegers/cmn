@@ -1,6 +1,5 @@
 #pragma once
 
-#include <type_traits>
 #include <tuple>
 
 #include <boost/mp11.hpp>

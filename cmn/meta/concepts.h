@@ -37,28 +37,11 @@ concept random_access_fus_sequence =
 
 #endif
 
+#include <cmn/fwd.h>
+
 namespace cmn
 {
 
-struct strong_typedef_tag {};
-
-namespace io
-{
-
-enum class int_fmt_t: short;
-
-//-----------------------------------------------------------------------------
-//
-// traits
-//
-template <typename Unit>
-struct strong_typedef_fmt_traits
-{
-    static constexpr bool enable_luxury_io = false;
-    static constexpr auto default_ = static_cast<int_fmt_t>(2665);  // int_fmt_t::default_
-};
-
-}
 
 namespace c
 {
@@ -114,6 +97,33 @@ concept scoped_enum = enum_<T> && std::is_scoped_enum_v<T>;
 
 template <typename T>
 concept c_enum = enum_<T> && !std::is_scoped_enum_v<T>;
+
+///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
+using namespace boost::mp11;
+
+using char_types_t = mp_list
+<
+      char
+    , unsigned char
+    , signed char
+    , wchar_t
+    , char8_t
+    , char16_t
+    , char32_t
+>;
+
+template <typename T>
+consteval auto is_char() -> bool
+{
+    return mp_find<char_types_t, std::remove_cvref_t<T>>::value < mp_size<char_types_t>::value;
+}
+
+}
+
+template <typename T> concept char_ = detail::is_char<T>();
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -229,7 +239,7 @@ template <typename T> requires std::integral<T>
 struct interop_type<T> : boost::promote<T> {};
 
 template <typename T> requires c::c_enum<T>
-struct interop_type<T> : boost::promote<std::underlying_type_t<T>> {};
+struct interop_type<T> : boost::promote<T> {};
 
 template <typename T> requires c::scoped_enum<T>
 struct interop_type<T> : std::underlying_type<T> {};
@@ -240,8 +250,8 @@ struct interop_type<T> : std::type_identity<typename T::underlying_type> {};
 template <typename T> requires c::interop_unit<T>
 struct interop_type<T> : std::type_identity<typename T::difference_type> {};
 
-template <c::enumerable T>
-using interop_type_t = typename interop_type<T>::type;
+// always integer
+template <c::enumerable T> using interop_type_t = typename interop_type<T>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace c
@@ -510,6 +520,36 @@ concept error_info_list =
 
 //
 ///////////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Extended enum concepts
+//
+///////////////////////////////////////////////////////////////////////////////
+
+template <typename T>
+concept enum_info =
+    enum_<typename T::enum_type>
+ && requires(T const &einfo, interop_type_t<enum_::op_t> &ops)
+    {
+        { einfo.kind() } -> std::same_as<enum_::kind_t>;
+        ops = einfo.m_ops;
+        einfo.m_groups;
+        einfo.m_masks;
+        { einfo.min_value() } -> std::same_as<typename T::enum_type>;
+        { einfo.max_value() } -> std::same_as<typename T::enum_type>;
+    }
+;
+
+//-----------------------------------------------------------------------------
+template <typename E>
+concept adapted_enum =
+    enum_<E>
+ && requires (E e)
+    {
+        { adapt_enum_info(e) } -> enum_info;
+    }
+;
 
 }
 

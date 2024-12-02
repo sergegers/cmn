@@ -1,10 +1,12 @@
 #pragma once
 
+#include <concepts>
+#include <type_traits>
 #include <cstddef>
 #include <bit>
-#include <concepts>
 #include <string>
 #include <tuple>
+#include <limits>
 
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
@@ -204,6 +206,11 @@ constexpr auto to_interop(T t) -> interop_type_t<T>
 {
     return static_cast<interop_type_t<T>>(t);
 }
+
+//-----------------------------------------------------------------------------
+constexpr auto lazy_to_interop(c::adapted_enum auto t) { return to_interop(t); }
+// suppress double conversion
+constexpr auto lazy_to_interop(c::enumerable auto t) { return t; }
 
 //-----------------------------------------------------------------------------
 template <c::enumerable T>
@@ -447,5 +454,22 @@ struct from_std_to_mp_sequence_impl<integer_sequence<I, Idss_...>>
 }
 
 template <typename T> using from_std_to_mp_sequence = typename detail::from_std_to_mp_sequence_impl<T>::type;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// enumerable utils
+//
+///////////////////////////////////////////////////////////////////////////////
+
+template <c::enumerable T> struct mask_type: interop_type<T> {};
+template <c::scoped_enum T> struct mask_type<T>: std::type_identity<T> {};
+
+// could be integer or enum
+template <c::enumerable T> using mask_type_t = typename mask_type<T>::type;
+
+//-----------------------------------------------------------------------------
+template <c::enumerable T>
+static constexpr auto no_mask = static_cast<mask_type_t<T>>(
+    std::numeric_limits<std::make_unsigned_t<interop_type_t<T>>>::max());
 
 }

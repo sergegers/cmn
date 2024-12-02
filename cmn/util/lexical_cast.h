@@ -1,12 +1,12 @@
 #pragma once
 
-#include <locale>
-#include <string>
-#include <sstream>
+#if __has_include(<boost/lexical_cast/string.hpp>)
+#   include <boost/lexical_cast/string.hpp>
+#else
+#   include <boost/lexical_cast.hpp>
 
-#include <boost/lexical_cast.hpp>
-
-#include <cmn/meta/concepts.h>
+#   include <locale>
+#   include <string>
 
 namespace boost
 {
@@ -45,3 +45,4 @@ template <> auto lexical_cast<std::wstring, std::string_view>(std::string_view c
 
 }	
 
+#endif

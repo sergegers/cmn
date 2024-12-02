@@ -1,10 +1,10 @@
 #pragma once
 
+#include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
-#include <cmn/enum/kind.h>
 #include <cmn/enum/op.h>
-#include <cmn/enum/info.h>
 
+#include <cmn/enum/detail/enum_info.h>
 #include <cmn/enum/detail/macro.h>
 
 // Do not include <cmn/enum/bitfield.h> to avoid circular dependency
@@ -44,7 +44,12 @@ consteval auto adapt_enum_info(print_t)
 
 CMN_ENUM_INJECT_OPS()
 
-//static_assert(ops_v<print_t> == (op_comparable | op_bitwise | op_interoperable));
+#ifdef CHT_STATIC_TEST
+
+static_assert(std::same_as<interop_type_t<print_t>, int>);
+static_assert(ops_v<print_t> == (op_comparable | op_bitwise | op_interoperable));
 static_assert(c::bitfield<print_t>);
+
+#endif
 
 }

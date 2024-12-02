@@ -57,50 +57,36 @@
     BOOST_PP_SEQ_ENUM(group_nvp_seq)
 
 ///////////////////////////////////////////////////////////////////////////////
-//#define CMN_ENUM_INJECT_OPS()   \
-//    using ::cmn::enum_::op::operator |; \
-//    using ::cmn::enum_::op::operator |=; \
-//    using ::cmn::enum_::op::operator &; \
-//    using ::cmn::enum_::op::operator &=; \
-//    using ::cmn::enum_::op::operator ^; \
-//    using ::cmn::enum_::op::operator ^=; \
-//    using ::cmn::enum_::op::operator ~; \
-//    using ::cmn::enum_::op::operator ++; \
-//    using ::cmn::enum_::op::operator --; \
-//    using ::cmn::enum_::op::operator +; \
-//    using ::cmn::enum_::op::operator -; \
-//    using ::cmn::enum_::op::operator *; \
-//    using ::cmn::enum_::op::operator *=; \
-//    using ::cmn::enum_::op::operator /; \
-//    using ::cmn::enum_::op::operator /=; \
-//    using ::cmn::enum_::op::operator %; \
-//    using ::cmn::enum_::op::operator %=; \
-//    using ::cmn::enum_::op::operator ==; \
-//    using ::cmn::enum_::op::operator !=; \
-//    using ::cmn::enum_::op::operator >; \
-//    using ::cmn::enum_::op::operator >=; \
-//    using ::cmn::enum_::op::operator <; \
-//    using ::cmn::enum_::op::operator <=; \
-//    using ::cmn::enum_::op::operator <<; \
-//    using ::cmn::enum_::op::operator >>;
 #define CMN_ENUM_INJECT_OPS()   \
-    using ::cmn::enum_::op::operator ==; \
-    using ::cmn::enum_::op::operator !=; \
-    using ::cmn::enum_::op::operator &; \
-    using ::cmn::enum_::op::operator &=; \
-    using ::cmn::enum_::op::operator |; \
-    using ::cmn::enum_::op::operator |=; \
-    using ::cmn::enum_::op::operator ^; \
-    using ::cmn::enum_::op::operator ^=; \
-    using ::cmn::enum_::op::operator ~; \
-    using ::cmn::enum_::op::operator ++; \
-    using ::cmn::enum_::op::operator --; \
-    using ::cmn::enum_::op::operator -=; \
-    using ::cmn::enum_::op::operator +; \
-    using ::cmn::enum_::op::operator +=; \
-    using ::cmn::enum_::op::operator -; \
-    using ::cmn::enum_::op::operator <<; \
-    using ::cmn::enum_::op::operator >>;
+    using ::cmn::enum_::op::operator ==;    \
+    using ::cmn::enum_::op::operator !=;    \
+    using ::cmn::enum_::op::operator >;     \
+    using ::cmn::enum_::op::operator >=;    \
+    using ::cmn::enum_::op::operator <;     \
+    using ::cmn::enum_::op::operator <=;    \
+    using ::cmn::enum_::op::operator &;     \
+    using ::cmn::enum_::op::operator &=;    \
+    using ::cmn::enum_::op::operator |;     \
+    using ::cmn::enum_::op::operator |=;    \
+    using ::cmn::enum_::op::operator ^;     \
+    using ::cmn::enum_::op::operator ^=;    \
+    using ::cmn::enum_::op::operator >>;    \
+    using ::cmn::enum_::op::operator >>=;   \
+    using ::cmn::enum_::op::operator <<;    \
+    using ::cmn::enum_::op::operator <<=;   \
+    using ::cmn::enum_::op::operator ~;     \
+    using ::cmn::enum_::op::operator ++;    \
+    using ::cmn::enum_::op::operator --;    \
+    using ::cmn::enum_::op::operator -;     \
+    using ::cmn::enum_::op::operator -=;    \
+    using ::cmn::enum_::op::operator +;     \
+    using ::cmn::enum_::op::operator +=;    \
+    using ::cmn::enum_::op::operator *;     \
+    using ::cmn::enum_::op::operator *=;    \
+    using ::cmn::enum_::op::operator /;     \
+    using ::cmn::enum_::op::operator /=;    \
+    using ::cmn::enum_::op::operator %;     \
+    using ::cmn::enum_::op::operator %=;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -114,3 +100,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 #define CMN_ENUM_DEFINE_CONST(item)              (item##_ BOOST_PP_COMMA() item)
 #define CMN_ENUM_DEFINE_CONST_CAST(item, to)     (item##_ BOOST_PP_COMMA() static_cast<to>(item))
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// generate enum item pair from macro definition
+//
+// #define item 5
+// CMN_ENUM_DEFINE_CONST(item) ->
+// item_ = item
+//
+///////////////////////////////////////////////////////////////////////////////
+#define CMN_ENUM_DEFINE_CONST_2(item)           item##_ = item
+#define CMN_ENUM_DEFINE_CONST_CAST_2(item, to)  item##_ = static_cast<to>(item)

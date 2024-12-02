@@ -6,10 +6,7 @@
 #include <utility>
 #include <compare>
 
-#include <cmn/enum/feature.h>
-
 #include "record_info.h"
-//#include "concepts.h"
 
 namespace cmn::enum_::detail
 {
@@ -21,6 +18,7 @@ struct group_info
     using enum_type = E;
     using record_type = record_info<E>;
     using mask_type = typename record_type::mask_type;
+    using interop_type = typename record_type::interop_type;
     using records_type = std::array<record_type, Sz_>;
 
     static constexpr std::size_t size = Sz_;
@@ -31,7 +29,7 @@ struct group_info
     consteval group_info(int_<Ens_>... ens):
         m_records{ record_type{ ens }... }
     {
-        std::ranges::sort(m_records, {}, &record_type::as_mask);
+        std::ranges::sort(m_records, {}, &record_type::as_interop);
     }
 
     constexpr auto operator <=> (group_info const &other) const noexcept -> std::strong_ordering
@@ -46,12 +44,15 @@ struct group_info
 
     consteval auto calc_mask() const -> mask_type
     {
-        return std::ranges::fold_left
+        return static_cast<mask_type>
         (
-            m_records, 
-            0, 
-            [](mask_type mask, record_type const &rec) -> mask_type
-            { return mask | rec.as_mask(); }
+            std::ranges::fold_left
+            (
+                m_records, 
+                0, 
+                [](interop_type mask, record_type const &rec) -> interop_type
+                { return mask | rec.as_interop(); }
+            )
         );
     }
 
@@ -83,17 +84,20 @@ struct group_info
     // enum value remainder
     //
     ///////////////////////////////////////////////////////////////////////////////
-    constexpr auto exec(mask_type group_mask, mask_type en, auto const &op) const -> mask_type
+    constexpr auto exec(enum_type en, auto const &op, mask_type group_mask = no_mask<enum_type>) const -> interop_type
     {
-        auto reminder = en;
-        auto const mval = en & group_mask;
+        auto reminder = to_interop(en);
+        auto const mval = to_interop(en) & to_interop(group_mask);
 
         std::ignore = std::ranges::find_if
         (
             m_records,
             [&reminder, mval, &op](record_type const &rec) constexpr -> bool
             {
-                bool found = rec.as_mask() == mval;
+                static_assert(std::same_as<decltype(rec.as_interop()), interop_type>);
+                auto x = rec.as_interop();
+                auto y = x == mval;
+                bool const found = (rec.as_interop() == mval);
                 if (found)
                 {
                     op(rec);
@@ -115,15 +119,16 @@ consteval group_info(std::integral_constant<E, Ens_>... ens) -> group_info<E, si
 namespace group_
 {
 
-template </*util::c::group_info*/typename T> using enum_type_t = typename T::enum_type;
-template </*util::c::group_info*/typename T> using mask_type_t = typename T::mask_type;
-template </*util::c::group_info*/typename T> using record_type_t = typename T::record_type;
+template <typename T> using enum_type_t = typename T::enum_type;
+template <typename T> using mask_type_t = typename T::mask_type;
+template <typename T> using interop_type_t = typename T::interop_type;
+template <typename T> using record_type_t = typename T::record_type;
 
-template </*util::c::group_info*/typename T> constexpr std::size_t size_v = T::size;
+template <typename T> constexpr std::size_t size_v = T::size;
 
 
-template <c::enum_ auto En_, decltype(En_) ... Ens_> consteval /*util::c::group_info*/ auto make() ->
-    group_info<decltype(En_), (sizeof...(Ens_) + 1)>
+template <c::enum_ auto En_, decltype(En_) ... Ens_> consteval auto make()
+    -> group_info<decltype(En_), (sizeof...(Ens_) + 1)>
 {
     return { int_<En_>{}, int_<Ens_>{}... };
 }

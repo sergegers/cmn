@@ -12,8 +12,8 @@
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/enum/combo.h>
-#include <cmn/enum/feature.h>
 #include <cmn/util/strong_typedef.h>
+#include <cmn/util/feature.h>
 
 namespace cmn
 {
@@ -63,14 +63,14 @@ enum class int_fmt_t: short
     long_c_up_hex       = hex | showbase | c | long_ | uppercase | forcesign        // +0x0000001B
 };
 
-consteval auto adapt_enum_info(int_fmt_t)
+consteval auto adapt_enum_info(int_fmt_t en)
 {
     using namespace cmn::enum_;
     using enum int_fmt_t;
 
     return enum_info
     (
-          default_ops(kind_t::combo) | op_interoperable
+          default_ops(en, kind_t::combo) | op_interoperable
         , group_::make<dec, hex>()
         , group_::make<showbase, hidebase>()
         , group_::make<asm_, c>()
@@ -158,7 +158,7 @@ struct reader
     {
         using enum int_fmt_t;
 
-        if (Unit unit; enum_::has_any_feature(fmt, sign, forcesign))
+        if (Unit unit; has_any_feature(fmt, sign, forcesign))
         {
             auto const sgn = te_unit;
             access::in(istr, unit);
@@ -200,7 +200,7 @@ struct writer
         -> std::basic_ostream<Char, CharTraits> &
     {
         using enum int_fmt_t;
-        if (enum_::has_any_feature(fmt, sign, forcesign) && te_unit < 0)
+        if (has_any_feature(fmt, sign, forcesign) && te_unit < 0)
         {
             using signed_type = std::make_signed_t<te_type>;
             // does not require unary minus

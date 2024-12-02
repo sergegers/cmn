@@ -55,6 +55,7 @@ struct decode_param<no_default> {};
 //
 template <typename Arg, typename Def = no_default> struct param {};
 
+//-----------------------------------------------------------------------------
 template <typename Arg, typename Def>
 struct decode_param<param<Arg, Def>>: decode_param<Arg> {};
 
@@ -67,6 +68,7 @@ struct decode_param<param<boost::use_default, Def>>: decode_param<Def> {};
 //
 template <typename Arg> struct lazy {};
 
+//-----------------------------------------------------------------------------
 template <typename Arg>   
 struct decode_param<lazy<Arg>>: decode_param<typename Arg::type> {};
 
@@ -76,6 +78,7 @@ struct decode_param<lazy<Arg>>: decode_param<typename Arg::type> {};
 //
 template <template <typename...> typename F, typename... L> struct mp_lazy {};
 
+//-----------------------------------------------------------------------------
 template <template <typename...> typename F, typename... L>
 struct decode_param<mp_lazy<F, L...>>:
     decode_param<F<decode_param_t<L>...>>
