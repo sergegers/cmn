@@ -84,28 +84,55 @@ constexpr decltype(auto) get(cmn::va::tuple_view<Sig> &&t) noexcept
 // adapt va_tuple
 //
 ////////////////////////////////////////////////////////////////////////////////
-//template <typename... EArgs>
-//struct tuple_size<cmn::va::tuple<EArgs...>> :
-//    integral_constant<size_t, cmn::va::tuple<EArgs...>::size()>
-//{};
-//
-//template <std::size_t Idx_, typename... EArgs>
-//struct tuple_element < Idx_, cmn::va::tuple<EArgs...>>
-//{
-//    using type = cmn::va::tuple_element_t<Idx_, EArgs...>;
-//};
-//
-//template <std::size_t Idx_, typename... EArgs>
-//constexpr auto get(cmn::va::tuple<EArgs...> const &t) noexcept -> decltype(auto)
-//{
-//    return t.template get<Idx_>();
-//}
-//
-//template <typename T, typename... EArgs>
-//constexpr auto get(cmn::va::tuple<EArgs...> const &t) noexcept -> decltype(auto)
-//{
-//    return t.template get<T>();
-//}
+template <cmn::c::function Sig>
+struct tuple_size<cmn::va::tuple<Sig>> :
+    integral_constant<size_t, cmn::va::tuple<Sig>::size()>
+{};
+
+template <std::size_t Idx_, cmn::c::function Sig>
+struct tuple_element < Idx_, cmn::va::tuple<Sig>>
+{
+    using tuple_type = cmn::va::tuple<Sig>;
+    using type = std::tuple_element_t<Idx_, typename tuple_type::args_type>;
+};
+
+//-----------------------------------------------------------------------------
+template <std::size_t Idx_, cmn::c::function Sig>
+constexpr decltype(auto) get(cmn::va::tuple<Sig> &t) noexcept
+{
+    return t.template get<Idx_>();
+}
+
+template <std::size_t Idx_, cmn::c::function Sig>
+constexpr decltype(auto) get(cmn::va::tuple<Sig> const &t) noexcept
+{
+    return t.template get<Idx_>();
+}
+
+template <std::size_t Idx_, cmn::c::function Sig>
+constexpr decltype(auto) get(cmn::va::tuple<Sig> &&t) noexcept
+{
+    return std::move(t).template get<Idx_>();
+}
+
+//-----------------------------------------------------------------------------
+template <typename T, cmn::c::function Sig>
+constexpr decltype(auto) get(cmn::va::tuple<Sig> &t) noexcept
+{
+    return t.template get<T>();
+}
+
+template <typename T, cmn::c::function Sig>
+constexpr decltype(auto) get(cmn::va::tuple<Sig> const &t) noexcept
+{
+    return t.template get<T>();
+}
+
+template <typename T, cmn::c::function Sig>
+constexpr decltype(auto) get(cmn::va::tuple<Sig> &&t) noexcept
+{
+    return std::move(t).template get<T>();
+}
 
 // tuple_cut support
 //template <typename... EArgs>

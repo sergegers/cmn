@@ -196,7 +196,6 @@ template <typename E>
         return detail::get_description_(static_cast<std::exception const &>(ex));
 }
 
-
 struct msg_
 {
     std::string m_msg;

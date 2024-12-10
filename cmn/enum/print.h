@@ -11,13 +11,12 @@
 
 #include <cmn/enum/traits.h>
 #include <cmn/enum/print_t.h>
+#include <cmn/enum/detail/macro.h>
 
 #include <cmn/tuple/io.h>
 #include <cmn/util/feature.h>
 
 #include "manip.h"
-
-#define CHT_HEX_OUT()   ::std::hex << ::std::showbase << ::std::uppercase
 
 namespace cmn::enum_
 {
@@ -87,7 +86,7 @@ auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
         boost::io::ios_flags_saver const ifs{ ostr };
         auto const delim = basic_bitfield_delim_manip<Char, CharTraits>::value(ostr);
 
-        ostr << CHT_HEX_OUT() << delim << tail_;
+        ostr << CMN_HEX_OUT() << delim << tail_;
     }
 }
 

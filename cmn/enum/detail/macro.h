@@ -88,6 +88,8 @@
     using ::cmn::enum_::op::operator %;     \
     using ::cmn::enum_::op::operator %=;
 
+#define CMN_HEX_OUT()   ::std::hex << ::std::showbase << ::std::uppercase
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // generate enum item pair from macro definition

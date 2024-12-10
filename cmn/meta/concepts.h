@@ -1,8 +1,8 @@
 #pragma once
 
 #include <concepts>
-#include <string>
 #include <type_traits>
+#include <string>
 #include <iosfwd>
 #include <exception>
 
@@ -41,7 +41,6 @@ concept random_access_fus_sequence =
 
 namespace cmn
 {
-
 
 namespace c
 {
@@ -97,6 +96,15 @@ concept scoped_enum = enum_<T> && std::is_scoped_enum_v<T>;
 
 template <typename T>
 concept c_enum = enum_<T> && !std::is_scoped_enum_v<T>;
+
+template <typename T>
+concept c_array = std::is_array_v<T>;
+
+template <typename T, typename Elem>
+concept c_array_of =
+    c_array<T>
+ && std::same_as<std::remove_all_extents_t<T>, Elem>
+;
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace detail

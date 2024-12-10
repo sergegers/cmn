@@ -25,17 +25,8 @@ struct fusion_sequence_tag;
 namespace traits
 {
 
-template <cmn::c::function Sig>
-struct tag_of<cmn::va::tuple_view<Sig>>
-{
-    using type = va_tuple_tag;
-};
-
-//template <typename... EArgs>
-//struct tag_of<cmn::va::tuple<EArgs...>>
-//{
-//    using type = va_tuple_tag;
-//};
+template <cmn::c::function Sig> struct tag_of<cmn::va::tuple_view<Sig>> { using type = va_tuple_tag; };
+template <cmn::c::function Sig> struct tag_of<cmn::va::tuple<Sig>> { using type = va_tuple_tag; };
 
 }   
 

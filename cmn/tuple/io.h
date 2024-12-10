@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cstdint>
-
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 
 #if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
@@ -11,7 +9,7 @@
 #   include <cmn/meta/concepts.h>
 #endif
 
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/concepts.h>
 #include <cmn/error/exception.h>
 
 #include "manip.h"
@@ -20,7 +18,7 @@ namespace cmn::tuple_::io
 {
 
 template <typename Char, typename CharTraits, boost::c::fus_sequence Seq>
-    requires !is_string_v<Seq, Char, CharTraits> // skip any type of string
+    requires !c::c_array_of<Seq, Char>   // skip string arrays
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Seq const &seq) -> decltype(ostr)
 {
     using ostream_type = std::basic_ostream<Char, CharTraits>;

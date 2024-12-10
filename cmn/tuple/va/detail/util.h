@@ -109,7 +109,7 @@ constexpr auto put(Tpl &tpl, Arg &&arg) noexcept -> void
     using slot_type = naked_<decltype(slot_)>;
     slot_.~slot_type();
 
-    slot_ = slot_type{ std::forward<Arg>(arg) };
+    slot_ = static_cast<slot_type>(std::forward<Arg>(arg));
 }
 
 // big arguments

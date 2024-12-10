@@ -181,19 +181,4 @@ template <typename Int> constexpr auto value_v = Int::value;
 template <bool Val_, typename...>
 constexpr bool dependent_v = Val_;
 
-///////////////////////////////////////////////////////////////////////////////
-//
-// is_string<> type trait
-//
-///////////////////////////////////////////////////////////////////////////////
-template <typename T, typename Char, typename CharTraits> struct is_string: std::false_type {};
-
-template <typename Char, typename CharTraits, std::size_t N_> struct is_string<Char[N_], Char, CharTraits>: std::true_type {};
-template <typename Char, typename CharTraits, std::size_t N_> struct is_string<Char const[N_], Char, CharTraits>: std::true_type {};
-
-template <typename Char, typename CharTraits> struct is_string<std::basic_string<Char, CharTraits>, Char, CharTraits>: std::true_type {};
-template <typename Char, typename CharTraits> struct is_string<std::basic_string_view<Char, CharTraits>, Char, CharTraits>: std::true_type {};
-
-template <typename T, typename Char, typename CharTraits> constexpr bool is_string_v= is_string<T, Char, CharTraits>::value;
-
 }

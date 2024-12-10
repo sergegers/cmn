@@ -284,6 +284,29 @@ public:
     }
 };
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// NamedArgs == 0, VaArgs == 0
+//
+///////////////////////////////////////////////////////////////////////////////
+template <>
+class tuple_impl<std::tuple<std::tuple<>, std::tuple<>>>
+{
+public:
+    using args_type = std::tuple<>;
+    using eargs_type = std::tuple<ellipsis>;
+    using named_args_type = std::tuple<>;
+    using keep_named_args_type = named_args_type;
+    using keep_va_args_type = std::tuple<>;
+    using keep_args_type = mp_append<keep_named_args_type, keep_va_args_type>;
+public:
+    tuple_impl() = default;
+
+    static constexpr auto size() { return 0; }
+
+    constexpr auto as_va_list() const -> std::va_list { return nullptr; }
+};
+
 }
 
 template <c::function Sig>
