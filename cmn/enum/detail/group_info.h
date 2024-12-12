@@ -1,5 +1,7 @@
 #pragma once
 
+#include <concepts>
+#include <type_traits>
 #include <cstddef>
 #include <array>
 #include <ranges>
@@ -28,6 +30,15 @@ struct group_info
     template <c::enum_ auto... Ens_>
     consteval group_info(int_<Ens_>... ens):
         m_records{ record_type{ ens }... }
+    {
+        std::ranges::sort(m_records, {}, &record_type::as_interop);
+    }
+
+    template <typename... Records>
+    consteval group_info(Records &&... records)
+        requires (std::same_as<Records, record_type> && ...)
+    :
+        m_records{ std::forward<Records>(records)... }
     {
         std::ranges::sort(m_records, {}, &record_type::as_interop);
     }
@@ -114,6 +125,11 @@ struct group_info
 //-----------------------------------------------------------------------------
 template <c::enum_ E, E... Ens_>
 consteval group_info(std::integral_constant<E, Ens_>... ens) -> group_info<E, sizeof... (Ens_)>;
+
+template <typename Record, typename... Records>
+    requires (std::same_as<Records, Record> && ...)
+consteval group_info(Record &&, Records &&...) -> 
+    group_info<record_::enum_type_t<std::remove_cvref_t<Record>>, sizeof... (Records) + 1>;
 
 
 namespace group_

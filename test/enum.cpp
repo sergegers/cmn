@@ -182,24 +182,6 @@ BOOST_AUTO_TEST_CASE(enum_class_out)
     }
 }
 
-//CMN_ENUM_DEFINE_COMBO
-//(
-//    cmb_t,
-//    (
-//        (one,       0x0)
-//        (two,       0x1)
-//        (three,     0x2)
-//    )
-//    (
-//        (red,       0x0)
-//        (green,     0x4)
-//        (blue,      0x8)
-//    ),
-//
-//    (digit_mask,    0x3)
-//    (color_mask,    0xC)
-//)
-
 enum cmb_t
 {
     one = 0x0,
@@ -219,8 +201,8 @@ consteval auto adapt_enum_info(cmb_t en)
     return enum_info
     {
           default_ops(en, kind_t::combo)
-        , group_::make<one, two, three>()
-        , group_::make<red, green, blue>()
+        , group_info{ CMN_ENUM_RECORD(one), record_::make<two>(), record_::make<three>() }
+        , group_info{ CMN_ENUM_RECORD(red), record_::make<green>(), record_::make<blue>() }
     };
 }
 
@@ -249,6 +231,29 @@ BOOST_AUTO_TEST_CASE(enum_out)
         output_test_stream tstr;
         tstr << bitfield_mask(color_mask) << e;
         BOOST_CHECK(tstr.is_equal("[green]"));
+    }
+}
+
+BOOST_AUTO_TEST_CASE(double_zero)
+{
+    auto const e = static_cast<cmb_t>(one | red);
+
+    {
+        output_test_stream tstr;
+        tstr << e;
+        BOOST_CHECK(tstr.is_equal("[one red]"));
+    }
+
+    {
+        output_test_stream tstr;
+        tstr << bitfield_mask(digit_mask) << e;
+        BOOST_CHECK(tstr.is_equal("[one]"));
+    }
+
+    {
+        output_test_stream tstr;
+        tstr << bitfield_mask(color_mask) << e;
+        BOOST_CHECK(tstr.is_equal("[red]"));
     }
 }
 

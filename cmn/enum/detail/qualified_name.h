@@ -4,6 +4,7 @@
 #include <iosfwd>
 #include <type_traits>
 
+#include <cmn/meta/concepts.h>
 #include <cmn/meta/symbols.h>
 
 #include "magic_get.h"
@@ -83,11 +84,11 @@ struct basic_qualified_member_name final
 
 private:
     //
-    // tag dispatched method family decompose(std::bool_constant<is_scoped_enum>)
+    // tag dispatched method family decompose(std::bool_constant<is_scoped_enum>, std::bool_constant<decompose_member_name>)
     //
 
     // ns0::...nsN::class_prefix::enum_member_name
-    consteval auto decompose(std::true_type) -> void
+    consteval auto decompose(std::true_type is_scoped_enum, c::instance_of_bool auto decompose_member_name) -> void
     {
         constexpr std::basic_string_view qualifier = symbols<Char, CharTraits>::scope_resolution;
 
@@ -105,19 +106,21 @@ private:
             {
                 m_ns = {};
                 m_enum_name = m_name.substr(0, - 1);
-                m_enum_member_name = m_name.substr(pos + qualifier.length() - 1);
+                if constexpr (decompose_member_name.value)
+                    m_enum_member_name = m_name.substr(pos + qualifier.length() - 1);
             }
             else
             {
                 m_ns = m_name.substr(0, pos2 - 1);
                 m_enum_name = m_name.substr(pos2 + qualifier.length() - 1, pos - pos2 - qualifier.length());
-                m_enum_member_name = m_name.substr(pos + qualifier.length() - 1);
+                if constexpr (decompose_member_name.value)
+                    m_enum_member_name = m_name.substr(pos + qualifier.length() - 1);
             }
         }
     }
 
     // ns0::...nsN::enum_member_name
-    consteval auto decompose(std::false_type) -> void
+    consteval auto decompose(std::false_type is_scoped_enum, c::instance_of_bool auto decompose_member_name) -> void
     {
         constexpr std::basic_string_view qualifier = symbols<Char, CharTraits>::scope_resolution;
 
@@ -125,12 +128,14 @@ private:
         if (pos == string_view_type::npos)
         {
             m_ns = {};
-            m_enum_member_name = m_name;
+            if constexpr (decompose_member_name.value)
+                m_enum_member_name = m_name;
         }
         else
         {
             m_ns = m_name.substr(0, pos - 1);
-            m_enum_member_name = m_name.substr(pos + qualifier.length() - 1);
+            if constexpr (decompose_member_name.value)
+                m_enum_member_name = m_name.substr(pos + qualifier.length() - 1);
         }
     }
 public:
@@ -139,8 +144,16 @@ public:
         m_name{ basic_magic_enum_member_name_v<En_, Char, CharTraits> },
         m_enum_name{ basic_qualified_name<Char, CharTraits>{ En_ }.m_enum_name }
     {
-        decompose(std::is_scoped_enum<decltype(En_)>{});
+        decompose(std::is_scoped_enum<decltype(En_)>{}, std::true_type{});
     }
+
+    template <c::enum_ auto En_>
+    consteval basic_qualified_member_name(int_<En_>, string_view_type enum_member_name):
+        m_enum_member_name{ enum_member_name }
+    {
+        decompose(std::is_scoped_enum<decltype(En_)>{}, std::false_type{});
+    }
+
 
     friend auto operator << (ostream_type &ostr, itself const &self) -> ostream_type &
     {

@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <compare>
+#include <string_view>
 
 #include <cmn/meta/concepts.h>
 
@@ -28,6 +29,19 @@ struct record_info
         m_name{ int_<En_>{} },
         m_wname{ int_<En_>{} }
     {}
+
+    template <E En_>
+    consteval record_info
+    (
+          std::integral_constant<E, En_>
+        , std::string_view enum_member_name
+        , std::wstring_view enum_member_wname
+    ) noexcept:
+        m_value{ En_ },
+        m_name{ int_<En_>{}, enum_member_name },
+        m_wname{ int_<En_>{}, enum_member_wname }
+    {}
+
 
     template <typename Char, typename CharTraits>
     constexpr auto &name(std::basic_ios<Char, CharTraits> const &) const noexcept
@@ -64,6 +78,8 @@ namespace record_
 template <typename T> using enum_type_t = typename T::enum_type;
 template <typename T> using mask_type_t = typename T::mask_type;
 template <typename T> using interop_type_t = typename T::interop_type;
+
+template <c::enum_ auto E_> consteval auto make() -> record_info<decltype(E_)> { return { int_<E_>{} }; }
 
 }
 

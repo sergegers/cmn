@@ -21,6 +21,7 @@ endif()
 if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
+
 project ("cmn")
 
 #set(Boost_DEBUG ON)

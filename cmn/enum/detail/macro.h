@@ -10,6 +10,8 @@
 #include <boost/preprocessor/seq/enum.hpp>
 #include <boost/preprocessor/seq/variadic_seq_to_seq.hpp>
 #include <boost/preprocessor/tuple/rem.hpp>
+#include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/wstringize.hpp>
 
 #pragma warning(disable: 4002 4003)
 
@@ -87,6 +89,11 @@
     using ::cmn::enum_::op::operator /=;    \
     using ::cmn::enum_::op::operator %;     \
     using ::cmn::enum_::op::operator %=;
+
+#define CMN_ENUM_RECORD(item)   \
+    ::cmn::enum_::record_info{ ::cmn::int_<item>{} BOOST_PP_COMMA()  \
+    BOOST_PP_STRINGIZE(item) BOOST_PP_COMMA()   \
+    BOOST_PP_WSTRINGIZE(item) }
 
 #define CMN_HEX_OUT()   ::std::hex << ::std::showbase << ::std::uppercase
 

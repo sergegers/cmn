@@ -45,6 +45,13 @@ using detail::group_::size_v;
 
 }
 
+namespace record_
+{
+
+using detail::record_::make;
+
+}
+
 //-----------------------------------------------------------------------------
 template <c::enumerable E>
 constexpr auto to_mask(E en) -> mask_type_t<E>
