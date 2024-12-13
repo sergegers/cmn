@@ -11,30 +11,10 @@
 #include <boost/type_traits/promote.hpp>
 #include <boost/exception/all.hpp>
 
-#if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
+#if __has_include(<boost/mp11/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
-#   include <boost/fusion/concepts.hpp>
 #else
-#   include <boost/fusion/support/is_sequence.hpp>
-#   include <boost/fusion/support/category_of.hpp>
-
-namespace boost::c
-{
-
-template <typename L> concept mp11_list = mp11::mp_is_list<L>::value;
-template <typename S> concept mp11_set = mp11::mp_is_set<S>::value;
-template <typename M> concept mp11_map = mp11::mp_is_map<M>::value;
-
-///////////////////////////////////////////////////////////////////////////////
-template <typename S>
-concept fus_sequence = fusion::traits::is_sequence<S>::value;
-
-template <typename S>
-concept random_access_fus_sequence =
-       fus_sequence<S> && fusion::traits::is_random_access<S>::value;
-
-}
-
+#   include <cmn/meta/boost/mp11/concepts.hpp>
 #endif
 
 #include <cmn/fwd.h>

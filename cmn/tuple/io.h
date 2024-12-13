@@ -2,11 +2,16 @@
 
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 
-#if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
+#if __has_include(<boost/mp11/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
+#else
+#   include <cmn/meta/boost/mp11/concepts.hpp>
+#endif
+
+#if __has_include(<boost/fusion/concepts.hpp>)
 #   include <boost/fusion/concepts.hpp>
 #else
-#   include <cmn/meta/concepts.h>
+#   include <cmn/meta/boost/fusion/concepts.hpp>
 #endif
 
 #include <cmn/meta/concepts.h>

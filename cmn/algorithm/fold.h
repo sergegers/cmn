@@ -6,11 +6,16 @@
 #include <boost/mp11.hpp>
 #include <boost/fusion/sequence/intrinsic/at.hpp>
 
-#if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
-#   include <boost/mp11/concepts.hpp>
-#   include <boost/fusion/concepts.hpp>
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
 #else
-#   include <cmn/meta/concepts.h>
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
+
+#if __has_include(<boost/fusion/concepts.hpp>)
+#   include <boost/fusion/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/fusion/concepts.hpp>
 #endif
 
 #include <cmn/util/util.h>         // make_index_sequence_reverse
@@ -53,7 +58,7 @@ constexpr auto fold_noctor_mp11(State &&state, Func &&func) -> decltype(auto)
     (
           std::forward<State>(state)
         , std::forward<Func>(func)
-        , make_index_sequence_reverse<mp_size<L>::value>{}
+        , make_index_sequence_reverse<mp_size_v<L>>{}
     );
 }
 
@@ -102,7 +107,7 @@ constexpr auto fold_fus(Sequence &seq, State &&state, Func &&func) -> decltype(a
           seq
         , std::forward<State>(state)
         , std::forward<Func>(func)
-        , make_index_sequence_reverse<fus::result_of::size<Sequence>::value>{}
+        , make_index_sequence_reverse<fus::result_of::size_v<Sequence>>{}
     );
 }
 

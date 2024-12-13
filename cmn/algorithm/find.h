@@ -2,6 +2,18 @@
 
 #include <type_traits>
 
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
+
+#if __has_include(<boost/fusion/type_traits.hpp>)
+#   include <boost/fusion/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/fusion/type_traits.hpp>
+#endif
+
 #include <cmn/meta/concepts.h>
 
 #include <cmn/algorithm/detail/visitor.h>
@@ -13,8 +25,8 @@ namespace cmn
 namespace detail
 {
 
-namespace fus = boost::fusion;
 namespace mpl = boost::mpl;
+namespace fus = boost::fusion;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -86,7 +98,7 @@ template
     , typename Iterator
     , typename EndIter
 >
-    requires fus::result_of::equal_to<Iterator, EndIter>::value
+    requires fus::result_of::equal_to_v<Iterator, EndIter>
 
 struct find_if_fus_impl<BeginIter, Iterator, EndIter>
 {
@@ -215,7 +227,7 @@ template
 	typename Iterator,
 	typename EndIter
 >
-    requires fus::result_of::equal_to<Iterator, EndIter>::value
+    requires fus::result_of::equal_to_v<Iterator, EndIter>
 
 struct iter_find_if_fus_impl<BeginIter, Iterator, EndIter>
 {
@@ -318,7 +330,7 @@ struct find_if_mp11_impl final
 
 
     template <boost::c::mp11_list Rest, typename Pred, typename Visitor>
-        requires mp_empty<Rest>::value
+        requires mp_empty_v<Rest>
 
     auto operator ()(std::type_identity<Rest>, Pred &&/*pred*/, Visitor &&visitor) const
     {
@@ -327,7 +339,7 @@ struct find_if_mp11_impl final
         // use first sequence element to compute a visitor
         // result type or use a part of the result_of protocol
         // if the sequence is empty
-        if constexpr (mp_empty<L>::value)
+        if constexpr (mp_empty_v<L>)
         {
             return result_{ std::forward<Visitor>(visitor) }
                     .vis_result_not_found()
@@ -390,7 +402,7 @@ struct find_if_noctor_mp11_impl final
     }
 
     template <boost::c::mp11_list Rest, typename Pred, typename Visitor>
-        requires mp_empty<Rest>::value
+        requires mp_empty_v<Rest>
     auto operator ()(std::type_identity<Rest>, Pred &&/*pred*/, Visitor &&visitor) const
     {
         using namespace boost::mp11;
@@ -398,7 +410,7 @@ struct find_if_noctor_mp11_impl final
         // use first sequence element to compute a visitor
         // result type or use a part of the result_of protocol
         // if the sequence is empty
-        if constexpr (mp_empty<L>::value)
+        if constexpr (mp_empty_v<L>)
         {
             return type_result_{ std::forward<Visitor>(visitor) }
                     .vis_result_not_found()

@@ -4,11 +4,28 @@
 
 #include <boost/mp11.hpp>
 
-#if __has_include(<boost/mp11/concepts.hpp>) && __has_include(<boost/fusion/concepts.hpp>)
+#if __has_include(<boost/mp11/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
+#else
+#   include <cmn/meta/boost/mp11/concepts.hpp>
+#endif
+
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
+
+#if __has_include(<boost/fusion/concepts.hpp>)
 #   include <boost/fusion/concepts.hpp>
 #else
-#   include <cmn/meta/concepts.h>
+#   include <cmn/meta/boost/fusion/concepts.hpp>
+#endif
+
+#if __has_include(<boost/fusion/type_traits.hpp>)
+#   include <boost/fusion/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/fusion/type_traits.hpp>
 #endif
 
 #include <cmn/util/util.h>
@@ -23,6 +40,7 @@ namespace detail
 
 using namespace boost::mp11;
 namespace fus = boost::fusion;
+namespace rfus = fus::result_of;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -33,7 +51,7 @@ namespace fus = boost::fusion;
 template <boost::c::mp11_list L, typename Comparer>
 struct binary_find_if_mp11_impl
 {
-    using itself = binary_find_if_mp11_impl<L, Comparer>;
+    using itself = binary_find_if_mp11_impl;
 
     binary_find_if_mp11_impl()               = default;
     binary_find_if_mp11_impl(itself const &) = delete;
@@ -64,7 +82,7 @@ struct binary_find_if_mp11_impl
 
         if constexpr (BeginIdx_ == EndIdx_)
         {
-            if constexpr (BeginIdx_ == mp_size<L>::value)
+            if constexpr (BeginIdx_ == mp_size_v<L>)
             {
                 // use the first sequence element to compute a visitor result type
                 return
@@ -150,7 +168,7 @@ struct binary_find_if_mp11_impl
         , typename Visitor
         , typename... Args
     >
-        requires mp_empty<L>::value
+        requires mp_empty_v<L>
     constexpr auto operator ()
     (
           [[maybe_unused]] mp_size_t<BeginIdx_> begin_idx
@@ -189,7 +207,7 @@ template
 >
 struct binary_find_fus_impl
 {
-    using itself = binary_find_fus_impl<Sequence, BeginIter, EndIter>;
+    using itself = binary_find_fus_impl;
 
     Sequence       &m_seq;
 
@@ -203,30 +221,22 @@ struct binary_find_fus_impl
     template <typename T, typename Comparer, typename Visitor, typename... Args>
     constexpr auto operator ()(T &&t, Comparer &&cmp, Visitor &&visitor, Args &&... args) const
     {
-        using fus::at_c;
-        using fus::front;
-        using fus::result_of::equal_to;
-        using fus::result_of::next;
-        using fus::result_of::advance_c;
-        using fus::result_of::distance;
-        using fus::result_of::deref;
+        using seq_begin_iter_type = rfus::begin_t<Sequence>;
+        using seq_end_iter_type = rfus::end_t<Sequence>;
 
-        using seq_begin_iter_type = typename fus::result_of::begin<Sequence>::type;
-        using seq_end_iter_type = typename fus::result_of::end<Sequence>::type;
-
-        if constexpr (equal_to<BeginIter, EndIter>::value)
+        if constexpr (rfus::equal_to_v<BeginIter, EndIter>)
         {
             // empty sequence chunk
 
-            if constexpr (equal_to<BeginIter, seq_end_iter_type>::value)
+            if constexpr (rfus::equal_to_v<BeginIter, seq_end_iter_type>)
             {
                 // end of search
 
                 // use first sequence element to compute a visitor result type
-                using front_type = typename deref<seq_begin_iter_type>::type;
+                using front_type = rfus::deref_t<seq_begin_iter_type>;
                 return
                     result_{ std::forward<Visitor>(visitor) }
-                        .args_not_found(std::forward<front_type>(front(m_seq)), std::forward<Args>(args)...)
+                        .args_not_found(std::forward<front_type>(fus::front(m_seq)), std::forward<Args>(args)...)
                         .with_index()
                     ()
                 ;
@@ -234,9 +244,9 @@ struct binary_find_fus_impl
             else
             {
                 // check the first picked sequence chunk element
-                static constexpr std::ptrdiff_t s_new_pos = distance<seq_begin_iter_type, BeginIter>::value;
+                static constexpr std::ptrdiff_t s_new_pos = rfus::distance_v<seq_begin_iter_type, BeginIter>;
 
-                if (decltype(auto) ct = at_c<s_new_pos>(m_seq); std::is_eq(cmp(t, ct)))
+                if (decltype(auto) ct = fus::at_c<s_new_pos>(m_seq); std::is_eq(cmp(t, ct)))
                 {
                     return result_{ std::forward<Visitor>(visitor) }
                             .with_args(std::forward<decltype(ct)>(ct), std::forward<Args>(args)...)
@@ -257,12 +267,12 @@ struct binary_find_fus_impl
         else
         {
             // get the middle iterator
-            static constexpr std::ptrdiff_t s_mid_delta = distance<BeginIter, EndIter>::value >> 1;
-            using mid_iter_type = typename advance_c<BeginIter, s_mid_delta>::type;
+            static constexpr std::ptrdiff_t s_mid_delta = rfus::distance_v<BeginIter, EndIter> >> 1;
+            using mid_iter_type = rfus::advance_c_t<BeginIter, s_mid_delta>;
 
-            constexpr std::ptrdiff_t s_new_pos = distance<seq_begin_iter_type, mid_iter_type>::value;
+            constexpr std::ptrdiff_t s_new_pos = rfus::distance_v<seq_begin_iter_type, mid_iter_type>;
 
-            if (decltype(auto) mt = at_c<s_new_pos>(m_seq);std::is_lt(cmp(t, mt)))
+            if (decltype(auto) mt = fus::at_c<s_new_pos>(m_seq);std::is_lt(cmp(t, mt)))
             {
                 binary_find_fus_impl<Sequence, BeginIter, mid_iter_type> const next_{ m_seq };
                 return next_
@@ -283,7 +293,7 @@ struct binary_find_fus_impl
             }
             else /*greater*/
             {
-                using next_iter_type = typename next<mid_iter_type>::type;
+                using next_iter_type = rfus::next_t<mid_iter_type>;
                 binary_find_fus_impl<Sequence, next_iter_type, EndIter> const next_{ m_seq };
                 return next_
                 (
@@ -303,11 +313,11 @@ template
     typename BeginIter, 
     typename EndIter
 >
-    requires fus::result_of::empty<Sequence>::value
+    requires rfus::empty_v<Sequence>
 
 struct binary_find_fus_impl<Sequence, BeginIter, EndIter>
 {
-    using itself = binary_find_fus_impl<Sequence, BeginIter, EndIter>;
+    using itself = binary_find_fus_impl;
 
     explicit binary_find_fus_impl(Sequence &/*seq*/) {}
     binary_find_fus_impl(itself const &) = delete;
@@ -371,7 +381,7 @@ constexpr auto binary_find_mp11
     return bs
     (
           mp_size_t<0>{}
-        , mp_size_t<mp_size<L>::value>{}
+        , mp_size_t<mp_size_v<L>>{}
         , std::forward<T>(t)
         , std::forward<Visitor>(visitor)
         , std::forward<Args>(args)...
@@ -408,7 +418,7 @@ constexpr auto binary_find_if_mp11
     return bs
     (
           mp_size_t<0>{}
-        , mp_size_t<mp_size<L>::value>{}
+        , mp_size_t<mp_size_v<L>>{}
         , std::forward<T>(t)
         , std::forward<Visitor>(visitor)
         , std::forward<Args>(args)...
@@ -438,9 +448,9 @@ constexpr auto binary_find_fus
     , Args &&... args
 )
 {
-    namespace fus_res = boost::fusion::result_of;
-    using begin_iter = typename fus_res::begin<Sequence>::type;
-    using end_iter = typename fus_res::end<Sequence>::type;
+    namespace rfus = boost::fusion::result_of;
+    using begin_iter = rfus::begin_t<Sequence>;
+    using end_iter = rfus::end_t<Sequence>;
 
     detail::binary_find_fus_impl
     <
@@ -482,9 +492,9 @@ constexpr auto binary_find_if_fus
     , Args &&... args
 )
 {
-    namespace fus_res = boost::fusion::result_of;
-    using begin_iter = typename fus_res::begin<Sequence>::type;
-    using end_iter = typename fus_res::end<Sequence>::type;
+    namespace rfus = boost::fusion::result_of;
+    using begin_iter = rfus::begin_t<Sequence>;
+    using end_iter = rfus::end_t<Sequence>;
 
     detail::binary_find_fus_impl
     <

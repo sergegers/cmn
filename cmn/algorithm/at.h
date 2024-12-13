@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <array>
 #include <cassert>
 
 // boost.mp11
@@ -9,15 +10,25 @@
 
 // boost.fusion
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
-#include <boost/fusion/sequence/intrinsic/empty.hpp>
 // boost.variant
 #include <boost/variant.hpp>
 
 #if __has_include(<boost/mp11/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
+#else
+#   include <cmn/meta/boost/mp11/concepts.hpp>
+#endif
+
+#if __has_include(<boost/fusion/concepts.hpp>)
 #   include <boost/fusion/concepts.hpp>
 #else
-#   include <cmn/meta/concepts.h>
+#   include <cmn/meta/boost/fusion/concepts.hpp>
+#endif
+
+#if __has_include(<boost/fusion/type_traits.hpp>)
+#   include <boost/fusion/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/fusion/type_traits.hpp>
 #endif
 
 #include <cmn/meta/type_traits.h>    // underlying_type_t<>
@@ -43,7 +54,7 @@ template
     , c::enumerable Idx
     , typename Visitor = detail::empty_visitor
 >
-    requires !boost::mp11::mp_empty<L>::value
+    requires !boost::mp11::mp_empty_v<L>
     
 constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
 {
@@ -51,7 +62,7 @@ constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
     using int_type = underlying_type_t<Idx>;
 
     auto const int_idx = static_cast<int_type>(idx);
-    static constexpr auto size = mp_size<L>::value;
+    static constexpr auto size = mp_size_v<L>;
 
     assert(int_idx < size); // Index is out of bounds
 
@@ -75,15 +86,17 @@ template
 >
     requires
            boost::c::random_access_fus_sequence<std::remove_reference_t<Sequence>>
-        && !boost::fusion::result_of::empty<Sequence>::value
+        && !boost::fusion::result_of::empty_v<Sequence>
 
 constexpr auto at_fus(Sequence &&seq, Idx idx, Visitor &&vis = detail::empty_visitor{})
 {
-    namespace fus = boost::fusion;
     using namespace boost::mp11;
+    namespace fus = boost::fusion;
+    namespace rfus = fus::result_of;
+
     using int_type = underlying_type_t<Idx>;
 
-    static constexpr auto size = boost::fusion::result_of::size<Sequence>::value;
+    static constexpr auto size = rfus::size_v<Sequence>;
     ASSERTE_MSG_A(idx < size, "Index " << idx << " is out of bounds [0, " << size << ")");
 
     static auto const tbl = []<int_type... Indices>

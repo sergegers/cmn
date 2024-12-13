@@ -3,8 +3,18 @@
 #include <type_traits>
 
 #include <boost/mp11.hpp>
-#include <boost/mp11/concepts.hpp>
-#include <boost/mp11/ext.hpp>
+
+#if __has_include(<boost/mp11/concepts.hpp>)
+#   include <boost/mp11/concepts.hpp>
+#else
+#   include <cmn/meta/boost/mp11/concepts.hpp>
+#endif
+
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
 
 namespace cmn
 {
