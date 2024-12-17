@@ -108,7 +108,7 @@ using int_fmt_slot_manip = slot_manip
 
 using int_fmt_forwarder = slot_manip_forwarder<int_fmt_slot_manip>;
 
-constexpr int_fmt_forwarder int_fmt{};
+inline constexpr int_fmt_forwarder int_fmt{};
 
 constexpr auto udec = int_fmt(int_fmt_t::dec);
 constexpr auto uhex = int_fmt(int_fmt_t::hex);

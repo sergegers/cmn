@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cmn/meta/symbols.h>
-#include <cmn/meta/concepts.h> // print_t
+#include <cmn/meta/concepts.h> // c::enum_<>, print_t
 
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
@@ -17,7 +17,7 @@ namespace cmn::enum_::io
 // Manipulator bitfield_mask_manip could be used with custom enums
 //
 ////////////////////////////////////////////////////////////////////////////////
-template <typename Enum>
+template <c::enum_ Enum>
 using bitfield_mask_manip =
     cmn::io::int_slot_manip
     <
@@ -27,7 +27,7 @@ using bitfield_mask_manip =
     >
 ;
 
-constexpr cmn::io::type_slot_manip_forwarder<bitfield_mask_manip> bitfield_mask {};
+inline constexpr cmn::io::deduce_slot_manip_forwarder<bitfield_mask_manip> bitfield_mask {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -53,7 +53,8 @@ using basic_open_manip =
 using open_manip = basic_open_manip<char>;
 using wopen_manip = basic_open_manip<wchar_t>;
 
-constexpr cmn::io::stream_slot_manip_forwarder<basic_open_manip> eopen {};
+inline constexpr cmn::io::slot_manip_forwarder<open_manip> eopen {};
+inline constexpr cmn::io::slot_manip_forwarder<wopen_manip> weopen {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -79,7 +80,8 @@ using basic_close_manip =
 using close_manip = basic_close_manip<char>;
 using wclose_manip = basic_close_manip<wchar_t>;
 
-constexpr cmn::io::stream_slot_manip_forwarder<basic_close_manip> eclose {};
+inline constexpr cmn::io::slot_manip_forwarder<close_manip> eclose {};
+inline constexpr cmn::io::slot_manip_forwarder<wclose_manip> weclose {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -102,7 +104,8 @@ using basic_bitfield_delim_manip =
 using bitfield_delim_manip = basic_bitfield_delim_manip<char>;
 using wbitfield_delim_manip = basic_bitfield_delim_manip<wchar_t>;
 
-constexpr cmn::io::stream_slot_manip_forwarder<basic_bitfield_delim_manip> bitfield_delim {};
+inline constexpr cmn::io::slot_manip_forwarder<bitfield_delim_manip> bitfield_delim {};
+inline constexpr cmn::io::slot_manip_forwarder<wbitfield_delim_manip> wbitfield_delim {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -119,7 +122,7 @@ using print_manip =
     >
 ;
 
-constexpr cmn::io::slot_manip_forwarder<print_manip> eprint {};
+inline constexpr cmn::io::slot_manip_forwarder<print_manip> eprint {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //

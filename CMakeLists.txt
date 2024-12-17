@@ -129,7 +129,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
- )
+  "cmn/io/manip/slot/storage.h")
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -147,12 +147,14 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/error.cpp"
   "test/algorithm.cpp"
   "test/enum.cpp" 
+   
    "test/strong_typedef.cpp" 
    "test/tuple/tuple.cpp"
    "test/tuple/va.cpp"
    "test/util.cpp" 
    "test/meta/type_traits.cpp"
- )
+   "test/test_accessor.h"
+   "test/manip.cpp" "test/range/io.cpp")
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

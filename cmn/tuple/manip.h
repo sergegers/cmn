@@ -34,7 +34,8 @@ using basic_open_manip =
 using open_manip = basic_open_manip<char>;
 using wopen_manip = basic_open_manip<wchar_t>;
 
-constexpr cmn::io::stream_slot_manip_forwarder<basic_open_manip> topen {};
+inline constexpr cmn::io::slot_manip_forwarder<open_manip> topen {};
+inline constexpr cmn::io::slot_manip_forwarder<wopen_manip> wtopen {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -60,7 +61,8 @@ using basic_close_manip =
 using close_manip = basic_close_manip<char>;
 using wclose_manip = basic_close_manip<wchar_t>;
 
-constexpr cmn::io::stream_slot_manip_forwarder<basic_close_manip> tclose {};
+inline constexpr cmn::io::slot_manip_forwarder<close_manip> tclose {};
+inline constexpr cmn::io::slot_manip_forwarder<wclose_manip> wtclose {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -82,7 +84,8 @@ using basic_delim_manip =
 using delim_manip = basic_delim_manip<char>;
 using wdelim_manip = basic_delim_manip<wchar_t>;
 
-constexpr cmn::io::stream_slot_manip_forwarder<basic_delim_manip> rdelim {};
+inline constexpr cmn::io::slot_manip_forwarder<delim_manip> rdelim {};
+inline constexpr cmn::io::slot_manip_forwarder<wdelim_manip> wrdelim {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //

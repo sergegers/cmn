@@ -6,10 +6,13 @@
 #include <concepts>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/meta/macro.h>
+
 #include <cmn/util/param.h>
 
 #include <cmn/io/manip/slot/decoder.h>
 #include <cmn/io/manip/slot/traits.h>
+#include <cmn/io/manip/slot/storage.h>
 
 namespace cmn { struct test_accessor_t; }
 
@@ -21,103 +24,36 @@ namespace manip
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Stream slot storage
-// template parameter Tag added to make an unique slot for every manipulator
-//
-////////////////////////////////////////////////////////////////////////////////
-
-//template <typename Tag, typename KeepType>
-//struct basic_stream_slot_storage;
-
-template <typename Tag, typename KeepType>
-    requires std::is_pointer_v<KeepType>
-struct basic_stream_slot_storage<Tag, KeepType>
-{
-    using keep_type = KeepType;
-    using tag_type = Tag;
-
-    static auto index() -> int
-    {
-        // call xalloc once to get an index at which we can store data for this
-        // manipulator.
-        static auto const idx = std::ios_base::xalloc();
-        return idx;
-    }
-    static auto value(std::ios_base const &ios)->  keep_type
-    {
-        return static_cast<keep_type>(const_cast<std::ios_base &>(ios).pword(index()));
-    }
-
-    static auto value(std::ios_base &ios_, keep_type value) -> void
-    {
-        // set mask
-        ios_.pword(index()) = value;
-    }
-};
-
-template <typename Tag, cmn::c::enumerable KeepType>
-struct basic_stream_slot_storage<Tag, KeepType>
-{
-    using keep_type = KeepType;
-    using tag_type = Tag;
-
-    static auto index() -> int
-    {
-        // call xalloc once to get an index at which we can store data for this
-        // manipulator.
-        static auto const idx = std::ios_base::xalloc();
-        return idx;
-    }
-    static auto value(std::ios_base const &ios)->  keep_type
-    {
-        return static_cast<keep_type>(const_cast<std::ios_base &>(ios).iword(index()));
-    }
-
-    static auto value(std::ios_base &ios_, keep_type value) -> void
-    {
-        // set mask
-        ios_.iword(index()) = static_cast<long>(value);
-    }
-};
-
-#ifdef CHT_STATIC_TEST
-
-static_assert(c::storage<ptr_stream_slot_storage<int>>);
-static_assert(c::storage<int_stream_slot_storage<int>>);
-
-#endif
-
-////////////////////////////////////////////////////////////////////////////////
-//
 // Slot manipulator.
 //
 // Manipulator template parameters:
 // DecodeType - loaded from/saved to stream type
 // DefaultInit - value returned by manipulator.value() set before the manipulator was applied
-// Default - the manipulator value set by default constructor
+// DefaultManip - value set by the manipulator w/o arguments
 // Decoder - decoder
 // Storage - storage
 //
 ////////////////////////////////////////////////////////////////////////////////
+
 struct reset_t {} constexpr reset_{};
 
 template
 <
       typename DecodeType
     , auto DefaultInit_
-    , auto Default_
+    , auto DefaultManip_
     , c::decoder Decoder
     , c::storage Storage
 >
     requires
         std::same_as<keep_type_t<Decoder>, keep_type_t<Storage>>
      && c::decoder_of<Decoder, decltype(DefaultInit_)>
-     && c::decoder_of<Decoder, decltype(Default_)>
+     && c::decoder_of<Decoder, decltype(DefaultManip_)>
 
 class slot_manip final
 {
 private:
-    using itself = slot_manip<DecodeType, DefaultInit_, Default_, Decoder, Storage>;
+    using itself = slot_manip;
     friend test_accessor_t;
 public:
     using decoder_type = Decoder;
@@ -125,92 +61,92 @@ public:
     using decode_type = DecodeType;
     using keep_type = typename storage_type::keep_type;
 private:
+    static constexpr decoder_type       decoder = {};
 
-    static constexpr decoder_type decoder = {};
-
-    static constexpr keep_type keep_real_default_init = {};
-    static constexpr keep_type keep_default_init = decoder.decode(DefaultInit_);
-
-    static inline decode_type decode_real_default_init = decoder.encode(keep_real_default_init);
-    static inline decode_type decode_default_init = decoder.encode(keep_default_init);
-    
-    keep_type        m_value;   // value to apply
-
-    template <typename ExtDecodeType> requires c::decoder_of<Decoder, ExtDecodeType>
-    static auto decode(ExtDecodeType const &in) -> keep_type
+    //-----------------------------------------------------------------------------
+    //
+    // interact with Storage through this class
+    //
+    class RS_PASS_BY_VALUE_ATTR unswapped_keep_type final
     {
-        if constexpr (keep_real_default_init == keep_default_init)
-        {
-            return decoder.decode(in);
-        }
-        else
-        {
-            // swap decode_real_default_init & decode_default_init
-            return 
-                in == decode_real_default_init?
-                    keep_default_init:
-                    in == decode_default_init?
-                        keep_real_default_init:
-                        decoder.decode(in)
-            ;
-        }
-    }
+    private:
+        static constexpr keep_type real_default_init = 0;
+        static constexpr keep_type default_init = decoder.decode(DefaultInit_);
 
-    static auto encode(keep_type out) -> decode_type
-    {
-        if constexpr (keep_real_default_init == keep_default_init)
-        {
-            return decoder.encode(out);
-        }
-        else
-        {
-            // swap keep_real_default_init & keep_default_init
-            return
-            // TODO: VS 16.3.0 make switch {} after implementing std::bitcast
-                out == keep_real_default_init? 
-                    decode_default_init:
-                    out == keep_default_init?
-                        decode_real_default_init:
-                        decoder.encode(out)
-            ;
-        }        
-    }
+        keep_type m_value;
+    public:
+        constexpr explicit unswapped_keep_type(keep_type value): m_value{ value } {}
 
-    static auto apply_value(std::ios_base &ios, keep_type value) -> void
+        constexpr explicit operator keep_type () const
+        {
+            if constexpr (real_default_init != default_init)
+            {
+                // swap real_default_init & default_init
+                switch (m_value)
+                {
+                case real_default_init: return default_init;
+                case default_init: return real_default_init;
+                default: return m_value;
+                }
+            }
+            else
+            {
+                return m_value;
+            }
+        }
+    };
+
+    //-----------------------------------------------------------------------------
+    struct storage_wrapper
     {
-        storage_type::value(ios, value);
-    }
+        static auto index() -> int { return storage_type::index(); }
+
+        static auto value(std::ios_base const &ios) -> keep_type
+        {
+            return static_cast<keep_type>(unswapped_keep_type { storage_type::value(ios) });
+        }
+
+        static auto value(std::ios_base &ios, keep_type value) -> void
+        {
+            storage_type::value(ios, static_cast<keep_type>(unswapped_keep_type{ value }));
+        }
+    };
+
+    //
+    //-----------------------------------------------------------------------------
+
+    static constexpr storage_wrapper    storage = {};
+
+    keep_type                           m_value;   // value to apply
 
     auto apply(std::ios_base &ios) const -> void
     {
-        apply_value(ios, m_value);
+        storage.value(ios, m_value);
     }
 public:
     //-----------------------------------------------------------------------------
     //
     // ctors
     //
-
-    template <typename ExtDecodeType> requires c::decoder_of<Decoder, ExtDecodeType>
-    explicit slot_manip(ExtDecodeType const &in):
-        m_value { decode(in) }
+    constexpr explicit slot_manip(c::decoded_by<Decoder> auto const &in):
+        m_value { decoder.decode(in) }
     {}
 
     // reset stream to initial state (as if no manipulator was applied)
-    explicit slot_manip(reset_t):
-        m_value { keep_real_default_init }
+    constexpr explicit slot_manip(reset_t):
+        m_value { decoder.decode(DefaultInit_) }
     {}
 
-    slot_manip() :
-        m_value { keep_default_init }
+    constexpr slot_manip() :
+        m_value { decoder.decode(DefaultManip_) }
     {}
 
     //-----------------------------------------------------------------------------
-    static auto index() -> int { return storage_type::index(); }
+    static auto index() -> int { return storage_wrapper::index(); }
 
     static auto value(std::ios_base const &ios) -> decode_type
     {
-        return encode(storage_type::value(ios));
+        return decoder.encode(storage.value(ios));
     }
 
     template
@@ -244,7 +180,7 @@ template
       typename TagOrStorage // = int_stream_slot_storage
     , std::integral Char
     , auto DefaultInit_
-    , auto Default_ = DefaultInit_
+    , auto DefaultManip_ = DefaultInit_
     , typename CharTraits = std::char_traits<Char>
 >
 using basic_string_slot_manip =
@@ -252,7 +188,7 @@ using basic_string_slot_manip =
     <
         std::basic_string<Char, CharTraits>
       , DefaultInit_
-      , Default_
+      , DefaultManip_
       , string_decoder<std::basic_string<Char, CharTraits>>
       , decode_param_t<int_storage_prm<TagOrStorage>>
     >
@@ -276,13 +212,13 @@ template
       typename TagOrStorage // = int_stream_slot_storage
     , cmn::c::enumerable Int
     , auto DefaultInit_
-    , auto Default_ = DefaultInit_
+    , auto DefaultManip_ = DefaultInit_
 >
 using int_slot_manip = slot_manip
 <
       Int 
     , DefaultInit_
-    , Default_
+    , DefaultManip_
     , int_decoder<Int>
     , decode_param_t<int_storage_prm<TagOrStorage>>
 >;
@@ -297,7 +233,7 @@ template
       typename TagOrStorage // = ptr_stream_slot_storage
     , typename Ptr
     , auto DefaultInit_
-    , auto Default_ = DefaultInit_
+    , auto DefaultManip_ = DefaultInit_
 >
     requires std::is_pointer_v<Ptr>
 
@@ -305,7 +241,7 @@ using ptr_slot_manip = slot_manip
 <
       Ptr 
     , DefaultInit_
-    , Default_
+    , DefaultManip_
     , ptr_decoder<Ptr>
     , decode_param_t<ptr_storage_prm<TagOrStorage>>
 >;

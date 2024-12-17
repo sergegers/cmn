@@ -205,11 +205,11 @@ public:
     constexpr auto operator ++ () noexcept -> U & { return ++this->m_t, static_cast<U &>(*this); }
     constexpr auto operator -- () noexcept -> U & { return --this->m_t, static_cast<U &>(*this); }
 
-    constexpr auto operator += (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
-    constexpr auto operator -= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t -= rhs, static_cast<U &>(*this); }
-    constexpr auto operator *= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
-    constexpr auto operator /= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
-    constexpr auto operator %= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U& { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator += (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U & { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator -= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U & { return this->m_t -= rhs, static_cast<U &>(*this); }
+    constexpr auto operator *= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U & { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator /= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U & { return this->m_t += rhs, static_cast<U &>(*this); }
+    constexpr auto operator %= (std::convertible_to<Ptrdiff> auto rhs) noexcept -> U & { return this->m_t += rhs, static_cast<U &>(*this); }
 
     friend constexpr auto operator - (U const &lhs, U const &rhs) noexcept -> Ptrdiff
     {
@@ -255,9 +255,9 @@ public:
 
     using inherited::operator ^=, inherited::operator &=, inherited::operator |=;
 
-    constexpr auto operator ^= (T const &rhs) noexcept -> U& { return this->m_t ^= rhs, static_cast<U &>(*this); }
-    constexpr auto operator &= (T const &rhs) noexcept -> U& { return this->m_t &= rhs, static_cast<U &>(*this); }
-    constexpr auto operator |= (T const &rhs) noexcept -> U& { return this->m_t |= rhs, static_cast<U &>(*this); }
+    constexpr auto operator ^= (T const &rhs) noexcept -> U & { return this->m_t ^= rhs, static_cast<U &>(*this); }
+    constexpr auto operator &= (T const &rhs) noexcept -> U & { return this->m_t &= rhs, static_cast<U &>(*this); }
+    constexpr auto operator |= (T const &rhs) noexcept -> U & { return this->m_t |= rhs, static_cast<U &>(*this); }
 };
 
 //-----------------------------------------------------------------------------
@@ -281,11 +281,11 @@ public:
     constexpr auto operator ++ () noexcept -> U& { return ++this->m_t, static_cast<U &>(*this); }
     constexpr auto operator -- () noexcept -> U& { return --this->m_t, static_cast<U &>(*this); }
 
-    constexpr auto operator += (U const &rhs) noexcept -> U& { return this->m_t += rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator -= (U const &rhs) noexcept -> U& { return this->m_t -= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator *= (U const &rhs) noexcept -> U& { return this->m_t *= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator /= (U const &rhs) noexcept -> U& { return this->m_t /= rhs.m_t, static_cast<U &>(*this); }
-    constexpr auto operator %= (U const &rhs) noexcept -> U& { return this->m_t %= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator += (U const &rhs) noexcept -> U & { return this->m_t += rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator -= (U const &rhs) noexcept -> U & { return this->m_t -= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator *= (U const &rhs) noexcept -> U & { return this->m_t *= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator /= (U const &rhs) noexcept -> U & { return this->m_t /= rhs.m_t, static_cast<U &>(*this); }
+    constexpr auto operator %= (U const &rhs) noexcept -> U & { return this->m_t %= rhs.m_t, static_cast<U &>(*this); }
 };
 
 //-----------------------------------------------------------------------------

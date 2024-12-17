@@ -35,6 +35,9 @@ concept decoder_of =
     }
 ;
 
+//-----------------------------------------------------------------------------
+template <typename T, typename Decoder> concept decoded_by = decoder_of<Decoder, T>;
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // low level manipulator slot processor
