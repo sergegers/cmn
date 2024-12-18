@@ -9,8 +9,11 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
+
+#include <cmn/io/manip/slot/fwd.h>
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
+
 #include <cmn/enum/combo.h>
 #include <cmn/util/strong_typedef.h>
 #include <cmn/util/feature.h>
@@ -89,7 +92,7 @@ auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t;
 
 struct int_fmt_storage_t
 {
-    using keep_type = std::intptr_t;
+    using keep_type = int_keep_type;
     using tag_type = int_fmt_storage_t;
 
     static auto index() -> int;

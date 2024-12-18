@@ -8,11 +8,10 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/macro.h>
 
-#include <cmn/util/param.h>
-
 #include <cmn/io/manip/slot/decoder.h>
 #include <cmn/io/manip/slot/traits.h>
 #include <cmn/io/manip/slot/storage.h>
+#include <cmn/io/manip/slot/param.h>
 
 namespace cmn { struct test_accessor_t; }
 
@@ -177,7 +176,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 template
 <
-      typename TagOrStorage // = int_stream_slot_storage
+      typename TagOrStorage                         // = int_stream_slot_storage<TagOrStorage>
     , std::integral Char
     , auto DefaultInit_
     , auto DefaultManip_ = DefaultInit_
@@ -190,7 +189,7 @@ using basic_string_slot_manip =
       , DefaultInit_
       , DefaultManip_
       , string_decoder<std::basic_string<Char, CharTraits>>
-      , decode_param_t<int_storage_prm<TagOrStorage>>
+      , decode_param_t<storage_prm<TagOrStorage, int_keep_type>>
     >
 ;
 
@@ -210,7 +209,7 @@ using basic_string_slot_manip =
 template
 <
       typename TagOrStorage // = int_stream_slot_storage
-    , cmn::c::enumerable Int
+    , c::enumerable Int
     , auto DefaultInit_
     , auto DefaultManip_ = DefaultInit_
 >
@@ -220,7 +219,7 @@ using int_slot_manip = slot_manip
     , DefaultInit_
     , DefaultManip_
     , int_decoder<Int>
-    , decode_param_t<int_storage_prm<TagOrStorage>>
+    , decode_param_t<storage_prm<TagOrStorage, int_keep_type>>
 >;
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -243,7 +242,7 @@ using ptr_slot_manip = slot_manip
     , DefaultInit_
     , DefaultManip_
     , ptr_decoder<Ptr>
-    , decode_param_t<ptr_storage_prm<TagOrStorage>>
+    , decode_param_t<storage_prm<TagOrStorage, ptr_keep_type>>
 >;
 
 }

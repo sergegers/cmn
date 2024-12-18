@@ -44,7 +44,7 @@ consteval auto adapt_enum_info(print_t)
 
 CMN_ENUM_INJECT_OPS()
 
-#ifdef CHT_STATIC_TEST
+#ifdef CMN_STATIC_TEST
 
 static_assert(std::same_as<interop_type_t<print_t>, int>);
 static_assert(ops_v<print_t> == (op_comparable | op_bitwise | op_interoperable));

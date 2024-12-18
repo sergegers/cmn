@@ -6,10 +6,13 @@
 #include <cstdint>
 #include <type_traits>
 #include <bit>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <ranges>
 
 #include <cmn/meta/concepts.h>
 #include <cmn/util/fixed_string.h>
+
+#include "fwd.h"
 
 namespace cmn::io::manip
 {
@@ -27,7 +30,7 @@ namespace cmn::io::manip
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Used for char and string types
+// Used for small char and string types
 //
 template <typename String>
 class string_decoder;
@@ -38,13 +41,13 @@ template
 	, typename CharTraits
 >
     // slot_room() >= 1
-    requires (sizeof(std::intptr_t) / sizeof(Char) >= 1)
+    requires (sizeof(int_keep_type) / sizeof(Char) >= 1)
 
 class string_decoder<std::basic_string<Char, CharTraits>> final
 {
 public:
     using decode_type = std::basic_string<Char, CharTraits>;
-    using keep_type = std::intptr_t;
+    using keep_type = int_keep_type;
 private:
     using string_view_type = std::basic_string_view<Char, CharTraits>;
 
@@ -108,7 +111,7 @@ public:
         return decode(str.data_());
     }
 
-    static auto decode(string_view_type str) -> keep_type
+    static constexpr auto decode(string_view_type str) -> keep_type
     {
         if (slot_room() < str.length()) 
             throw std::logic_error{ "String is too big." };
@@ -124,17 +127,65 @@ public:
 
 ///////////////////////////////////////////////////////////////////////////////
 //
+// Used for large char and string types
+//
+template <typename String>
+class large_string_decoder;
+
+template 
+<
+	  typename Char
+	, typename CharTraits
+>
+class large_string_decoder<std::basic_string<Char, CharTraits>> final
+{
+public:
+    using decode_type = std::basic_string<Char, CharTraits>;
+    using keep_type = Char *;
+private:
+    using string_view_type = std::basic_string_view<Char, CharTraits>;
+public:
+    //-----------------------------------------------------------------------------
+    //
+    // decoder interface
+    //
+
+    static constexpr auto encode(keep_type decoded) noexcept -> decode_type
+    {
+        return decode_type { decoded };
+    }
+
+    // N_ includes the trailing zero
+    template <std::size_t N_>
+    static constexpr auto decode(std::array<Char, N_> const &arr) noexcept -> keep_type
+    {
+        return decode_type { arr.data() };
+    }
+
+    template <std::size_t N_>
+    static constexpr auto decode(basic_fixed_string<Char, N_, CharTraits> const &str) noexcept -> keep_type
+    {
+        return decode(str.data_());
+    }
+
+    static constexpr auto decode(string_view_type str) -> keep_type
+    {
+        return keep_type{ str.data() };
+    }
+};
+
+///////////////////////////////////////////////////////////////////////////////
+//
 // Used for integral types
 //
 template <c::enumerable Int>
-    // sizeof(keep_type) >= sizeof(decode_type)
-    requires (sizeof(void *) >= sizeof(Int))
+    requires (sizeof(int_keep_type) >= sizeof(Int))
 
 class int_decoder final
 {
 public:
     using decode_type = Int;
-    using keep_type = std::intptr_t;
+    using keep_type = int_keep_type;
     //-----------------------------------------------------------------------------
     //
     // decoder interface
@@ -154,13 +205,12 @@ public:
 //
 // Used for pointer types
 //
-template <typename Ptr>
-    requires std::is_pointer_v<Ptr>
+template<c::pointer Ptr>
 class ptr_decoder final
 {
 public:
     using decode_type = Ptr;
-    using keep_type = void *;
+    using keep_type = ptr_keep_type;
     //-----------------------------------------------------------------------------
     //
     // decoder interface

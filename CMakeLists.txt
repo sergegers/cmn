@@ -22,6 +22,8 @@ if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
 
+add_compile_definitions("$<$<CONFIG:Debug>:CMN_STATIC_TEST>")
+
 project ("cmn")
 
 #set(Boost_DEBUG ON)
@@ -49,7 +51,7 @@ add_library (
  cmn 
  STATIC
 
- "cmn/fwd.h"
+ 
 
  "cmn/meta/macro.h"
  "cmn/meta/type_traits.h"
@@ -58,7 +60,7 @@ add_library (
  "cmn/meta/symbols.h"
 
  "cmn/util/fixed_string.h"
- "cmn/util/param.h"
+ "cmn/io/manip/slot/param.h"
  "cmn/util/lexical_cast.h"
  "cmn/util/lexical_cast.cpp"
  "cmn/util/inverse.h" 
@@ -67,11 +69,12 @@ add_library (
  "cmn/util/strong_typedef_io.cpp" 
  "cmn/util/feature.h"
 
- "cmn/io/manip/slot/concepts.h"
+ "cmn/io/manip/slot/fwd.h"
  "cmn/io/manip/slot/decoder.h"
  "cmn/io/manip/slot/forwarder.h"
- "cmn/tuple/manip.h"
  "cmn/io/manip/slot/traits.h"
+ "cmn/io/manip/slot/storage.h"
+ "cmn/io/manip/slot/param.h"
 
  "cmn/range/io.h"
  "cmn/range/manip.h" 
@@ -129,7 +132,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  "cmn/io/manip/slot/storage.h")
+ )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

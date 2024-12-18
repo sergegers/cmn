@@ -4,6 +4,7 @@
 
 #include <cmn/util/fixed_string.h>
 
+#include <cmn/io/manip/slot/fwd.h>
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/manip.h>
 
@@ -20,7 +21,7 @@ BOOST_AUTO_TEST_CASE(decoder)
     using manip_type = basic_string_slot_manip<struct storage_, char, "1"_fs>;
     using ta = test_accessor_t;
 
-    using keep_type = std::intptr_t;
+    using keep_type = int_keep_type;
     using chars_type = char[sizeof(keep_type) / sizeof(char)];
     // slot emulator
     union 

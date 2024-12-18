@@ -3,8 +3,6 @@
 #include <iosfwd>
 #include <ranges>
 #include <algorithm>
-// boost.io
-#include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
 
@@ -25,7 +23,7 @@ namespace cmn::range_::io
 struct table_out_
 {
     template <typename Char, typename CharTraits>
-    friend decltype(auto) operator <<(std::basic_ostream<Char, CharTraits> &ostr, table_out_)
+    friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, table_out_)
     {
         using symbols = symbols<Char, CharTraits>;
         return ostr << 

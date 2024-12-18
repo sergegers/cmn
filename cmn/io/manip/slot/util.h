@@ -4,8 +4,8 @@
 #include <ios>
 #include <type_traits>
 
+#include <cmn/meta/concepts.h>
 #include <cmn/io/manip/slot/decoder.h>   // TODO: investigate why decoder.h inclusion is required?
-#include <cmn/io/manip/slot/concepts.h>
 
 namespace cmn::io::manip
 {
