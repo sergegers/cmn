@@ -31,6 +31,10 @@ using basic_open_manip =
     >
 ;
 
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits = std::char_traits<Char>>
+constexpr cmn::io::slot_manip_forwarder<basic_open_manip<Char, CharTraits>> basic_ropen {};
+
 using open_manip = basic_open_manip<char>;
 using wopen_manip = basic_open_manip<wchar_t>;
 
@@ -58,6 +62,10 @@ using basic_close_manip =
     >
 ;
 
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits = std::char_traits<Char>>
+constexpr cmn::io::slot_manip_forwarder<basic_close_manip<Char, CharTraits>> basic_rclose {};
+
 using close_manip = basic_close_manip<char>;
 using wclose_manip = basic_close_manip<wchar_t>;
 
@@ -81,6 +89,10 @@ using basic_delim_manip =
     >
 ;
 
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits = std::char_traits<Char>>
+constexpr cmn::io::slot_manip_forwarder<basic_delim_manip<Char, CharTraits>> basic_rdelim {};
+
 using delim_manip = basic_delim_manip<char>;
 using wdelim_manip = basic_delim_manip<wchar_t>;
 
@@ -93,5 +105,22 @@ inline constexpr cmn::io::slot_manip_forwarder<wdelim_manip> wrdelim {};
 //
 using rsaver = cmn::io::manip::iword_saver<open_manip, close_manip, delim_manip>;
 using wrsaver = cmn::io::manip::iword_saver<wopen_manip, wclose_manip, wdelim_manip>;
+
+}
+
+namespace cmn::io
+{
+
+using range_::io::basic_ropen;
+using range_::io::ropen;
+using range_::io::wropen;
+using range_::io::basic_rclose;
+using range_::io::rclose;
+using range_::io::wrclose;
+using range_::io::basic_rdelim;
+using range_::io::rdelim;
+using range_::io::wrdelim;
+using range_::io::rsaver;
+using range_::io::wrsaver;
 
 }

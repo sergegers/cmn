@@ -844,5 +844,38 @@ BOOST_AUTO_TEST_CASE(large_enum)
     }
 }
 
+//BOOST_AUTO_TEST_CASE(local_enum)
+//{
+//    enum class loc_en_t { e0, e1, e2 };
+//
+//    struct adapted
+//    {
+//        consteval auto operator () (loc_en_t) const
+//        {
+//            using enum loc_en_t;
+//            return adapt_enum_info_helper<e0, e1, e2>();
+//        };
+//    };
+//
+//    //adapt_enum_info(loc_en_t::e0);
+//    //static_assert(c::adapted_enum<loc_en_t>);
+//}
+
+enum { ae_0, ae_1, ae_2 };
+
+consteval auto adapt_enum_info(decltype(ae_0))
+{
+    return adapt_enum_info_helper<ae_0, ae_1, ae_2>();
+}
+
+BOOST_AUTO_TEST_CASE(anonymous_enum)
+{
+    output_test_stream tstr;
+    tstr << ae_1;
+    BOOST_CHECK(tstr.is_equal("[ae_1]"));
+
+    // NOTE: what about using print_t::class_prefix option?
+}
+
 BOOST_AUTO_TEST_SUITE_END() // enum_
 BOOST_AUTO_TEST_SUITE_END() // cmn

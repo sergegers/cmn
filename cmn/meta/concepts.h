@@ -514,12 +514,13 @@ concept error_info_list =
 // Extended enum concepts
 //
 ///////////////////////////////////////////////////////////////////////////////
-
 template <typename T>
 concept enum_info =
     enum_<typename T::enum_type>
  && requires(T const &einfo, interop_type_t<enum_::op_t> &ops)
     {
+        typename T::enum_type;
+
         { einfo.kind() } -> std::same_as<enum_::kind_t>;
         ops = einfo.m_ops;
         einfo.m_groups;

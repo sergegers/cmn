@@ -50,6 +50,10 @@ using basic_open_manip =
     >
 ;
 
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits = std::char_traits<Char> >
+constexpr cmn::io::slot_manip_forwarder<basic_open_manip<Char, CharTraits>> basic_eopen {};
+
 using open_manip = basic_open_manip<char>;
 using wopen_manip = basic_open_manip<wchar_t>;
 
@@ -77,6 +81,10 @@ using basic_close_manip =
     >
 ;
 
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits = std::char_traits<Char> >
+constexpr cmn::io::slot_manip_forwarder<basic_close_manip<Char, CharTraits>> basic_eclose {};
+
 using close_manip = basic_close_manip<char>;
 using wclose_manip = basic_close_manip<wchar_t>;
 
@@ -101,6 +109,11 @@ using basic_bitfield_delim_manip =
       , CharTraits
     >
 ;
+
+//-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits = std::char_traits<Char> >
+constexpr cmn::io::slot_manip_forwarder<basic_bitfield_delim_manip<Char, CharTraits>> basic_bitfield_delim {};
+
 using bitfield_delim_manip = basic_bitfield_delim_manip<char>;
 using wbitfield_delim_manip = basic_bitfield_delim_manip<wchar_t>;
 
@@ -147,9 +160,15 @@ namespace cmn::io
 {
 
 using enum_::io::bitfield_mask;
+using enum_::io::basic_eopen;
 using enum_::io::eopen;
+using enum_::io::weopen;
+using enum_::io::basic_eclose;
 using enum_::io::eclose;
+using enum_::io::weclose;
+using enum_::io::basic_bitfield_delim;
 using enum_::io::bitfield_delim;
+using enum_::io::wbitfield_delim;
 using enum_::io::eprint;
 using enum_::io::basic_esaver;
 using enum_::io::esaver;

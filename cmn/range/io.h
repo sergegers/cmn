@@ -29,9 +29,9 @@ struct table_out_
     {
         using symbols = symbols<Char, CharTraits>;
         return ostr << 
-            ropen(symbols::open_angle_bracket + symbols::endl) << 
-            rclose(symbols::close_angle_bracket + symbols::endl) <<
-            rdelim(symbols::endl)
+            basic_ropen<Char, CharTraits>(symbols::open_angle_bracket + symbols::endl) << 
+            basic_rclose<Char, CharTraits>(symbols::close_angle_bracket + symbols::endl) <<
+            basic_rdelim<Char, CharTraits>(symbols::endl)
         ;
     }
 };
@@ -49,9 +49,9 @@ struct compact_table_out_
     {
         using symbols = symbols<Char, CharTraits>;
         return ostr << 
-            ropen(symbols::open_angle_bracket) << 
-            rclose(symbols::close_angle_bracket) <<
-            rdelim(symbols::comma + symbols::whitespace)
+            basic_ropen<Char, CharTraits>(symbols::open_angle_bracket) << 
+            basic_rclose<Char, CharTraits>(symbols::close_angle_bracket) <<
+            basic_rdelim<Char, CharTraits>(symbols::comma + symbols::whitespace)
         ;
     }
 };
@@ -92,17 +92,6 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Range rng) -> std:
 }
 
 }   
-
-namespace cmn::io
-{
-
-using range_::io::ropen;
-using range_::io::rclose;
-using range_::io::rdelim;
-using range_::io::rsaver;
-using range_::io::wrsaver;
-
-}
 
 // inject to STL streams namespace for using ADL
 namespace std

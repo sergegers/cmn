@@ -2,8 +2,6 @@
 
 #include <type_traits>
 
-#include "manip.h"
-
 namespace cmn::io
 {
 
