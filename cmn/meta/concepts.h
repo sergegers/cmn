@@ -37,14 +37,14 @@ template <typename T>
 concept pointer = std::is_pointer_v<T>;
 
 template <typename T>
-concept dereferencable =  requires (T &t)
+concept dereferenceable =  requires (T &t)
 {
     { *t };
 };
 
 //-----------------------------------------------------------------------------
 //
-// also support smart pointers
+// add smart pointer support
 //
 // https://stackoverflow.com/a/78595795/8452129
 //-----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ concept pointer_like =
     pointer<T>
  ||
 (
-    dereferencable<T>
+    dereferenceable<T>
  && requires (T t)
  {
     { static_cast<bool>(t) };
@@ -371,7 +371,7 @@ concept string = requires (T const &ct, std::size_t idx)
     typename T::value_type;
     typename T::traits_type;
 
-    { ct.c_str() } -> std::same_as<typename T::value_type const *>;
+//    { ct.c_str() } -> std::same_as<typename T::value_type const *>;
     { ct[idx] } -> std::same_as<typename T::value_type const &>;
     { std::size(ct) } -> std::same_as<std::size_t>;
 };

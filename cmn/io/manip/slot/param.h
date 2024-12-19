@@ -47,19 +47,19 @@ struct decode_param<io::manip::storage_prm<TagOrStorage, KeepType>>
     using type = TagOrStorage;
 };
 
-template <typename TagOrStorage>
+template <typename TagOrStorage> requires !c::storage<TagOrStorage>
 struct decode_param<io::manip::storage_prm<TagOrStorage, io::manip::ptr_keep_type>>
 {
     using type = io::manip::ptr_stream_slot_storage<TagOrStorage>;
 };
 
-template <typename TagOrStorage>
+template <typename TagOrStorage> requires !c::storage<TagOrStorage>
 struct decode_param<io::manip::storage_prm<TagOrStorage, io::manip::int_keep_type>>
 {
     using type = io::manip::int_stream_slot_storage<TagOrStorage>;
 };
 
-template <c::storage TagOrStorage, c::pointer CharPtr>
+template <c::storage TagOrStorage, c::pointer CharPtr> requires !c::storage<TagOrStorage>
 struct decode_param<io::manip::storage_prm<TagOrStorage, CharPtr>>
 {
     using type = io::manip::large_string_stream_slot_storage<TagOrStorage, CharPtr>;

@@ -155,7 +155,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
    "test/tuple/tuple.cpp"
    "test/tuple/va.cpp"
    "test/util.cpp" 
-   "test/meta/type_traits.cpp"
+   "test/meta.cpp"
    "test/test_accessor.h"
    "test/manip.cpp" "test/range/io.cpp")
 

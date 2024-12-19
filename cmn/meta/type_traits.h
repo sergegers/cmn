@@ -10,20 +10,16 @@
 namespace cmn
 {
 
-template<typename T>
-struct remove_rvalue_reference
-{
-    using type = T;
-};
+template<typename T> struct remove_rvalue_reference { using type = T; };
+template<typename T> struct remove_rvalue_reference<T &&> { using type = T; };
 
-template<typename T>
-struct remove_rvalue_reference<T&&>
-{
-    using type = T;
-};
+template<typename T> using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
 
-template<typename T>
-using remove_rvalue_reference_t = typename remove_rvalue_reference<T>::type;
+//-----------------------------------------------------------------------------
+template<typename T> struct remove_lvalue_reference { using type = T; };
+template<typename T> struct remove_lvalue_reference<T &> { using type = T; };
+
+template<typename T> using remove_lvalue_reference_t = typename remove_lvalue_reference<T>::type;
 
 //-----------------------------------------------------------------------------
 //
