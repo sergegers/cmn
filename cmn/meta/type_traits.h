@@ -177,4 +177,12 @@ template <typename Int> constexpr auto value_v = Int::value;
 template <bool Val_, typename...>
 constexpr bool dependent_v = Val_;
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// string helpers
+//
+///////////////////////////////////////////////////////////////////////////////
+template <c::string T> using char_t = typename T::value_type;
+template <c::string T> using char_traits_t = typename T::traits_type;
+
 }

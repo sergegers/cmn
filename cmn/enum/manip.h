@@ -22,7 +22,6 @@ using bitfield_mask_manip =
     cmn::io::int_slot_manip
     <
         struct bitfield_mask_
-      , Enum
       , static_cast<Enum>(std::numeric_limits<interop_type_t<Enum>>::max())
     >
 ;
@@ -43,10 +42,8 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_open_
-      , Char
       , symbols<Char, CharTraits>::open_square_bracket
       , symbols<Char, CharTraits>::nothing
-      , CharTraits
     >
 ;
 
@@ -74,10 +71,8 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_close_
-      , Char
       , symbols<Char, CharTraits>::close_square_bracket
       , symbols<Char, CharTraits>::nothing
-      , CharTraits
     >
 ;
 
@@ -103,10 +98,8 @@ using basic_bitfield_delim_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_bitfield_delim_
-      , Char
       , symbols<Char, CharTraits>::whitespace
       , symbols<Char, CharTraits>::nothing
-      , CharTraits
     >
 ;
 
@@ -125,16 +118,7 @@ inline constexpr cmn::io::slot_manip_forwarder<wbitfield_delim_manip> wbitfield_
 // Print options manipulator
 //
 ///////////////////////////////////////////////////////////////////////////////
-using print_manip =
-    cmn::io::int_slot_manip
-    <
-          struct print_
-        , print_t
-        , print_t::tail
-        , print_t::empty
-    >
-;
-
+using print_manip = cmn::io::int_slot_manip<struct print_, print_t::tail, print_t::empty>;
 inline constexpr cmn::io::slot_manip_forwarder<print_manip> eprint {};
 
 ///////////////////////////////////////////////////////////////////////////////

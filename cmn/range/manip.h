@@ -24,10 +24,8 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_open_
-      , Char
       , symbols<Char, CharTraits>::open_angle_bracket
       , symbols<Char, CharTraits>::nothing
-      , CharTraits
     >
 ;
 
@@ -55,10 +53,8 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
           struct basic_range_close_
-		, Char
 		, symbols<Char, CharTraits>::close_angle_bracket
         , symbols<Char, CharTraits>::nothing
-		, CharTraits
     >
 ;
 
@@ -82,10 +78,8 @@ using basic_delim_manip =
     cmn::io::basic_string_slot_manip
     <
           struct basic_range_delim_
-		, Char
 		, symbols<Char, CharTraits>::comma + symbols<Char, CharTraits>::whitespace
         , symbols<Char, CharTraits>::nothing
-		, CharTraits
     >
 ;
 

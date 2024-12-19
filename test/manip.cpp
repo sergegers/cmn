@@ -18,7 +18,7 @@ using namespace std::string_literals;
 
 BOOST_AUTO_TEST_CASE(decoder)
 {
-    using manip_type = basic_string_slot_manip<struct storage_, char, "1"_fs>;
+    using manip_type = basic_string_slot_manip<struct storage_, "1"_fs>;
     using ta = test_accessor_t;
 
     using keep_type = int_keep_type;
@@ -44,7 +44,6 @@ BOOST_AUTO_TEST_CASE(decoder)
 using imanip = int_slot_manip
 <                   
       struct int_manip_     // TagOrStorage                 
-    , int                   // Int
     , 4                     // DefaultInit_
     , 7                     // Default_
 >;
@@ -66,7 +65,6 @@ BOOST_AUTO_TEST_CASE(int_manip)
 using bmanip = int_slot_manip
 <
       struct bool_manip_    // TagOrStorage
-    , bool                  // Int
     , false                 // DefaultInit_
     , true                  // Default_
 >;

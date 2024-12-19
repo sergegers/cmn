@@ -6,6 +6,7 @@
 #include <concepts>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
 #include <cmn/meta/macro.h>
 
 #include <cmn/io/manip/slot/decoder.h>
@@ -177,19 +178,21 @@ public:
 template
 <
       typename TagOrStorage                         // = int_stream_slot_storage<TagOrStorage>
-    , std::integral Char
-    , auto DefaultInit_
-    , auto DefaultManip_ = DefaultInit_
-    , typename CharTraits = std::char_traits<Char>
+    , c::string auto DefaultInit_
+    , c::string auto DefaultManip_ = DefaultInit_
 >
+    requires
+        std::same_as<char_t<decltype(DefaultInit_)>, char_t<decltype(DefaultManip_)>>
+     && std::same_as<char_traits_t<decltype(DefaultInit_)>, char_traits_t<decltype(DefaultManip_)>>
+
 using basic_string_slot_manip =
     slot_manip
     <
-        std::basic_string<Char, CharTraits>
+        std::basic_string<char_t<decltype(DefaultInit_)>, char_traits_t<decltype(DefaultInit_)>>
       , DefaultInit_
       , DefaultManip_
-      , string_decoder<std::basic_string<Char, CharTraits>>
-      , decode_param_t<storage_prm<TagOrStorage, int_keep_type>>
+      , string_decoder<std::basic_string<char_t<decltype(DefaultInit_)>, char_traits_t<decltype(DefaultInit_)>>>
+      , decode_param_t<string_storage_prm<TagOrStorage, int_keep_type>>
     >
 ;
 
@@ -209,16 +212,15 @@ using basic_string_slot_manip =
 template
 <
       typename TagOrStorage // = int_stream_slot_storage
-    , c::enumerable Int
-    , auto DefaultInit_
-    , auto DefaultManip_ = DefaultInit_
+    , c::enumerable auto DefaultInit_
+    , decltype(DefaultInit_) DefaultManip_ = DefaultInit_
 >
 using int_slot_manip = slot_manip
 <
-      Int 
+      decltype(DefaultInit_)
     , DefaultInit_
     , DefaultManip_
-    , int_decoder<Int>
+    , int_decoder<decltype(DefaultInit_)>
     , decode_param_t<storage_prm<TagOrStorage, int_keep_type>>
 >;
 
@@ -230,18 +232,15 @@ using int_slot_manip = slot_manip
 template
 <
       typename TagOrStorage // = ptr_stream_slot_storage
-    , typename Ptr
-    , auto DefaultInit_
-    , auto DefaultManip_ = DefaultInit_
+    , c::pointer auto DefaultInit_
+    , decltype(DefaultInit_) DefaultManip_ = DefaultInit_
 >
-    requires std::is_pointer_v<Ptr>
-
 using ptr_slot_manip = slot_manip
 <
-      Ptr 
+      decltype(DefaultInit_)
     , DefaultInit_
     , DefaultManip_
-    , ptr_decoder<Ptr>
+    , ptr_decoder<decltype(DefaultInit_)>
     , decode_param_t<storage_prm<TagOrStorage, ptr_keep_type>>
 >;
 
