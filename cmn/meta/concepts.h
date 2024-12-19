@@ -365,18 +365,26 @@ concept ariphmetic =
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, typename Char, typename CharTraits>
-concept basic_string = requires (T const &ct, std::size_t idx)
+template <typename T>
+concept string = requires (T const &ct, std::size_t idx)
 {
-    { ct.c_str() } -> std::same_as<Char const *>;
-    { ct[idx] } -> std::same_as<Char const &>;
+    typename T::value_type;
+    typename T::traits_type;
+
+    { ct.c_str() } -> std::same_as<typename T::value_type const *>;
+    { ct[idx] } -> std::same_as<typename T::value_type const &>;
     { std::size(ct) } -> std::same_as<std::size_t>;
 };
 
-template <typename T> concept string = basic_string<T, char, std::char_traits<char>>;
-template <typename T> concept wstring = basic_string<T, wchar_t, std::char_traits<wchar_t>>;
-
 //-----------------------------------------------------------------------------
+template <typename T, typename Char, typename CharTraits>
+concept string_of =
+    string<T>
+ && std::same_as<typename T::value_type, Char>
+ && std::same_as<typename T::traits_type, CharTraits>
+;
+
+///////////////////////////////////////////////////////////////////////////////
 template <typename T, typename Char, typename CharTraits>
 concept printable = requires (std::basic_ostream<Char, CharTraits> &ostr, T const &t)
 {

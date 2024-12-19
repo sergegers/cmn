@@ -150,7 +150,7 @@ template
     , typename Char = char
     , typename CharTraits = std::char_traits<Char>
 >
-constexpr auto itoa() -> c::basic_string<Char, CharTraits> auto
+constexpr auto itoa() -> c::string_of<Char, CharTraits> auto
 {
     using unsigned_type = std::make_unsigned_t<decltype(N_)>;
     if constexpr (N_ >= 0)
