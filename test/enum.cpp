@@ -307,15 +307,15 @@ BOOST_AUTO_TEST_CASE(save_flags)
     BOOST_TEST(close_manip::value(ostr) == "]");
 
     {        
-        boost::io::ios_iword_saver eos { ostr, open_manip::index() };
-        boost::io::ios_iword_saver ecs { ostr, close_manip::index() };
+        boost::io::ios_iword_saver eos { ostr, open_manip::index(ostr) };
+        boost::io::ios_iword_saver ecs { ostr, close_manip::index(ostr) };
 
         ostr << eopen() << eclose();
         BOOST_TEST(open_manip::value(ostr) == "");
         BOOST_TEST(close_manip::value(ostr) == "");
 
         ostr << val;
-        BOOST_CHECK_MESSAGE(ostr.str() == "two blue", ostr.str());
+        BOOST_TEST(ostr.str() == "two blue");
     
         ostr.str(""s);
     }
@@ -843,23 +843,6 @@ BOOST_AUTO_TEST_CASE(large_enum)
         BOOST_TEST(sstr.str() == "[e1071]");
     }
 }
-
-//BOOST_AUTO_TEST_CASE(local_enum)
-//{
-//    enum class loc_en_t { e0, e1, e2 };
-//
-//    struct adapted
-//    {
-//        consteval auto operator () (loc_en_t) const
-//        {
-//            using enum loc_en_t;
-//            return adapt_enum_info_helper<e0, e1, e2>();
-//        };
-//    };
-//
-//    //adapt_enum_info(loc_en_t::e0);
-//    //static_assert(c::adapted_enum<loc_en_t>);
-//}
 
 enum { ae_0, ae_1, ae_2 };
 

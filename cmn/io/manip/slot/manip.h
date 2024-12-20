@@ -47,8 +47,8 @@ template
 >
     requires
         std::same_as<keep_type_t<Decoder>, keep_type_t<Storage>>
-     && c::decoder_of<Decoder, decltype(DefaultInit_)>
-     && c::decoder_of<Decoder, decltype(DefaultManip_)>
+     && c::static_decoder_for<Decoder, decltype(DefaultInit_)>
+     && c::static_decoder_for<Decoder, decltype(DefaultManip_)>
 
 class slot_manip final
 {
@@ -70,8 +70,8 @@ private:
     class RS_PASS_BY_VALUE_ATTR unswapped_keep_type final
     {
     private:
-        static constexpr keep_type real_default_init = 0;
-        static constexpr keep_type default_init = decoder.decode(DefaultInit_);
+        static constexpr keep_type real_default_init = {};  // zero initialized
+        static constexpr auto default_init = decoder.static_decode(DefaultInit_);
 
         keep_type m_value;
     public:
@@ -82,12 +82,10 @@ private:
             if constexpr (real_default_init != default_init)
             {
                 // swap real_default_init & default_init
-                switch (m_value)
-                {
-                case real_default_init: return default_init;
-                case default_init: return real_default_init;
-                default: return m_value;
-                }
+                if (m_value == real_default_init) return default_init;
+                if (m_value == default_init) return real_default_init;
+
+                return m_value;
             }
             else
             {
@@ -99,9 +97,9 @@ private:
     //-----------------------------------------------------------------------------
     struct storage_wrapper
     {
-        static auto index() -> int { return storage_type::index(); }
+        static auto index(std::ios_base &ios) -> int { return storage_type::index(ios); }
 
-        static auto value(std::ios_base const &ios) -> keep_type
+        static auto value(std::ios_base &ios) -> keep_type
         {
             return static_cast<keep_type>(unswapped_keep_type { storage_type::value(ios) });
         }
@@ -142,9 +140,12 @@ public:
     {}
 
     //-----------------------------------------------------------------------------
-    static auto index() -> int { return storage_wrapper::index(); }
+    //
+    // slot_manipulator concept
+    //
+    static auto index(std::ios_base &ios) -> int { return storage_wrapper::index(ios); }
 
-    static auto value(std::ios_base const &ios) -> decode_type
+    static auto value(std::ios_base &ios) -> decode_type
     {
         return decoder.encode(storage.value(ios));
     }
@@ -192,7 +193,36 @@ using basic_string_slot_manip =
       , DefaultInit_
       , DefaultManip_
       , string_decoder<std::basic_string<char_t<decltype(DefaultInit_)>, char_traits_t<decltype(DefaultInit_)>>>
-      , decode_param_t<string_storage_prm<TagOrStorage, int_keep_type>>
+      , decode_param_t<storage_prm<TagOrStorage, int_keep_type>>
+    >
+;
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// basic_large_string_slot_manip
+//
+////////////////////////////////////////////////////////////////////////////////
+template <c::string auto DefaultInit_>
+using ls_decode_type_t = std::basic_string<char_t<decltype(DefaultInit_)>, char_traits_t<decltype(DefaultInit_)>>;
+
+template
+<
+      typename TagOrStorage                         // = int_stream_slot_storage<TagOrStorage>
+    , c::string auto DefaultInit_
+    , c::string auto DefaultManip_ = DefaultInit_
+>
+    requires
+        std::same_as<char_t<decltype(DefaultInit_)>, char_t<decltype(DefaultManip_)>>
+     && std::same_as<char_traits_t<decltype(DefaultInit_)>, char_traits_t<decltype(DefaultManip_)>>
+
+using basic_large_string_slot_manip =
+    slot_manip
+    <
+        ls_decode_type_t<DefaultInit_>
+      , DefaultInit_
+      , DefaultManip_
+      , large_string_decoder<ls_decode_type_t<DefaultInit_>>
+      , large_string_stream_slot_storage<TagOrStorage, char_t<decltype(DefaultInit_)>, char_traits_t<decltype(DefaultInit_)>>
     >
 ;
 

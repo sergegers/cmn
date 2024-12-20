@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
 
     //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
     {
-        boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index() };
+        boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
         ostr << uhex << ushowbase << uupercase << uasm << ulong_ << usign << my_int{ 6789 };
         //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
         //BOOST_TEST_MESSAGE(ostr.str());
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
     ostr.str("");
     BOOST_TEST(manip::int_fmt_slot_manip::value(ostr) == int_fmt_t::empty);
     {
-        boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index() };
+        boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
         ostr << my_int{ 6789 };
         //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
         //BOOST_TEST_MESSAGE(ostr.str());        

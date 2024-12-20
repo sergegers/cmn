@@ -2,8 +2,10 @@
 
 #include <ios>
 #include <cstdlib>
+// ReSharper disable CppUnusedIncludeDirective
 #include <ranges>
 #include <exception>
+// ReSharper restore CppUnusedIncludeDirective
 
 #include <cmn/meta/symbols.h>
 
@@ -25,21 +27,21 @@ struct ptr_stream_slot_storage
     using keep_type = ptr_keep_type;
     using tag_type = Tag;
 
-    static auto index() -> int
+    static auto index(std::ios_base &/*ios*/) -> int
     {
         // call xalloc once to get an index at which we can store data for this manipulator.
         static auto const idx = std::ios_base::xalloc();
         return idx;
     }
 
-    static auto value(std::ios_base const &ios) ->  keep_type
+    static auto value(std::ios_base &ios) ->  keep_type
     {
-        return const_cast<std::ios_base &>(ios).pword(index());
+        return ios.pword(index(ios));
     }
 
     static auto value(std::ios_base &ios, keep_type value) -> void
     {
-        ios.pword(index()) = value;
+        ios.pword(index(ios)) = value;
     }
 };
 
@@ -50,73 +52,84 @@ struct int_stream_slot_storage
     using keep_type = int_keep_type;
     using tag_type = Tag;
 
-    static auto index() -> int
+    static auto index(std::ios_base &/*ios*/) -> int
     {
         // call xalloc() once to get an index at which we can store data for this manipulator.
         static auto const idx = std::ios_base::xalloc();
         return idx;
     }
 
-    static auto value(std::ios_base const &ios)->  keep_type
+    static auto value(std::ios_base &ios)->  keep_type
     {
-        return const_cast<std::ios_base &>(ios).iword(index());
+        return ios.iword(index(ios));
     }
 
     static auto value(std::ios_base &ios, keep_type value) -> void
     {
-        ios.iword(index()) = value;
+        ios.iword(index(ios)) = value;
     }
 };
 
 //-----------------------------------------------------------------------------
-template <typename Tag, c::pointer CharPtr>
+template
+<
+      typename Tag
+    , typename Char
+    , typename CharTraits = std::char_traits<Char>
+>
 struct large_string_stream_slot_storage
 {
 public:
-    using keep_type = CharPtr;
+    using keep_type = std::basic_string_view<Char, CharTraits>;
     using tag_type = Tag;
-    using char_type = std::remove_pointer_t<CharPtr>;
+    using char_type = Char;
 
 private:
-    static auto alloc(std::ios_base const &ios, std::size_t sz) -> keep_type
+    static auto buffer(std::ios_base &ios)
     {
-        return std::realloc(value(ios), sz * sizeof(char_type));
+        return static_cast<char_type *>(ios.pword(index(ios)));
+    }
+
+    static auto realloc(std::ios_base &ios, std::size_t sz) -> char_type *
+    {
+        return static_cast<char_type *>(std::realloc(buffer(ios), sz * sizeof(char_type)));
     }
 
     static auto on_exit(std::ios_base::event evt, std::ios_base &ios, int idx) noexcept -> void
     {
-        if (std::ios_base::erase_event == evt && index() == idx)
-            std::free(value(ios));
+        if (std::ios_base::erase_event == evt && index(ios) == idx)
+            std::free(buffer(ios));
     }
 public:
-    static auto index() -> int
+    static auto index(std::ios_base &ios) -> int
     {
         // call xalloc once to get an index at which we can store data for this manipulator.
-        static auto const idx = std::ios_base::xalloc();
-        std::ios_base::register_callback(&on_exit, idx);
+        static auto const idx = [](std::ios_base &ios)
+        {
+            auto const idx = std::ios_base::xalloc();
+            ios.register_callback(&on_exit, idx);
+            return idx;
+        }
+        (ios);
 
         return idx;
     }
 
-    static auto value(std::ios_base const &ios) ->  keep_type
+    static auto value(std::ios_base &ios) ->  keep_type
     {
-        return const_cast<std::ios_base &>(ios).pword(index());
+        auto buffer_ = buffer(ios);
+        return buffer_? keep_type{ buffer_}: keep_type{};
     }
 
     static auto value(std::ios_base &ios, keep_type value) -> void
     {
-        static constexpr auto max_string = 0x100000;
-        auto const zero = cmn::to_char(symbols<CharPtr>::zero);
+        auto const null_pos = value.size();
+        auto new_buffer = realloc(ios, null_pos + 1);
 
-        auto const it = std::ranges::find(value, value + max_string, zero);
-        if (value + max_string == it)
-            throw std::logic_error{ "Not null terminated string" };
-
-        auto const sz = std::ranges::distance(value, it) + 1;
-        auto slot = alloc(ios, sz);
-
-        std::ranges::copy(value, value + sz, slot);
-        ios.pword(index()) = slot;
+        std::ranges::copy(value, new_buffer);
+        // terminating null
+        new_buffer[null_pos] = cmn::to_char(symbols<Char, CharTraits>::ends);
+        ios.pword(index(ios)) = new_buffer;
     }
 };
 

@@ -486,18 +486,20 @@ concept error_info_pair =
 namespace detail
 {
 
+using namespace boost::mp11;
+
 template <typename T>
 struct is_error_info_map_: std::false_type {};
 
 template <error_info_pair... ErrorInfoPairs>
-struct is_error_info_map_<boost::mp11::mp_list<ErrorInfoPairs...>>: std::true_type {};
+struct is_error_info_map_<mp_list<ErrorInfoPairs...>>: std::true_type {};
 
 //-----------------------------------------------------------------------------
 template <typename T>
 struct is_error_info_list_: std::false_type {};
 
 template <error_info... ErrorInfos>
-struct is_error_info_list_<boost::mp11::mp_list<ErrorInfos...>>: std::true_type {};
+struct is_error_info_list_<mp_list<ErrorInfos...>>: std::true_type {};
 
 //-----------------------------------------------------------------------------
 template <boost::c::mp11_list L>
@@ -557,6 +559,10 @@ concept adapted_enum =
 // Slot manipulator concepts
 //
 ///////////////////////////////////////////////////////////////////////////////
+template <typename U, typename V>
+concept interoperable_with = std::equality_comparable_with<U, V>;
+
+//-----------------------------------------------------------------------------
 template <typename T>
 concept decoder =
     std::default_initializable<T>
@@ -567,15 +573,14 @@ concept decoder =
     }
  && requires(typename T::decode_type in, typename T::keep_type out)
     {
-        { T::decode(in) } -> std::same_as<typename T::keep_type>;    // constexpr for decode packed_value
+        { T::decode(in) } -> std::same_as<typename T::keep_type>;
         { T::encode(out) } -> std::same_as<typename T::decode_type>;
     }
 ;
 
-///////////////////////////////////////////////////////////////////////////////
-//
+//-----------------------------------------------------------------------------
 template <typename T, typename DecodeType>
-concept decoder_of =
+concept decoder_for =
     decoder<T>
  && requires(DecodeType const &dt)
     {
@@ -584,21 +589,32 @@ concept decoder_of =
 ;
 
 //-----------------------------------------------------------------------------
-template <typename T, typename Decoder> concept decoded_by = decoder_of<Decoder, T>;
+template <typename T, typename Decoder> concept decoded_by = decoder_for<Decoder, T>;
+
+//-----------------------------------------------------------------------------
+template <typename T, typename DecodeType>
+concept static_decoder_for =
+    decoder_for<T, DecodeType>
+ && requires(DecodeType const &dt)
+    {
+        { T::static_decode(dt) } -> interoperable_with<typename T::keep_type>;
+    }
+;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // low level manipulator slot processor
 //
 template <typename T>
-concept storage = 
-    requires(std::ios_base &ios)
+concept storage =
+    std::default_initializable<T>
+ && requires(std::ios_base &ios)
     {
         typename T::tag_type;
         typename T::keep_type;
 
-        { T::index() } -> std::same_as<int>;                                            // slot index
-        { T::value(std::as_const(ios)) } -> std::same_as<typename T::keep_type>;     // get value
+        { T::index(ios) } -> std::same_as<int>;                                         // slot index
+        { T::value(ios) } -> std::same_as<typename T::keep_type>;                       // get value
         { T::value(ios, typename T::keep_type{}) } -> std::same_as<void>;               // set value
     }
 ;
@@ -618,15 +634,15 @@ concept restore_storage =
 // NOTE: introduce concept to drop <slot/manip.h> dependency
 template <typename T>
 concept slot_manipulator =
-    requires (std::ios_base const &cios)
+    requires (std::ios_base &ios)
     {
         typename T::decoder_type;
         typename T::decode_type;
         typename T::storage_type;
         typename T::keep_type;
 
-        { T::index() } -> std::same_as<int>;
-        { T::value(cios) } -> std::same_as<typename T::decode_type>;
+        { T::index(ios) } -> std::same_as<int>;
+        { T::value(ios) } -> std::same_as<typename T::decode_type>;
         // TODO: refine concept
     }
  && storage<typename T::storage_type>

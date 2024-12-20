@@ -19,7 +19,6 @@ namespace io::manip
 
 template <typename TagOrStorage> struct tag_prm {};
 template <typename TagOrStorage, typename KeepType> struct storage_prm {};
-template <typename TagOrStorage, typename KeepType> struct string_storage_prm {};
 
 }
 
@@ -58,26 +57,6 @@ template <typename TagOrStorage> requires !c::storage<TagOrStorage>
 struct decode_param<io::manip::storage_prm<TagOrStorage, io::manip::int_keep_type>>
 {
     using type = io::manip::int_stream_slot_storage<TagOrStorage>;
-};
-
-//-----------------------------------------------------------------------------
-template <c::storage TagOrStorage, typename KeepType>
-struct decode_param<io::manip::string_storage_prm<TagOrStorage, KeepType>>
-{
-    static_assert(std::same_as<KeepType, io::manip::keep_type_t<TagOrStorage>>);
-    using type = TagOrStorage;
-};
-
-template <typename TagOrStorage> requires !c::storage<TagOrStorage>
-struct decode_param<io::manip::string_storage_prm<TagOrStorage, io::manip::int_keep_type>>
-{
-    using type = io::manip::int_stream_slot_storage<TagOrStorage>;
-};
-
-template <typename TagOrStorage, c::pointer CharPtr> requires !c::storage<TagOrStorage>
-struct decode_param<io::manip::string_storage_prm<TagOrStorage, CharPtr>>
-{
-    using type = io::manip::large_string_stream_slot_storage<TagOrStorage, CharPtr>;
 };
 
 }

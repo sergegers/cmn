@@ -85,6 +85,27 @@ BOOST_AUTO_TEST_CASE(bool_manip)
     BOOST_TEST(bmanip::value(ostr));
 }
 
+using ls_manip = basic_large_string_slot_manip
+<
+      struct large_string_manip_
+    , "default init"_fs
+    , "default manip"_fs
+>;
+constexpr slot_manip_forwarder<ls_manip> string_ {};
+
+BOOST_AUTO_TEST_CASE(large_string_manip)
+{
+    boost::test_tools::output_test_stream ostr {};
+    BOOST_TEST(ls_manip::value(ostr) == "default init");
+
+    ostr << string_();
+    BOOST_TEST(ls_manip::value(ostr) == "default manip");
+
+    static_assert(c::decoded_by<decltype("my str"), ls_manip::decoder_type>);
+    ostr << string_("my str");
+    BOOST_TEST(ls_manip::value(ostr) == "my str");
+}
+
 BOOST_AUTO_TEST_SUITE_END() // manip
 BOOST_AUTO_TEST_SUITE_END() // io
 BOOST_AUTO_TEST_SUITE_END() // cmn

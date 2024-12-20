@@ -117,7 +117,6 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     [[nodiscard]] constexpr auto back() noexcept -> reference  requires (!empty()) { return m_data[size() - 1]; }
     [[nodiscard]] constexpr auto back() const noexcept -> const_reference  requires (!empty()) { return m_data[size() - 1]; }
 
-    [[nodiscard]] constexpr auto &data_(this auto &self_) noexcept { return self_.m_data; }
     [[nodiscard]] constexpr auto data() noexcept -> pointer { return m_data.data(); }
     [[nodiscard]] constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
 

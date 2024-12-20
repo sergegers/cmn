@@ -95,9 +95,9 @@ struct int_fmt_storage_t
     using keep_type = int_keep_type;
     using tag_type = int_fmt_storage_t;
 
-    static auto index() -> int;
-    static auto value(std::ios_base const &ios) -> keep_type;
-    static auto value(std::ios_base &ios_, keep_type value) -> void;
+    static auto index(std::ios_base &ios) -> int;
+    static auto value(std::ios_base &ios) -> keep_type;
+    static auto value(std::ios_base &ios, keep_type value) -> void;
 };
 
 using int_fmt_slot_manip = slot_manip

@@ -41,7 +41,7 @@ auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t
     return orig;
 }
 
-auto int_fmt_storage_t::index() -> int
+auto int_fmt_storage_t::index(std::ios_base &ios) -> int
 {
     // call xalloc once to get an index at which we can store data for this
     // manipulator.
@@ -49,23 +49,23 @@ auto int_fmt_storage_t::index() -> int
     return idx;
 }
 
-auto int_fmt_storage_t::value(std::ios_base const &ios) -> keep_type
+auto int_fmt_storage_t::value(std::ios_base &ios) -> keep_type
 {
-    return const_cast<std::ios_base&>(ios).iword(index());
+    return ios.iword(index(ios));
 }
 
-auto int_fmt_storage_t::value(std::ios_base &ios_, keep_type value) -> void
+auto int_fmt_storage_t::value(std::ios_base &ios, keep_type value) -> void
 {
     // set mask
     auto const fvalue = static_cast<int_fmt_t>(value);
     auto const mask   = get_mask(fvalue);
 
-    auto const old_fvalue = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios_));
+    auto const old_fvalue = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios));
     auto const new_fvalue = set_value(old_fvalue, fvalue, mask);
 
     auto const new_value = static_cast<keep_type>(0) | static_cast<short>(new_fvalue);
 
-    ios_.iword(index()) = static_cast<int>(new_value);
+    ios.iword(index(ios)) = static_cast<int>(new_value);
 }
 
 }

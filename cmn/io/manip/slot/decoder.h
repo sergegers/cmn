@@ -68,7 +68,7 @@ private:
 public:
     //-----------------------------------------------------------------------------
     //
-    // decoder interface
+    // decoder concept
     //
 
     // encode - read chars from slot w/o null
@@ -85,43 +85,39 @@ public:
         return decode_type { arr.data(), sz };
     }
 
-    // N_ counts the trailing zero
-    template <std::size_t N_>
-        requires (slot_room() >= N_ - 1)
-    static constexpr auto decode(std::array<Char, N_> const &arr) noexcept -> keep_type
-    {
-        // endian independent implementation, 
-        // also it keeps function constexpr
-        return
-            []<std::size_t... Idss_>
-            (std::array<Char, N_> const &arr_, std::index_sequence<Idss_...>) constexpr -> keep_type
-            {
-                return (0 | ... | (keep_type{ arr_[Idss_] } << bits_in_char() * Idss_));
-            }
-        (
-              arr
-            , std::make_index_sequence<length(N_)>{}
-        );
-    }
-
-    template <std::size_t N_>
-        requires (slot_room() >= N_)
-    static constexpr auto decode(basic_fixed_string<Char, N_, CharTraits> const &str) noexcept -> keep_type
-    {
-        return decode(str.data_());
-    }
-
+    //-----------------------------------------------------------------------------
+    //
+    // decoder_of concept
+    //
     static constexpr auto decode(string_view_type str) -> keep_type
     {
         if (slot_room() < str.length()) 
             throw std::logic_error{ "String is too big." };
 
         keep_type res { 0 };
-        for (auto idx = 0; idx < str.length(); ++idx)
+        for (auto idx = 0ul; idx < str.length(); ++idx)
             res |= static_cast<keep_type>(str[idx]) << bits_in_char() * idx;
 
         // if slot_room() > str.length() trailing zero will be appended
         return res;
+    }
+
+
+    template <std::size_t N_> requires (slot_room() >= N_)
+    static constexpr auto static_decode(basic_fixed_string<Char, N_, CharTraits> const &str) noexcept -> keep_type
+    {
+        // endian independent implementation, 
+        // also it keeps function constexpr
+        return
+            []<std::size_t... Idss_>
+            (basic_fixed_string<Char, N_, CharTraits> const &str_, std::index_sequence<Idss_...>) constexpr -> keep_type
+            {
+                return (0 | ... | (keep_type{ str_[Idss_] } << bits_in_char() * Idss_));
+            }
+        (
+              str
+            , std::make_index_sequence<length(N_)>{}
+        );
     }
 };
 
@@ -140,14 +136,14 @@ template
 class large_string_decoder<std::basic_string<Char, CharTraits>> final
 {
 public:
+    using string_view_type  = std::basic_string_view<Char, CharTraits>;
+
     using decode_type = std::basic_string<Char, CharTraits>;
-    using keep_type = Char *;
-private:
-    using string_view_type = std::basic_string_view<Char, CharTraits>;
-public:
+    using keep_type = string_view_type;
+
     //-----------------------------------------------------------------------------
     //
-    // decoder interface
+    // decoder concept
     //
 
     static constexpr auto encode(keep_type decoded) noexcept -> decode_type
@@ -155,22 +151,24 @@ public:
         return decode_type { decoded };
     }
 
-    // N_ includes the trailing zero
-    template <std::size_t N_>
-    static constexpr auto decode(std::array<Char, N_> const &arr) noexcept -> keep_type
-    {
-        return decode_type { arr.data() };
-    }
-
-    template <std::size_t N_>
-    static constexpr auto decode(basic_fixed_string<Char, N_, CharTraits> const &str) noexcept -> keep_type
-    {
-        return decode(str.data_());
-    }
-
+    // decode_type implicitly converted to string_view_type
     static constexpr auto decode(string_view_type str) -> keep_type
     {
-        return keep_type{ str.data() };
+        return str;
+    }
+
+    //-----------------------------------------------------------------------------
+    //
+    // decoder_of concept
+    //
+
+    // based_fixed_string<> implicitly converted to string_view_type
+    //static constexpr auto decode(string_view_type str) -> keep_type
+
+    template <std::size_t N_>
+    static constexpr auto static_decode(basic_fixed_string<Char, N_, CharTraits> const &str) noexcept
+    {
+        return str;
     }
 };
 
@@ -188,16 +186,25 @@ public:
     using keep_type = int_keep_type;
     //-----------------------------------------------------------------------------
     //
-    // decoder interface
+    // decoder concept
     //
+    static constexpr auto encode(keep_type out) noexcept -> decode_type
+    {
+        return static_cast<decode_type>(out);
+    }
+
     static constexpr auto decode(decode_type in) noexcept -> keep_type
     {
         return static_cast<keep_type>(in);
     }
 
-    static constexpr auto encode(keep_type out) noexcept -> decode_type
+    //-----------------------------------------------------------------------------
+    //
+    // decoder_of concept
+    //
+    static constexpr auto static_decode(decode_type in) noexcept -> keep_type
     {
-        return static_cast<decode_type>(out);
+        return decode(in);
     }
 };
 
@@ -213,7 +220,7 @@ public:
     using keep_type = ptr_keep_type;
     //-----------------------------------------------------------------------------
     //
-    // decoder interface
+    // decoder concept
     //
     static constexpr auto decode(decode_type in) noexcept -> keep_type
     {
@@ -231,6 +238,15 @@ public:
     static constexpr auto encode(keep_type out) -> decode_type
     {
         return static_cast<decode_type>(out);
+    }
+
+    //-----------------------------------------------------------------------------
+    //
+    // decoder_of concept
+    //
+    static constexpr auto static_decode(decode_type in) noexcept -> keep_type
+    {
+        return decode(in);
     }
 };
 
