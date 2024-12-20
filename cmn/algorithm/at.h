@@ -4,6 +4,8 @@
 #include <array>
 #include <cassert>
 
+// ReSharper disable CppUnusedIncludeDirective
+
 // boost.mp11
 #include <boost/mp11.hpp>
 #include <boost/mp11/mpl_list.hpp>
@@ -13,10 +15,18 @@
 // boost.variant
 #include <boost/variant.hpp>
 
+// ReSharper restore CppUnusedIncludeDirective
+
 #if __has_include(<boost/mp11/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
 #else
 #   include <cmn/meta/boost/mp11/concepts.hpp>
+#endif
+
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
 #endif
 
 #if __has_include(<boost/fusion/concepts.hpp>)

@@ -18,15 +18,15 @@ private:
     std::array<Int, sizeof... (Manips)>    m_saved;
 
     template <typename Manip>
-    static auto save_manip(std::ios_base& ios, std::integral_constant<long, 0>) -> long
+    static auto save_manip(std::ios_base &ios, std::integral_constant<long, 0>) -> long
     {
-        return ios.iword(Manip::index());
+        return ios.iword(Manip::index(ios));
     }
 
     template <typename Manip>
-    static auto save_manip(std::ios_base& ios, std::integral_constant<void *, nullptr>) -> void *
+    static auto save_manip(std::ios_base &ios, std::integral_constant<void *, nullptr>) -> void *
     {
-        return ios.pword(Manip::index());
+        return ios.pword(Manip::index(ios));
     }
 
     template <typename Manip, std::size_t Idx_>
@@ -36,7 +36,7 @@ private:
         if constexpr (c::restore_storage<storage_type>)
             storage_type::restore(m_ios);
 
-        m_ios.iword(Manip::index()) = m_saved[Idx_];
+        m_ios.iword(Manip::index(m_ios)) = m_saved[Idx_];
     }
 
     template <typename Manip, std::size_t Idx_>
@@ -46,7 +46,7 @@ private:
         if constexpr (c::restore_storage<storage_type>)
             storage_type::restore(m_ios);
 
-        m_ios.pword(Manip::index()) = m_saved[Idx_];
+        m_ios.pword(Manip::index(m_ios)) = m_saved[Idx_];
     }
 public:
     [[nodiscard]] explicit basic_saver(std::ios_base &ios):
