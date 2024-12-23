@@ -36,11 +36,18 @@
 #include <string_view>
 #include <string>
 #include <type_traits>
+#include <algorithm>
+#include <stdexcept>
 
 namespace cmn
 {
 
-template <typename Char, std::size_t N_, typename CharTraits = std::char_traits<Char>>
+template
+<
+      typename Char
+    , std::size_t N_
+    , typename CharTraits = std::char_traits<Char>
+>
 struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
 {
     // exposition only
@@ -64,17 +71,62 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     static constexpr auto npos = string_view_type::npos;
     static constexpr auto nsize = N_;
 
+    ///////////////////////////////////////////////////////////////////////////////
+    //
+    // constructors
+    //
     constexpr basic_fixed_string() noexcept = default;
 
-    constexpr basic_fixed_string(value_type const (&array)[N_ + 1]) noexcept // NOLINT(google-explicit-constructor)
+    constexpr basic_fixed_string(value_type const (&array)[N_ + 1]) // NOLINT(google-explicit-constructor)
+        noexcept(std::copy_constructible<value_type>)
     {
-        std::copy(std::begin(array), std::end(array), m_data.begin());
+        std::ranges::copy(array, std::ranges::begin(m_data));
     }
 
-    constexpr auto operator = (value_type const (&array)[N_ + 1]) noexcept -> basic_fixed_string &
+    //-----------------------------------------------------------------------------
+    template <std::random_access_iterator It, std::sentinel_for<It> Se>
+        requires std::indirectly_copyable<It, iterator>
+
+    constexpr basic_fixed_string(It first, Se last)
     {
-        std::copy(std::begin(array), std::end(array), m_data.begin());
+        if (std::distance(first, last) > N_)
+            throw std::out_of_range{ "String is too long" };
+
+        std::ranges::copy(first, last, std::ranges::begin(m_data));
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    //
+    // assignment operators
+    //
+    constexpr auto operator = (value_type const (&array)[N_ + 1]) noexcept(std::copy_constructible<value_type>)
+        -> basic_fixed_string &
+    {
+        std::ranges::copy(array, std::ranges::begin(m_data));
         return *this;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////
+    //
+    // interoperability
+    //
+    template <std::size_t M_> requires (M_ <= N_)
+    explicit constexpr basic_fixed_string(basic_fixed_string<Char, M_, CharTraits> const &other)
+        noexcept(std::copy_constructible<value_type>)
+    {
+        std::ranges::copy_n(std::ranges::begin(other.m_data), M_, std::ranges::begin(m_data));
+        if constexpr (M_ < N_) m_data[M_] = 0;
+    }
+
+    template <std::size_t M_> requires (M_ <= N_)
+    [[nodiscard]] explicit constexpr operator basic_fixed_string<Char, M_, CharTraits> () const
+        noexcept(std::copy_constructible<value_type>)
+    {
+        basic_fixed_string<Char, M_, CharTraits> res{};
+        std::ranges::copy_n(std::ranges::begin(res.m_data), M_, std::ranges::begin(m_data));
+        if constexpr (M_ < N_) m_data[M_] = 0;
+
+        return res;
     }
 
     ///////////////////////////////////////////////////////////////////////////////

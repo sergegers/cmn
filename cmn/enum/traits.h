@@ -133,17 +133,6 @@ constexpr auto next_on_mask(E prev_mask) -> E
     return E{ 1 } << (bsr(static_cast<mask_type>(prev_mask)) + 1);
 }
 
-template 
-<
-      c::enumerable Enum
-    , c::enumerable... Enums
->
-    requires (std::same_as<Enum, Enums> && ...)
-constexpr auto in(Enum en, Enums ...ens) -> bool
-{
-    return ((en == ens) || ...);
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enum_ E>
 consteval auto default_ops(E, kind_t kind) -> interop_type_t<kind_t>

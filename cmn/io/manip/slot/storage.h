@@ -117,14 +117,14 @@ public:
 
     static auto value(std::ios_base &ios) ->  keep_type
     {
-        auto buffer_ = buffer(ios);
+        auto const buffer_ = buffer(ios);
         return buffer_? keep_type{ buffer_}: keep_type{};
     }
 
     static auto value(std::ios_base &ios, keep_type value) -> void
     {
         auto const null_pos = value.size();
-        auto new_buffer = realloc(ios, null_pos + 1);
+        auto const new_buffer = realloc(ios, null_pos + 1);
 
         std::ranges::copy(value, new_buffer);
         // terminating null

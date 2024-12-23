@@ -35,6 +35,7 @@ namespace manip
 //
 ////////////////////////////////////////////////////////////////////////////////
 
+// reset stream to initial state (as if no manipulator was applied)
 struct reset_t {} constexpr reset_{};
 
 template

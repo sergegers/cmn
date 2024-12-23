@@ -36,6 +36,7 @@ struct symbols<char>
     static constexpr auto nothing                   = ""_fs;
     static constexpr auto endl                      = "\n"_fs;
     static constexpr auto ends                      = "\0"_fs;
+    static constexpr auto tab                       = "\t"_fs;
     static constexpr auto open_square_bracket       = "["_fs;
     static constexpr auto close_square_bracket      = "]"_fs;
     static constexpr auto open_angle_bracket        = "<"_fs;
@@ -52,6 +53,7 @@ struct symbols<char>
     static constexpr auto zero                      = "0"_fs;
     static constexpr auto asterisk                  = "*"_fs;
     static constexpr auto ampersand                 = "&"_fs;
+    static constexpr auto circumflex                = "^"_fs;
     static constexpr auto end                       = "end"_fs;
     static constexpr auto empty                     = "empty"_fs;
     static constexpr auto nullptr_                  = "nullptr"_fs;
@@ -60,7 +62,6 @@ struct symbols<char>
     static constexpr auto scope_resolution          = "::"_fs;
     static constexpr auto left_arrow                = "<-"_fs;
     static constexpr auto right_arrow               = "->"_fs;
-    static constexpr auto tab                       = "\t"_fs;
     static constexpr auto void_                     = "void"_fs;
     static constexpr auto class_                    = "class"_fs;
     static constexpr auto struct_                   = "struct"_fs;
@@ -75,6 +76,7 @@ struct symbols<wchar_t>
     static constexpr auto open_square_bracket       = L"["_wfs;
     static constexpr auto endl                      = L"\n"_wfs;
     static constexpr auto ends                      = L"\0"_wfs;
+    static constexpr auto tab                       = L"\t"_wfs;
     static constexpr auto close_square_bracket      = L"]"_wfs;
     static constexpr auto open_angle_bracket        = L"<"_wfs;
     static constexpr auto close_angle_bracket       = L">"_wfs;
@@ -90,6 +92,7 @@ struct symbols<wchar_t>
     static constexpr auto zero                      = L"0"_wfs;
     static constexpr auto asterisk                  = L"*"_wfs;
     static constexpr auto ampersand                 = L"&"_wfs;
+    static constexpr auto circumflex                = L"^"_wfs;
     static constexpr auto end                       = L"end"_wfs;
     static constexpr auto empty                     = L"empty"_wfs;
     static constexpr auto nullptr_                  = L"nullptr"_wfs;
@@ -98,7 +101,6 @@ struct symbols<wchar_t>
     static constexpr auto scope_resolution          = L"::"_wfs;
     static constexpr auto left_arrow                = L"<-"_wfs;
     static constexpr auto right_arrow               = L"->"_wfs;
-    static constexpr auto tab                       = L"\t"_wfs;
     static constexpr auto void_                     = L"void"_wfs;
     static constexpr auto class_                    = L"class"_wfs;
     static constexpr auto struct_                   = L"struct"_wfs;

@@ -113,7 +113,8 @@ add_library (
  "cmn/enum/read.h" 
  "cmn/enum/read.cpp" 
  "cmn/enum/manip.h" 
- 
+ "cmn/enum/formatter.h"
+
  "cmn/algorithm/detail/result.h"
  "cmn/algorithm/detail/visitor.h"
  "cmn/algorithm/switch/ordered.h"

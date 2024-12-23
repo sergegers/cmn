@@ -12,12 +12,19 @@ namespace cmn
 template <c::enumerable Policy>
 [[nodiscard]] constexpr auto empty(Policy pol) noexcept -> bool { return static_cast<interop_type_t<Policy>>(pol) == 0; }
 
-template <c::bitfield Policy>
+template <c::strong_bitfield Policy>
 [[nodiscard]] constexpr auto has_feature(Policy pol, Policy feat) noexcept -> bool
 {
     return feat == (pol & feat);
 }
 
+template <c::bitfield Policy>
+[[nodiscard]] constexpr auto has_feature(interop_type_t<Policy> pol, Policy feat) noexcept -> bool
+{
+    return feat == (pol & feat);
+}
+
+// TODO: add bitfield, strong_bitfield overloads. see has_feature()
 template <c::bitfield Policy, c::bitfield... Features>
     requires (... && std::same_as<Policy, Features>)
 [[nodiscard]] constexpr auto has_all_features(Policy pol, Features ...feats) noexcept -> bool
@@ -108,6 +115,18 @@ template <c::bitfield I>
     auto masked = value & mask_value;
     auto const other =  value & ~mask_value;
     return static_cast<I>(++masked | other);
+}
+
+//-----------------------------------------------------------------------------
+template 
+<
+      c::enumerable Enum
+    , c::enumerable... Enums
+>
+    requires (std::same_as<Enum, Enums> && ...)
+constexpr auto in(Enum en, Enums ...ens) -> bool
+{
+    return ((en == ens) || ...);
 }
 
 }

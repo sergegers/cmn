@@ -2,6 +2,7 @@
 
 #include <iosfwd>
 #include <string>
+#include <iterator>
 
 // boost.io
 #include <boost/io/ios_state.hpp>
@@ -12,6 +13,7 @@
 #include <cmn/enum/traits.h>
 #include <cmn/enum/print_t.h>
 #include <cmn/enum/detail/macro.h>
+#include <cmn/enum/detail/record_info.h>
 
 #include <cmn/tuple/io.h>
 #include <cmn/util/feature.h>
@@ -26,7 +28,7 @@ namespace detail
 
 // keep print operations here to avoid circular dependencies
 template <typename Char, typename CharTraits, c::enum_ En>
-auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
+constexpr auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
 {
     using enum io::print_t;
 
@@ -57,7 +59,7 @@ private:
     bool                                    &m_first_time;
 
 public:
-    print_record
+    constexpr print_record
     (
         std::basic_ostream<Char, CharTraits>& ostr,
         bool &first_time
@@ -65,7 +67,7 @@ public:
         : m_ostr{ ostr }, m_first_time{ first_time } {}
 
     template <c::enum_ En>
-    auto operator ()(record_info<En> const &rec) const -> void
+    constexpr auto operator ()(record_info<En> const &rec) const -> void
     {
         using enum print_t;
 
@@ -77,7 +79,7 @@ public:
 };
 
 template <typename Tail, typename Char, typename CharTraits>
-auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
+constexpr auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
 {
     auto const po = print_manip::value(ostr);
 
@@ -101,10 +103,10 @@ struct printer<Enum, kind_t::enum_>
     Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
+    constexpr printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
-    auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
+    constexpr auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
     {
         using print_record_type = detail::print_record<Char, CharTraits>;
 
@@ -141,10 +143,10 @@ struct printer<Enum, kind_t::bitfield>
     Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
+    constexpr printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
-    auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
+    constexpr auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
     {
         using print_record_type = detail::print_record<Char, CharTraits>;
 
@@ -194,10 +196,10 @@ struct printer<Enum, kind_t::combo>
     Enum                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
+    constexpr printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
-    auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
+    constexpr auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
     {
         using print_record_type = detail::print_record<Char, CharTraits>;
 
