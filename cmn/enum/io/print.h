@@ -71,8 +71,8 @@ public:
     {
         using enum print_t;
 
-        auto const delim = basic_bitfield_delim_manip<Char>::value(m_ostr);
-        if (m_first_time) m_first_time = false; else m_ostr << delim;
+        auto const separator = basic_bitfield_separator_manip<Char>::value(m_ostr);
+        if (m_first_time) m_first_time = false; else m_ostr << separator;
 
         m_ostr << rec;
     }
@@ -86,9 +86,9 @@ constexpr auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr
     if (has_feature(po, print_t::tail) && !empty(tail_))
     {
         boost::io::ios_flags_saver const ifs{ ostr };
-        auto const delim = basic_bitfield_delim_manip<Char, CharTraits>::value(ostr);
+        auto const separator = basic_bitfield_separator_manip<Char, CharTraits>::value(ostr);
 
-        ostr << CMN_HEX_OUT() << delim << tail_;
+        ostr << CMN_HEX_OUT() << separator << tail_;
     }
 }
 

@@ -27,9 +27,9 @@ struct table_out_
     {
         using symbols = symbols<Char, CharTraits>;
         return ostr << 
-            basic_ropen<Char, CharTraits>(symbols::open_angle_bracket + symbols::endl) << 
-            basic_rclose<Char, CharTraits>(symbols::close_angle_bracket + symbols::endl) <<
-            basic_rdelim<Char, CharTraits>(symbols::endl)
+            basic_range_open<Char, CharTraits>(symbols::open_angle_bracket + symbols::endl) << 
+            basic_range_close<Char, CharTraits>(symbols::close_angle_bracket + symbols::endl) <<
+            basic_range_separator<Char, CharTraits>(symbols::endl)
         ;
     }
 };
@@ -47,9 +47,9 @@ struct compact_table_out_
     {
         using symbols = symbols<Char, CharTraits>;
         return ostr << 
-            basic_ropen<Char, CharTraits>(symbols::open_angle_bracket) << 
-            basic_rclose<Char, CharTraits>(symbols::close_angle_bracket) <<
-            basic_rdelim<Char, CharTraits>(symbols::comma + symbols::whitespace)
+            basic_range_open<Char, CharTraits>(symbols::open_angle_bracket) << 
+            basic_range_close<Char, CharTraits>(symbols::close_angle_bracket) <<
+            basic_range_separator<Char, CharTraits>(symbols::comma + symbols::whitespace)
         ;
     }
 };
@@ -65,7 +65,7 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Range rng) -> std:
 {
     // NOTE: don't make it static
     auto const open  = basic_open_manip<Char, CharTraits>::value(ostr);
-    auto const delim = basic_delim_manip<Char, CharTraits>::value(ostr);
+    auto const separator = basic_separator_manip<Char, CharTraits>::value(ostr);
     auto const close = basic_close_manip<Char, CharTraits>::value(ostr);
 
     ostr << open;
@@ -73,10 +73,10 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Range rng) -> std:
     std::ranges::for_each
     (
         std::move(rng),
-        [first = true, &ostr, &delim](auto const &elem) mutable 
+        [first = true, &ostr, &separator](auto const &elem) mutable 
         {
             if (!first)
-                ostr << delim;
+                ostr << separator;
             else
                 first = false;
 

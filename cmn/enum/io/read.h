@@ -13,10 +13,11 @@
 
 #include <cmn/meta/concepts.h>
 
-#include <cmn/enum/print_t.h>
 #include <cmn/util/feature.h>
 
-#include "traits.h"
+#include <cmn/enum/print_t.h>
+#include <cmn/enum/traits.h>
+
 #include "manip.h"
 
 namespace cmn::enum_::io
@@ -84,7 +85,6 @@ template <typename E, typename Char, typename CharTraits>
     -> boost::optional<E>
 {
     using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
-    using string_type = std::basic_string<Char, CharTraits>;
 
     static_assert(std::tuple_size_v<decltype(groups_v<E>)> == 1);
 
@@ -203,7 +203,7 @@ struct reader<E, kind_t::enum_>
     using kkind_type = int_<kind_t::enum_>;
 
     E                                   &m_val;
-    [[no_unique_address]] kkind_type        m_kind;
+    [[no_unique_address]] kkind_type    m_kind;
 
     reader(E &val, kkind_type kind): m_val { val }, m_kind{ kind } {}
 
@@ -240,7 +240,7 @@ struct reader<E, kind_t::bitfield>
     using kkind_type = int_<kind_t::bitfield>;
 
     E                                   &m_val;
-    [[no_unique_address]] kkind_type        m_kind;
+    [[no_unique_address]] kkind_type    m_kind;
 
     reader(E &val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
@@ -281,7 +281,7 @@ struct reader<E, kind_t::combo>
     using kkind_type = int_<kind_t::combo>;
 
     E                                   &m_val;
-    [[no_unique_address]] kkind_type        m_kind;
+    [[no_unique_address]] kkind_type    m_kind;
 
     reader(E &val, kkind_type kind): m_val { val }, m_kind{ kind } {}
 

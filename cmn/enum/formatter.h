@@ -6,7 +6,6 @@
 #include <sstream>
 #include <algorithm>
 #include <utility>
-#include <iterator>
 
 #include <boost/type_traits/promote.hpp>
 
@@ -18,36 +17,11 @@
 #include <cmn/util/feature.h>
 
 #include <cmn/enum/traits.h>
-#include <cmn/enum/manip.h>
+#include <cmn/enum/io/manip.h>
 
 namespace cmn::enum_::io::detail
 {
 
-template
-<
-      typename ParseContext
-    , typename... Tgts
->
-constexpr auto scroll_next(ParseContext &ctx, typename ParseContext::iterator it, std::remove_cvref_t<decltype(*it)> tgt, 
-    Tgts... tgts) noexcept -> typename ParseContext::iterator
-{
-    typename ParseContext::iterator res;
-    std::ignore = ((ctx.end() != (res = find(it, ctx.end(), tgt))) || ... || (ctx.end() != (res = find(it, ctx.end(), tgts))));
-
-    return res;
-}
-
-template <typename ParseContext>
-constexpr auto scroll_next(ParseContext &ctx, typename ParseContext::iterator it) noexcept -> typename ParseContext::iterator
-{
-    using char_type = typename std::iterator_traits<typename ParseContext::iterator>::value_type;
-    using symbols_type = symbols<char_type>;
-
-    static constexpr auto delim_fmt = cmn::to_char(symbols_type::colon);
-    return find(it, ctx.end(), delim_fmt);
-}
-
-//-----------------------------------------------------------------------------
 enum scroll_result_t
 {
     sr_last = 0x0,      // end of format string, iterator is pointed to '}'
@@ -56,14 +30,15 @@ enum scroll_result_t
     sr_unk  = 0x4       // state is unknown
 };
 
+//-----------------------------------------------------------------------------
 template <typename ParseContext>
 constexpr auto check_state(ParseContext &ctx, typename ParseContext::iterator it, 
     boost::promote_t<scroll_result_t> expected_states)  -> scroll_result_t
 {
-    using char_type = typename std::iterator_traits<typename ParseContext::iterator>::value_type;
+    using char_type = typename ParseContext::char_type;
     using symbols_type = symbols<char_type>;
 
-    constexpr auto delim_fmt = cmn::to_char(symbols_type::colon);
+    constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
     constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
     scroll_result_t state;
@@ -72,7 +47,7 @@ constexpr auto check_state(ParseContext &ctx, typename ParseContext::iterator it
         switch (*it)
         {
         case end_fmt: state = sr_last; break;
-        case delim_fmt: state = sr_next; break;
+        case separator_fmt: state = sr_next; break;
         default: state = sr_unk;
         }
 
@@ -93,7 +68,7 @@ constexpr auto check_state(ParseContext &ctx, typename ParseContext::iterator it
         break;
 
     case sr_eos:
-        throw std::format_error("Invalid format string for adapted enum. Unexpected EOS");
+        throw std::format_error("Invalid format string for adapted enum. Missing closing '}'");
 
     case sr_unk:
     {
@@ -109,6 +84,30 @@ constexpr auto check_state(ParseContext &ctx, typename ParseContext::iterator it
     return state;
 };
 
+//-----------------------------------------------------------------------------
+template
+<
+      typename ParseContext
+    , typename... Tgts
+>
+constexpr auto parse_chunk(ParseContext &ctx, typename ParseContext::iterator it, typename ParseContext::char_type tgt, 
+    Tgts... tgts) noexcept -> typename ParseContext::iterator
+{
+    typename ParseContext::iterator res;
+    std::ignore = ((ctx.end() != (res = find(it, ctx.end(), tgt))) || ... || (ctx.end() != (res = find(it, ctx.end(), tgts))));
+
+    return res;
+}
+
+template <typename ParseContext>
+constexpr auto parse_chunk(ParseContext &ctx, typename ParseContext::iterator it) noexcept -> typename ParseContext::iterator
+{
+    using char_type = typename ParseContext::char_type;
+    using symbols_type = symbols<char_type>;
+
+    static constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
+    return find(it, ctx.end(), separator_fmt);
+}
 
 }
 
@@ -125,7 +124,7 @@ struct formatter<E, Char>
     using manip_str_type = cmn::basic_fixed_string<Char, max_slot_size>;
 
     // custom format {0:[:]}
-    static constexpr auto delim_fmt = cmn::to_char(symbols_type::colon);
+    static constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
     static constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
     using open_manip_type = cmn::enum_::io::basic_open_manip<Char>;
@@ -138,7 +137,7 @@ struct formatter<E, Char>
     constexpr auto parse(ParseContext &ctx) -> typename ParseContext::iterator
     {
         using enum cmn::enum_::io::detail::scroll_result_t;
-        using cmn::enum_::io::detail::scroll_next;
+        using cmn::enum_::io::detail::parse_chunk;
         using cmn::enum_::io::detail::check_state;
 
         auto it = ctx.begin();
@@ -146,7 +145,7 @@ struct formatter<E, Char>
         if (state == sr_last) return it;            // {}
 
         //-----------------------------------------------------------------------------
-        auto const open_end = scroll_next(ctx, it, delim_fmt, end_fmt);
+        auto const open_end = parse_chunk(ctx, it, separator_fmt, end_fmt);
         state = check_state(ctx, open_end, sr_next | sr_last);
 
         m_open = open_manip_type{ manip_str_type { it, open_end } };
@@ -155,7 +154,7 @@ struct formatter<E, Char>
         it = open_end; ++it;
 
         //-----------------------------------------------------------------------------
-        auto const close_end = scroll_next(ctx, it, end_fmt);
+        auto const close_end = parse_chunk(ctx, it, end_fmt);
         check_state(ctx, close_end, sr_last);
 
         m_close = close_manip_type{ manip_str_type { it, close_end } };
@@ -189,22 +188,22 @@ struct formatter<E, Char>
     using manip_str_type = cmn::basic_fixed_string<Char, max_slot_size>;
 
     // custom format {0:[: :]}
-    static constexpr auto delim_fmt = cmn::to_char(symbols_type::colon);
+    static constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
     static constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
-    using open_manip_type   = cmn::enum_::io::basic_open_manip<Char>;
-    using delim_manip_type  = cmn::enum_::io::basic_bitfield_delim_manip<Char>;
-    using close_manip_type  = cmn::enum_::io::basic_close_manip<Char>;
+    using open_manip_type       = cmn::enum_::io::basic_open_manip<Char>;
+    using separator_manip_type  = cmn::enum_::io::basic_bitfield_separator_manip<Char>;
+    using close_manip_type      = cmn::enum_::io::basic_close_manip<Char>;
 
-    open_manip_type     m_open      = open_manip_type { cmn::io::reset_ };
-    delim_manip_type    m_delim     = delim_manip_type{ cmn::io::reset_ };
-    close_manip_type    m_close     = close_manip_type { cmn::io::reset_ };
+    open_manip_type         m_open          = open_manip_type { cmn::io::reset_ };
+    separator_manip_type    m_separator     = separator_manip_type{ cmn::io::reset_ };
+    close_manip_type        m_close         = close_manip_type { cmn::io::reset_ };
 
     template<typename ParseContext>
     constexpr auto parse(ParseContext &ctx) -> typename ParseContext::iterator
     {
         using enum cmn::enum_::io::detail::scroll_result_t;
-        using cmn::enum_::io::detail::scroll_next;
+        using cmn::enum_::io::detail::parse_chunk;
         using cmn::enum_::io::detail::check_state;
 
         auto it = ctx.begin();
@@ -212,7 +211,7 @@ struct formatter<E, Char>
         if (state == sr_last) return it;            // {}
 
         //-----------------------------------------------------------------------------
-        auto const open_end = scroll_next(ctx, it, delim_fmt, end_fmt);
+        auto const open_end = parse_chunk(ctx, it, separator_fmt, end_fmt);
         state = check_state(ctx, open_end, sr_next | sr_last);
 
         m_open = open_manip_type{ manip_str_type { it, open_end } };
@@ -221,16 +220,16 @@ struct formatter<E, Char>
         it = open_end; ++it;
 
         //-----------------------------------------------------------------------------
-        auto const delim_end = scroll_next(ctx, it, delim_fmt, end_fmt);
-        state = check_state(ctx, delim_end, sr_next | sr_last);
+        auto const separator_end = parse_chunk(ctx, it, separator_fmt, end_fmt);
+        state = check_state(ctx, separator_end, sr_next | sr_last);
 
-        m_delim = delim_manip_type { manip_str_type { it, delim_end } };
-        if (state == sr_last) return delim_end;     // {0:[: }
+        m_separator = separator_manip_type { manip_str_type { it, separator_end } };
+        if (state == sr_last) return separator_end;     // {0:[: }
 
-        it = delim_end; ++ it;
+        it = separator_end; ++ it;
 
         //-----------------------------------------------------------------------------
-        auto const close_end = scroll_next(ctx, it, end_fmt);
+        auto const close_end = parse_chunk(ctx, it, end_fmt);
         check_state(ctx, close_end, sr_last);
 
         m_close = close_manip_type{ manip_str_type { it, close_end } };
@@ -244,8 +243,8 @@ struct formatter<E, Char>
         using namespace cmn::enum_;
 
         ostring_stream_type ostr;
-        ostr << m_open << m_delim << m_close;
-
+        ostr << m_open << m_separator << m_close;
+        
         io::printer<E, kind_v<E>>{ en, cmn::int_<kind_v<E>>{} }.print(ostr);
  
         return ranges::copy(std::move(ostr).str(), ctx.out()).out;

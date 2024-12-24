@@ -49,7 +49,7 @@ using basic_open_manip =
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits = std::char_traits<Char> >
-constexpr cmn::io::slot_manip_forwarder<basic_open_manip<Char, CharTraits>> basic_eopen {};
+constexpr cmn::io::slot_manip_forwarder<basic_open_manip<Char, CharTraits>> basic_enum_open {};
 
 using open_manip = basic_open_manip<char>;
 using wopen_manip = basic_open_manip<wchar_t>;
@@ -78,7 +78,7 @@ using basic_close_manip =
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits = std::char_traits<Char> >
-constexpr cmn::io::slot_manip_forwarder<basic_close_manip<Char, CharTraits>> basic_eclose {};
+constexpr cmn::io::slot_manip_forwarder<basic_close_manip<Char, CharTraits>> basic_enum_close {};
 
 using close_manip = basic_close_manip<char>;
 using wclose_manip = basic_close_manip<wchar_t>;
@@ -88,16 +88,16 @@ inline constexpr cmn::io::slot_manip_forwarder<wclose_manip> weclose {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Manipulator basic_bitfield_delim_manip for customizing delimiter between
-// bitfield elements during output.
+// Manipulator basic_bitfield_separator_manip for customizing separator between
+// bitfield or combo elements during the output.
 // Default value is " "
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Char, typename CharTraits = std::char_traits<Char> >
-using basic_bitfield_delim_manip =
+using basic_bitfield_separator_manip =
     cmn::io::basic_string_slot_manip
     <
-        struct basic_bitfield_delim_
+        struct basic_bitfield_separator_
       , symbols<Char, CharTraits>::whitespace
       , symbols<Char, CharTraits>::nothing
     >
@@ -105,13 +105,13 @@ using basic_bitfield_delim_manip =
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits = std::char_traits<Char> >
-constexpr cmn::io::slot_manip_forwarder<basic_bitfield_delim_manip<Char, CharTraits>> basic_bitfield_delim {};
+constexpr cmn::io::slot_manip_forwarder<basic_bitfield_separator_manip<Char, CharTraits>> basic_bitfield_separator {};
 
-using bitfield_delim_manip = basic_bitfield_delim_manip<char>;
-using wbitfield_delim_manip = basic_bitfield_delim_manip<wchar_t>;
+using bitfield_separator_manip = basic_bitfield_separator_manip<char>;
+using wbitfield_separator_manip = basic_bitfield_separator_manip<wchar_t>;
 
-inline constexpr cmn::io::slot_manip_forwarder<bitfield_delim_manip> bitfield_delim {};
-inline constexpr cmn::io::slot_manip_forwarder<wbitfield_delim_manip> wbitfield_delim {};
+inline constexpr cmn::io::slot_manip_forwarder<bitfield_separator_manip> bfsep {};
+inline constexpr cmn::io::slot_manip_forwarder<wbitfield_separator_manip> wbfsep {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -131,7 +131,7 @@ using basic_esaver = cmn::io::manip::iword_saver
 <
     basic_open_manip<Char, CharTraits>
     , basic_close_manip<Char, CharTraits>
-    , basic_bitfield_delim_manip<Char, CharTraits>
+    , basic_bitfield_separator_manip<Char, CharTraits>
     , print_manip
 >;
 
@@ -144,15 +144,15 @@ namespace cmn::io
 {
 
 using enum_::io::bitfield_mask;
-using enum_::io::basic_eopen;
+using enum_::io::basic_enum_open;
 using enum_::io::eopen;
 using enum_::io::weopen;
-using enum_::io::basic_eclose;
+using enum_::io::basic_enum_close;
 using enum_::io::eclose;
 using enum_::io::weclose;
-using enum_::io::basic_bitfield_delim;
-using enum_::io::bitfield_delim;
-using enum_::io::wbitfield_delim;
+using enum_::io::basic_bitfield_separator;
+using enum_::io::bfsep;
+using enum_::io::wbfsep;
 using enum_::io::eprint;
 using enum_::io::basic_esaver;
 using enum_::io::esaver;

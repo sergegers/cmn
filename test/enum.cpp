@@ -11,7 +11,6 @@
 #include <cmn/enum/op.h>
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
-#include <cmn/enum/manip.h>
 #include <cmn/enum/enum.h>
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/combo.h>
@@ -867,6 +866,7 @@ BOOST_AUTO_TEST_CASE(format_enum)
     using enum cl_en_t;
     BOOST_TEST(std::format("{}", apple) == "[apple]");
     BOOST_TEST(std::format("{0:<}", apple) == "<apple]");
+    BOOST_TEST(std::format("{:<}", apple) == "<apple]");
     BOOST_TEST(std::format("{0:[[:>>}", apple) == "[[apple>>");
     BOOST_TEST(std::format("{0:<<:>>}", apple) == "<<apple>>");
     BOOST_TEST(std::format("{0::}", apple) == "apple");
@@ -877,6 +877,7 @@ BOOST_AUTO_TEST_CASE(format_combo)
     using enum cl_cmb_t;
     BOOST_TEST(std::format("{}", red) == "[zero red]");
     BOOST_TEST(std::format("{}", red | two) == "[two red]");
+    BOOST_TEST(std::format("{:<}", red | two) == "<two red]");
     BOOST_TEST(std::format("{0:<}", red | two) == "<two red]");
     BOOST_TEST(std::format("{0:<:__:>}", red | two) == "<two__red>");
     BOOST_TEST(std::format("{0:::}", red | two) == "twored");

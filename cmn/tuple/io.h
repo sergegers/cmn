@@ -1,5 +1,7 @@
 #pragma once
 
+#include <ranges>
+
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 
 #if __has_include(<boost/mp11/concepts.hpp>)
@@ -23,14 +25,14 @@ namespace cmn::tuple_::io
 {
 
 template <typename Char, typename CharTraits, boost::c::fus_sequence Seq>
-    requires !c::c_array_of<Seq, Char>   // skip string arrays
+    requires !std::ranges::range<Seq>   // skip ranges
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Seq const &seq) -> decltype(ostr)
 {
     using ostream_type = std::basic_ostream<Char, CharTraits>;
 
     // NOTE: don't make it static
     auto const open  = basic_open_manip<Char, CharTraits>::value(ostr);
-    auto const delim = basic_delim_manip<Char, CharTraits>::value(ostr);
+    auto const separator = basic_separator_manip<Char, CharTraits>::value(ostr);
     auto const close = basic_close_manip<Char, CharTraits>::value(ostr);
 
     ostr << open;
@@ -39,11 +41,10 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Seq const &seq) ->
     (
         seq,
         ostr,
-        [&delim, first = true](ostream_type &ostr, auto item) mutable 
-            -> decltype(ostr)
+        [&separator, first = true](ostream_type &ostr, auto item) mutable -> decltype(ostr)
         {
             if (!first)
-                ostr << delim;
+                ostr << separator;
             else
                 first = false;
 
@@ -56,6 +57,7 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Seq const &seq) ->
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits, boost::c::fus_sequence Seq>
+    requires !std::ranges::range<Seq>   // skip ranges
 auto operator >> (std::basic_istream<Char, CharTraits> &istr, Seq &seq) -> decltype(istr)
 {
     throw not_implemented();

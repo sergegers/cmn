@@ -77,7 +77,7 @@ add_library (
  "cmn/io/manip/slot/param.h"
 
  "cmn/range/io.h"
- "cmn/range/manip.h" 
+ "cmn/enum/io/manip.h" 
 
  "cmn/tuple/tuple.h"
  "cmn/tuple/ops.h"
@@ -109,10 +109,10 @@ add_library (
  "cmn/enum/bitfield.h" 
  "cmn/enum/combo.h" 
  "cmn/enum/io.h" 
- "cmn/enum/print.h" 
- "cmn/enum/read.h" 
- "cmn/enum/read.cpp" 
- "cmn/enum/manip.h" 
+ "cmn/enum/io/print.h" 
+ "cmn/enum/io/read.h" 
+ "cmn/enum/io/read.cpp" 
+ "cmn/enum/io/manip.h" 
  "cmn/enum/formatter.h"
 
  "cmn/algorithm/detail/result.h"
@@ -158,7 +158,8 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
    "test/util.cpp" 
    "test/meta.cpp"
    "test/test_accessor.h"
-   "test/manip.cpp" "test/range/io.cpp")
+   "test/manip.cpp" 
+   "test/range/io.cpp")
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

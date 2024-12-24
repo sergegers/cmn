@@ -7,8 +7,9 @@
 // - <cmn/shared/enum/combo.h>
 // inclusion
 
-#include "print.h"
-#include "read.h"
+#include <cmn/enum/io/print.h>
+#include <cmn/enum/io/read.h>
+#include <cmn/enum/io/manip.h>
 
 namespace cmn::io
 {

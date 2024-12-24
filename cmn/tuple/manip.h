@@ -29,6 +29,9 @@ using basic_open_manip =
     >
 ;
 
+template <typename Char, typename CharTraits = std::char_traits<Char>>
+constexpr cmn::io::slot_manip_forwarder<basic_open_manip<Char, CharTraits>> basic_tuple_open {};
+
 using open_manip = basic_open_manip<char>;
 using wopen_manip = basic_open_manip<wchar_t>;
 
@@ -54,6 +57,9 @@ using basic_close_manip =
     >
 ;
 
+template <typename Char, typename CharTraits = std::char_traits<Char>>
+constexpr cmn::io::slot_manip_forwarder<basic_close_manip<Char, CharTraits>> basic_tuple_close {};
+
 using close_manip = basic_close_manip<char>;
 using wclose_manip = basic_close_manip<wchar_t>;
 
@@ -62,30 +68,50 @@ inline constexpr cmn::io::slot_manip_forwarder<wclose_manip> wtclose {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// tuple_::delimiter manipulator
+// tuple separator manipulator
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Char, typename CharTraits = std::char_traits<Char>>
-using basic_delim_manip =
+using basic_separator_manip =
     cmn::io::basic_string_slot_manip
     <
-          struct basic_range_delim_
+          struct basic_separator_
 		, symbols<Char, CharTraits>::comma + symbols<Char, CharTraits>::whitespace
         , symbols<Char, CharTraits>::nothing
     >
 ;
 
-using delim_manip = basic_delim_manip<char>;
-using wdelim_manip = basic_delim_manip<wchar_t>;
+template <typename Char, typename CharTraits = std::char_traits<Char>>
+constexpr cmn::io::slot_manip_forwarder<basic_separator_manip<Char, CharTraits>> basic_tuple_separator {};
 
-inline constexpr cmn::io::slot_manip_forwarder<delim_manip> rdelim {};
-inline constexpr cmn::io::slot_manip_forwarder<wdelim_manip> wrdelim {};
+using separator_manip = basic_separator_manip<char>;
+using wseparator_manip = basic_separator_manip<wchar_t>;
+
+inline constexpr cmn::io::slot_manip_forwarder<separator_manip> tsep {};
+inline constexpr cmn::io::slot_manip_forwarder<wseparator_manip> wtsep {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Utilities
 //
-using tsaver = cmn::io::manip::iword_saver<open_manip, close_manip, delim_manip>;
-using wtsaver = cmn::io::manip::iword_saver<wopen_manip, wclose_manip, wdelim_manip>;
+using tsaver = cmn::io::manip::iword_saver<open_manip, close_manip, separator_manip>;
+using wtsaver = cmn::io::manip::iword_saver<wopen_manip, wclose_manip, wseparator_manip>;
+
+}
+
+namespace cmn::io_
+{
+
+using tuple_::io::basic_tuple_open;
+using tuple_::io::topen;
+using tuple_::io::wtopen;
+using tuple_::io::basic_tuple_close;
+using tuple_::io::tclose;
+using tuple_::io::wtclose;
+using tuple_::io::basic_tuple_separator;
+using tuple_::io::tsep;
+using tuple_::io::wtsep;
+using tuple_::io::tsaver;
+using tuple_::io::wtsaver;
 
 }

@@ -7,12 +7,12 @@
 #include <boost/lexical_cast.hpp>
 
 #include <cmn/error/exception.h>
-#include <cmn/enum/manip.h>
 #include <cmn/util/util.h>   // overloaded
 #include <cmn/util/lexical_cast.h>
 #include <cmn/util/feature.h>
 
 #include "read.h"
+#include "manip.h"
 
 #pragma warning (push)
 #pragma warning(disable: 4459)
@@ -44,9 +44,9 @@ auto get_close(std::basic_istream<Char, CharTraits>& istr)
 }
 
 template <typename Char, typename CharTraits>
-auto get_delim(std::basic_istream<Char, CharTraits>& istr)
+auto get_separator(std::basic_istream<Char, CharTraits>& istr)
 {
-    return basic_bitfield_delim_manip<Char, CharTraits>::value(istr);
+    return basic_bitfield_separator_manip<Char, CharTraits>::value(istr);
 }
 
 // NOTE: transfer istream iterators by reference
@@ -253,7 +253,7 @@ auto parse_combo
 
     auto const open = get_open(istr);
     auto const close = get_close(istr);
-    auto const delim = basic_bitfield_delim_manip<Char, CharTraits>::value(istr);
+    auto const separator = basic_bitfield_separator_manip<Char, CharTraits>::value(istr);
 
     std::ptrdiff_t items = 0;
     auto const begin = iterator_type{ istr };
@@ -271,13 +271,13 @@ auto parse_combo
                   enum_item_type const &item 
                 , string_type const &open
                 , string_type const &close
-                , string_type const &delim
+                , string_type const &separator
                 , string_type const &pfx 
             ): parser::base_type { items }
             {
                 using namespace qi;
 
-                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(delim)];
+                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(separator)];
                 items    = lit(open) >> value >> lit(close);
 
                 //BOOST_SPIRIT_DEBUG_NODES
@@ -287,7 +287,7 @@ auto parse_combo
             }
         }
 
-        const parser{ item, open, close, delim, enum_name.class_prefix() };
+        const parser{ item, open, close, separator, enum_name.class_prefix() };
         check_result
         (
             qi::phrase_parse(last, end, parser, qi::space, items),
@@ -306,12 +306,12 @@ auto parse_combo
                   enum_item_type const &item 
                 , string_type const & open
                 , string_type const & close
-                , string_type const & delim
+                , string_type const & separator
             ): parser::base_type { items }
             {
                 using namespace qi;
 
-                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(delim)];
+                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(separator)];
                 items       = lit(open) >> value >> lit(close);
 
                 //BOOST_SPIRIT_DEBUG_NODES
@@ -322,7 +322,7 @@ auto parse_combo
             }
         }
 
-        const parser { item, open, close, delim };
+        const parser { item, open, close, separator };
         check_result
         (
             qi::phrase_parse(last, end, parser, qi::space, items),
@@ -354,7 +354,7 @@ auto try_parse_combo
 
     auto const open = get_open(istr);
     auto const close = get_close(istr);
-    auto const delim = basic_bitfield_delim_manip<Char, CharTraits>::value(istr);
+    auto const separator = basic_bitfield_separator_manip<Char, CharTraits>::value(istr);
 
     std::ptrdiff_t items = 0;
     auto const begin = iterator_type{ istr };
@@ -372,13 +372,13 @@ auto try_parse_combo
                   enum_item_type const &item 
                 , string_type const &open
                 , string_type const &close
-                , string_type const &delim
+                , string_type const &separator
                 , string_type const &pfx 
             ): parser::base_type { items }
             {
                 using namespace qi;
 
-                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(delim)];
+                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(separator)];
                 items    = lit(open) >> value >> lit(close);
 
                 //BOOST_SPIRIT_DEBUG_NODES
@@ -388,7 +388,7 @@ auto try_parse_combo
             }
         }
 
-        const parser{ item, open, close, delim, enum_name.class_prefix() };
+        const parser{ item, open, close, separator, enum_name.class_prefix() };
         if
         (
             check_errors
@@ -413,12 +413,12 @@ auto try_parse_combo
                   enum_item_type const &item 
                 , string_type const & open
                 , string_type const & close
-                , string_type const & delim
+                , string_type const & separator
             ): parser::base_type { items }
             {
                 using namespace qi;
 
-                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(delim)];
+                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(separator)];
                 items       = lit(open) >> value >> lit(close);
 
                 //BOOST_SPIRIT_DEBUG_NODES
@@ -429,7 +429,7 @@ auto try_parse_combo
             }
         }
 
-        const parser { item, open, close, delim };
+        const parser { item, open, close, separator };
         if
         (
             check_errors
