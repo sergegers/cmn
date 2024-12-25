@@ -1,13 +1,16 @@
 #pragma once
 
+#include <cstddef>
 #include <iosfwd>
 #include <string>
+#include <string_view>
 #include <type_traits>
-#include <cstddef>
 #include <ranges>
+#include <algorithm>
 
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 #include <boost/spirit/include/qi_symbols.hpp>
+#include <boost/spirit/include/support_istream_iterator.hpp>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <boost/optional/optional_fwd.hpp>
 
@@ -19,6 +22,7 @@
 #include <cmn/enum/traits.h>
 
 #include "manip.h"
+#include "parse.h"
 
 namespace cmn::enum_::io
 {
@@ -26,53 +30,72 @@ namespace cmn::enum_::io
 namespace detail
 {
 
-template <typename Char, typename CharTraits>
-auto check_stream_state(std::basic_ios<Char, CharTraits> const &istr) noexcept -> bool;
+template <c::adapted_enum E, typename Char, typename CharTraits>
+constexpr auto prepare_enum_items(int_<kind_t::enum_>) -> boost::spirit::qi::symbols<Char, std::ptrdiff_t>
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
-// parse kind_t::enum
-template <typename Char, typename CharTraits>
-auto parse_enum
-(
-      std::basic_istream<Char, CharTraits>& istr
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , basic_qualified_name<Char, CharTraits> enum_name
-    , print_t po
-)
-    ->std::ptrdiff_t;
+    static_assert(std::tuple_size_v<decltype(groups_v<E>)> == 1);
 
-// parse kind_t::bitfield, kind_t::combo
-template <typename Char, typename CharTraits>
-auto parse_combo
-(
-      std::basic_istream<Char, CharTraits>& istr
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , basic_qualified_name<Char, CharTraits> enum_name
-    , print_t po
-)
-    ->std::ptrdiff_t;
+    return std::ranges::fold_left
+    (
+        std::get<0>(groups_v<E>).m_records
+      , enum_item_type{}
+      , [](auto &&items, auto const &rec) 
+        {
+            auto const enum_member_name = rec.template name<Char, CharTraits>().m_enum_member_name;
+            items.add(string_type{ enum_member_name }, rec.as_interop());
+            return items;
+        }
+    );
+}
 
-//-----------------------------------------------------------------------------
-// try parse kind_t::enum
-template <typename Char, typename CharTraits>
-[[nodiscard]] auto try_parse_enum
-(
-    std::basic_istream<Char, CharTraits>& istr
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , basic_qualified_name<Char, CharTraits> enum_name
-    , print_t po
-) noexcept
- -> boost::optional<std::ptrdiff_t>;
+template <c::adapted_enum E, typename Char, typename CharTraits>
+constexpr auto prepare_enum_items(int_<kind_t::bitfield>) -> boost::spirit::qi::symbols<Char, std::ptrdiff_t>
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
-// try parse kind_t::bitfield, kind_t::combo
-template <typename Char, typename CharTraits>
-auto try_parse_combo
-(
-    std::basic_istream<Char, CharTraits>& istr
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& item
-    , basic_qualified_name<Char, CharTraits> enum_name
-    , print_t po
-) noexcept
- -> boost::optional<std::ptrdiff_t>;
+    return boost::fusion::fold
+    (
+        groups_v<E>,
+        enum_item_type{},
+        []<typename Group>(auto &&items, Group const& group)
+        {
+            static_assert(group_::size_v<Group> == 1);
+
+            auto const &rec = group.m_records[0];
+            auto const enum_member_name = rec.template name<Char, CharTraits>().m_enum_member_name;
+            items.add(string_type{ enum_member_name }, rec.as_interop());
+
+            return items;
+        }
+    );
+}
+
+template <c::adapted_enum E, typename Char, typename CharTraits>
+constexpr auto prepare_enum_items(int_<kind_t::combo>) -> boost::spirit::qi::symbols<Char, std::ptrdiff_t>
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+
+    return boost::fusion::fold
+    (
+        groups_v<E>,
+        enum_item_type{},
+        [](auto &&items, auto const& group)
+        {
+            for (auto const &rec : group.m_records)
+            {
+                auto const enum_member_name = rec.template name<Char, CharTraits>().m_enum_member_name;
+                items.add(string_type{ enum_member_name }, rec.as_interop());
+            }
+
+            return items;
+        }
+    );
+}
 
 //-----------------------------------------------------------------------------
 template <typename E, typename Char, typename CharTraits>
@@ -80,7 +103,7 @@ template <typename E, typename Char, typename CharTraits>
 (
     std::basic_istream<Char, CharTraits> &istr, 
     E en,
-    int_<kind_t::enum_>
+    int_<kind_t::enum_> kind
 ) noexcept
     -> boost::optional<E>
 {
@@ -88,27 +111,17 @@ template <typename E, typename Char, typename CharTraits>
 
     static_assert(std::tuple_size_v<decltype(groups_v<E>)> == 1);
 
-    if (!detail::check_stream_state(istr)) return {};
+    if (istr.rdstate() != std::ios_base::goodbit) return {};
 
     auto const po = print_manip::value(istr);
 
-    static auto const item = std::ranges::fold_left
-    (
-        std::get<0>(groups_v<E>).m_records
-      , enum_item_type{}
-      , [&istr](auto &&item, auto const &rec) 
-        {
-            auto const lit = rec.name(istr).m_enum_member_name;
-            item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
-            return item;
-        }
-    );
+    static auto const items = prepare_enum_items<E, Char, CharTraits>(kind);
 
-    return try_parse_enum
+    return try_parse
     (
-          istr
-        , item
-        , enum_::name(en, istr)
+          kind
+        , items
+        , name(en, istr)
         , po
     ).map([](std::ptrdiff_t res) { return static_cast<E>(res); });
 }
@@ -118,36 +131,22 @@ template <typename E, typename Char, typename CharTraits>
 (
     std::basic_istream<Char, CharTraits> &istr, 
     E,
-    int_<kind_t::bitfield>
+    int_<kind_t::bitfield> kind
 ) noexcept
     -> boost::optional<E>
 {
     using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
 
-    if (!detail::check_stream_state(istr)) return {};
+    if (istr.rdstate() != std::ios_base::goodbit) return {};
 
     auto const po = print_manip::value(istr);
 
-    static auto const item = boost::fusion::fold
-    (
-        groups_v<E>,
-        enum_item_type{},
-        []<typename Group>(auto && item, Group const& group)
-        {
-            static_assert(group_::size_v<Group> == 1);
-
-            auto const& rec = group[0];
-            auto const lit = rec.template get_str<Char, CharTraits>();
-            item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
-
-            return item;
-        }
-    );
+    static auto const items = prepare_enum_items<E, Char, CharTraits>(kind);
 
     return try_parse_combo
     (
           istr
-        , item
+        , items
         , name(istr)
         , std::is_scoped_enum_v<E> && has_feature(po, print_t::class_prefix)
     ).map([](std::ptrdiff_t res) { return static_cast<E>(res); });
@@ -158,37 +157,20 @@ template <typename E, typename Char, typename CharTraits>
 (
     std::basic_istream<Char, CharTraits> &istr, 
     E,
-    int_<kind_t::combo>
+    int_<kind_t::combo> kind
 ) noexcept
     -> boost::optional<E>
 {
-    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
-
-    if (!detail::check_stream_state(istr)) return {};
+    if (istr.rdstate() != std::ios_base::goodbit) return {};
 
     auto const po = print_manip::value(istr);
 
-    static auto const item = boost::fusion::fold
-    (
-        groups_v<E>,
-        enum_item_type{},
-        []<typename Item>(Item && item, auto const& group)
-        {
-            for (auto const& rec : group)
-            {
-                auto const lit = rec.template get_str<Char, CharTraits>();
-                auto const val = rec.m_val;
-                item.add(lit, static_cast<std::ptrdiff_t>(val));
-            }
-
-            return std::forward<Item>(item);
-        }
-    );
+    static auto const items = prepare_enum_items<E, Char, CharTraits>(kind);
 
     return try_parse_combo
     (
           istr
-        , item
+        , items
         , name(istr)
         , po
     ).map([](std::ptrdiff_t res) { return static_cast<E>(res); });
@@ -196,8 +178,9 @@ template <typename E, typename Char, typename CharTraits>
 
 }
 
+
 ///////////////////////////////////////////////////////////////////////////////
-template<c::enum_ E>
+template<c::adapted_enum E>
 struct reader<E, kind_t::enum_>
 {
     using kkind_type = int_<kind_t::enum_>;
@@ -210,31 +193,38 @@ struct reader<E, kind_t::enum_>
     template <typename Char, typename CharTraits>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
-        using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+        using open_manip_type = basic_open_manip<Char, CharTraits>;
+        using close_manip_type = basic_close_manip<Char, CharTraits>;
+        using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
+        using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
-        static_assert(std::tuple_size_v<decltype(groups_v<E>)> == 1);
+        static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
 
-        auto const po = print_manip::value(istr);
+        fmt_specs_type const fmt_specs
+        {
+            .open = open_manip_type::value(istr),
+            .close = close_manip_type::value(istr),
+            .po = print_manip::value(istr)
+        };
 
-        static auto const item = std::ranges::fold_left
+        this->m_val = static_cast<E>
         (
-            std::get<0>(groups_v<E>).m_records
-          , enum_item_type{}
-          , [&istr](auto &&item, auto const &rec) 
-            {
-                auto const lit = rec.name(istr).m_enum_member_name;
-                item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
-                return item;
-            }
+            parse
+            (
+                  m_kind
+                , items
+                , name(E{}, istr)
+                , fmt_specs
+                , istream_iterator_type{ istr }
+                , istream_iterator_type{}
+            )
         );
-
-        this->m_val = static_cast<E>(detail::parse_enum(istr, item, name(E{}, istr), po));
 
         return istr;
     }
 };
 
-template<c::enum_ E>
+template<c::adapted_enum E>
 struct reader<E, kind_t::bitfield>
 {
     using kkind_type = int_<kind_t::bitfield>;
@@ -247,35 +237,40 @@ struct reader<E, kind_t::bitfield>
     template <typename Char, typename CharTraits>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
-        using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+        using open_manip_type = basic_open_manip<Char, CharTraits>;
+        using close_manip_type = basic_close_manip<Char, CharTraits>;
+        using separator_manip_type = basic_bitfield_separator_manip<Char, CharTraits>;
+        using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
+        using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
-        auto const po = print_manip::value(istr);
+        static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
 
-        static auto const item = boost::fusion::fold
+        fmt_specs_type const fmt_specs
+        {
+            .open = open_manip_type::value(istr),
+            .separator = separator_manip_type::value(istr),
+            .close = close_manip_type::value(istr),
+            .po = print_manip::value(istr)
+        };
+
+        this->m_val = static_cast<E>
         (
-            groups_v<E>,
-            enum_item_type{},
-            [&istr]<typename Group>(auto &&item, Group const &group)
-            {
-                using string_type = std::basic_string<Char, CharTraits>;
-
-                static_assert(group_::size_v<Group> == 1);
-
-                auto const &rec = group.m_records.front();
-                auto const lit = rec.name(istr).m_enum_member_name;
-                item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
-
-                return item;
-            }
+            parse
+            (
+                  m_kind
+                , items
+                , name(E{}, istr)
+                , fmt_specs
+                , istream_iterator_type{ istr }
+                , istream_iterator_type{}
+            )
         );
-
-        this->m_val = static_cast<E>(detail::parse_combo(istr, item, name(E{}, istr), po));
 
         return istr;
     }
 };
 
-template<c::enum_ E>
+template<c::adapted_enum E>
 struct reader<E, kind_t::combo>
 {
     using kkind_type = int_<kind_t::combo>;
@@ -288,32 +283,34 @@ struct reader<E, kind_t::combo>
     template <typename Char, typename CharTraits>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
-        using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+        using open_manip_type = basic_open_manip<Char, CharTraits>;
+        using close_manip_type = basic_close_manip<Char, CharTraits>;
+        using separator_manip_type = basic_bitfield_separator_manip<Char, CharTraits>;
+        using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
+        using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
-        auto const po = print_manip::value(istr);
+        static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
 
-        static auto const item = boost::fusion::fold
+        fmt_specs_type const fmt_specs
+        {
+            .open = open_manip_type::value(istr),
+            .separator = separator_manip_type::value(istr),
+            .close = close_manip_type::value(istr),
+            .po = print_manip::value(istr)
+        };
+
+        this->m_val = static_cast<E>
         (
-            groups_v<E>,
-            enum_item_type{},
-            [&istr]<typename Item>(Item &&item, auto const &group)
-            {
-                return std::ranges::fold_left
-                (
-                    group.m_records,
-                    std::forward<Item>(item),
-                    [&istr](auto &&item, auto const &rec)
-                    {
-                        auto const lit = rec.name(istr).m_enum_member_name;
-                        item.add(lit, static_cast<std::ptrdiff_t>(rec.m_value));
-
-                        return item;
-                    }
-                );
-            }
+            parse
+            (
+                  m_kind
+                , items
+                , name(E{}, istr)
+                , fmt_specs
+                , istream_iterator_type { istr }
+                , istream_iterator_type {}
+            )
         );
-
-        this->m_val = static_cast<E>(detail::parse_combo(istr, item, name(E{}, istr), po));
 
         return istr;
     }

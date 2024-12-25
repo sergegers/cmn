@@ -2,7 +2,8 @@
 
 #include <iosfwd>
 
-#include <cmn/meta/symbols.h>
+#include <cmn/util/symbols.h>
+
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/util.h>

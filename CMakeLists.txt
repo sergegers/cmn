@@ -57,7 +57,7 @@ add_library (
  "cmn/meta/type_traits.h"
  "cmn/meta/function_traits.h"
  
- "cmn/meta/symbols.h"
+ "cmn/util/symbols.h"
 
  "cmn/util/fixed_string.h"
  "cmn/io/manip/slot/param.h"
@@ -108,12 +108,14 @@ add_library (
  "cmn/enum/enum.h" 
  "cmn/enum/bitfield.h" 
  "cmn/enum/combo.h" 
+ "cmn/enum/formatter.h"
  "cmn/enum/io.h" 
  "cmn/enum/io/print.h" 
  "cmn/enum/io/read.h" 
  "cmn/enum/io/read.cpp" 
  "cmn/enum/io/manip.h" 
- "cmn/enum/formatter.h"
+ "cmn/enum/io/parse.h" 
+ "cmn/enum/io/parse.cpp"
 
  "cmn/algorithm/detail/result.h"
  "cmn/algorithm/detail/visitor.h"

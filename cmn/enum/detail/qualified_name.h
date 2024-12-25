@@ -1,11 +1,12 @@
 #pragma once
 
-#include <string_view>
 #include <iosfwd>
 #include <type_traits>
+#include <string_view>
+#include <string>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/symbols.h>
+#include <cmn/util/symbols.h>
 
 #include "magic_get.h"
 
@@ -48,13 +49,7 @@ struct basic_qualified_name final
         itself{ basic_magic_enum_name_v<Enum, Char, CharTraits> }
     {}
 
-    friend auto operator << (ostream_type &ostr, itself const &self) -> ostream_type &
-    {
-        return ostr << self.m_name;
-    }
-
-    constexpr auto class_prefix() noexcept
-        -> std::basic_string<Char, CharTraits>
+    constexpr auto class_prefix() const noexcept -> std::basic_string<Char, CharTraits>
     {
         using string_type = std::basic_string<Char, CharTraits>;
 
@@ -63,6 +58,10 @@ struct basic_qualified_name final
         return pfx;
     }
 
+    friend auto operator << (ostream_type &ostr, itself const &self) -> ostream_type &
+    {
+        return ostr << self.m_name;
+    }
 };
 
 using qualified_name = basic_qualified_name<char>;
@@ -153,7 +152,6 @@ public:
     {
         decompose(std::is_scoped_enum<decltype(En_)>{}, std::false_type{});
     }
-
 
     friend auto operator << (ostream_type &ostr, itself const &self) -> ostream_type &
     {

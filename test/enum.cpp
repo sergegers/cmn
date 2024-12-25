@@ -7,15 +7,16 @@
 #include <boost/test/tools/output_test_stream.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/enum/traits.h>
-#include <cmn/enum/op.h>
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
+
+#include <cmn/enum/traits.h>
+#include <cmn/enum/op.h>
 #include <cmn/enum/enum.h>
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/combo.h>
-#include <cmn/enum/io.h>
 #include <cmn/enum/formatter.h>
+#include <cmn/enum/io.h>
 
 //====================================================================
 /// Debugger return codes.
@@ -357,9 +358,6 @@ BOOST_AUTO_TEST_CASE(read_combo)
     using enum cl_cmb_t;
     using namespace std::string_literals;
 
-    BOOST_TEST((green | two) == boost::lexical_cast<cl_cmb_t>("[green two]"s));
-    BOOST_TEST(two == boost::lexical_cast<cl_cmb_t>("[two]"s));
-
     {
         std::istringstream sstr{ "[red three]" };
         cl_cmb_t e{};
@@ -381,6 +379,9 @@ BOOST_AUTO_TEST_CASE(read_combo)
         sstr >> e;
         BOOST_TEST(e == (red | three));
     }
+
+    BOOST_TEST((green | two) == boost::lexical_cast<cl_cmb_t>("[green two]"s));
+    BOOST_TEST(two == boost::lexical_cast<cl_cmb_t>("[two]"s));
 }
 
 CMN_ENUM_DEFINE_BITFIELD

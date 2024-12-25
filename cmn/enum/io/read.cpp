@@ -32,22 +32,29 @@ template auto check_stream_state(std::ios const &) noexcept -> bool;
 template auto check_stream_state(std::wios const &) noexcept -> bool;
 
 template <typename Char, typename CharTraits>
-auto get_open(std::basic_istream<Char, CharTraits>& istr)
+auto get_print_options(std::basic_istream<Char, CharTraits> &istr) -> print_t
+{
+    
+}
+
+template <typename Char, typename CharTraits>
+auto get_open(std::basic_istream<Char, CharTraits> &istr)
 {
     return basic_open_manip<Char, CharTraits>::value(istr);
 }
 
 template <typename Char, typename CharTraits>
-auto get_close(std::basic_istream<Char, CharTraits>& istr)
+auto get_close(std::basic_istream<Char, CharTraits> &istr)
 {
     return basic_close_manip<Char, CharTraits>::value(istr);
 }
 
 template <typename Char, typename CharTraits>
-auto get_separator(std::basic_istream<Char, CharTraits>& istr)
+auto get_separator(std::basic_istream<Char, CharTraits> &istr)
 {
     return basic_bitfield_separator_manip<Char, CharTraits>::value(istr);
 }
+
 
 // NOTE: transfer istream iterators by reference
 // because they don't meet iterator requirements

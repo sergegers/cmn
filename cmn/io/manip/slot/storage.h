@@ -7,7 +7,7 @@
 #include <exception>
 // ReSharper restore CppUnusedIncludeDirective
 
-#include <cmn/meta/symbols.h>
+#include <cmn/util/symbols.h>
 
 #include "fwd.h"
 

@@ -7,7 +7,9 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>   // int_<>
+
 #include <cmn/util/util.h>          // lazy_to_interop()
+#include <cmn/util/feature.h>
 
 #include <cmn/enum/traits.h>        // ops_v<>
 
@@ -67,7 +69,7 @@ namespace op
 //-----------------------------------------------------------------------------
 
 #define CMN_ENUM_RQUIRES_CLAUSE(supported_ops)  \
-    requires ((ops_v<E> & (supported_ops)) == (supported_ops))
+    requires (has_feature(ops_v<E>, supported_ops))
 
 //-----------------------------------------------------------------------------
 #define CMN_ENUM_BINARY_OP(op, supported_ops, lhs_type, rhs_type, result_type)  \
@@ -242,17 +244,19 @@ CMN_ENUM_BINARY_OP(<=, op_comparable | op_interoperable, interop_type_t<E>, E, b
 //-----------------------------------------------------------------------------
 template <c::adapted_enum E, typename Char, typename CharTaits>
 auto operator << (std::basic_ostream<Char, CharTaits> &ostr, E en) -> std::basic_ostream<Char, CharTaits> &
-    requires ((ops_v<E> & op_io) == op_io)
+    requires (has_feature(ops_v<E>, op_io))
 {
     return io::printer{ en, int_<kind_v<E>>{} }.print(ostr);                                                                                     \
 } 
 
 template <c::adapted_enum E, typename Char, typename CharTaits>
 auto operator >> (std::basic_istream<Char, CharTaits> &istr, E &en) -> std::basic_istream<Char, CharTaits> &
-    requires ((ops_v<E> & op_io) == op_io)
+    requires (has_feature(ops_v<E>, op_io))
 {
     return io::reader{ en, int_<kind_v<E>>{} }.read(istr);
 }
+
+#undef CMN_ENUM_RQUIRES_CLAUSE
 
 #undef CMN_ENUM_BINARY_OP
 #undef CMN_ENUM_UNARY_OP

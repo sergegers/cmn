@@ -10,7 +10,7 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
-#include <cmn/meta/symbols.h>
+#include <cmn/util/symbols.h>
 #include <cmn/util/fixed_string.h>
 
 namespace cmn
