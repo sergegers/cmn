@@ -18,11 +18,11 @@
 
 #include <cmn/util/feature.h>
 
-#include <cmn/enum/print_t.h>
 #include <cmn/enum/traits.h>
 
 #include "manip.h"
 #include "parse.h"
+#include "fmt_specs.h"
 
 namespace cmn::enum_::io
 {
@@ -63,7 +63,7 @@ constexpr auto prepare_enum_items(int_<kind_t::bitfield>) -> boost::spirit::qi::
         enum_item_type{},
         []<typename Group>(auto &&items, Group const& group)
         {
-            static_assert(group_::size_v<Group> == 1);
+            static_assert(group_::size_v<Group> == 1, "Bitfield group must contain the one and only one record");
 
             auto const &rec = group.m_records[0];
             auto const enum_member_name = rec.template name<Char, CharTraits>().m_enum_member_name;
@@ -180,54 +180,10 @@ template <typename E, typename Char, typename CharTraits>
 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<c::adapted_enum E>
-struct reader<E, kind_t::enum_>
+template<c::adapted_enum E, kind_t Kind_>
+struct reader<E, Kind_>
 {
-    using kkind_type = int_<kind_t::enum_>;
-
-    E                                   &m_val;
-    [[no_unique_address]] kkind_type    m_kind;
-
-    reader(E &val, kkind_type kind): m_val { val }, m_kind{ kind } {}
-
-    template <typename Char, typename CharTraits>
-    auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
-    {
-        using open_manip_type = basic_open_manip<Char, CharTraits>;
-        using close_manip_type = basic_close_manip<Char, CharTraits>;
-        using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
-        using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
-
-        static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
-
-        fmt_specs_type const fmt_specs
-        {
-            .open = open_manip_type::value(istr),
-            .close = close_manip_type::value(istr),
-            .po = print_manip::value(istr)
-        };
-
-        this->m_val = static_cast<E>
-        (
-            parse
-            (
-                  m_kind
-                , items
-                , name(E{}, istr)
-                , fmt_specs
-                , istream_iterator_type{ istr }
-                , istream_iterator_type{}
-            )
-        );
-
-        return istr;
-    }
-};
-
-template<c::adapted_enum E>
-struct reader<E, kind_t::bitfield>
-{
-    using kkind_type = int_<kind_t::bitfield>;
+    using kkind_type = int_<Kind_>;
 
     E                                   &m_val;
     [[no_unique_address]] kkind_type    m_kind;
@@ -263,52 +219,6 @@ struct reader<E, kind_t::bitfield>
                 , fmt_specs
                 , istream_iterator_type{ istr }
                 , istream_iterator_type{}
-            )
-        );
-
-        return istr;
-    }
-};
-
-template<c::adapted_enum E>
-struct reader<E, kind_t::combo>
-{
-    using kkind_type = int_<kind_t::combo>;
-
-    E                                   &m_val;
-    [[no_unique_address]] kkind_type    m_kind;
-
-    reader(E &val, kkind_type kind): m_val { val }, m_kind{ kind } {}
-
-    template <typename Char, typename CharTraits>
-    auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
-    {
-        using open_manip_type = basic_open_manip<Char, CharTraits>;
-        using close_manip_type = basic_close_manip<Char, CharTraits>;
-        using separator_manip_type = basic_bitfield_separator_manip<Char, CharTraits>;
-        using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
-        using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
-
-        static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
-
-        fmt_specs_type const fmt_specs
-        {
-            .open = open_manip_type::value(istr),
-            .separator = separator_manip_type::value(istr),
-            .close = close_manip_type::value(istr),
-            .po = print_manip::value(istr)
-        };
-
-        this->m_val = static_cast<E>
-        (
-            parse
-            (
-                  m_kind
-                , items
-                , name(E{}, istr)
-                , fmt_specs
-                , istream_iterator_type { istr }
-                , istream_iterator_type {}
             )
         );
 

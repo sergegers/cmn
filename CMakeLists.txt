@@ -69,7 +69,8 @@ add_library (
  "cmn/util/strong_typedef_io.cpp" 
  "cmn/util/feature.h"
 
- "cmn/io/manip/slot/fwd.h"
+"cmn/io/formatter.h"
+"cmn/io/manip/slot/fwd.h"
  "cmn/io/manip/slot/decoder.h"
  "cmn/io/manip/slot/forwarder.h"
  "cmn/io/manip/slot/traits.h"
@@ -77,7 +78,8 @@ add_library (
  "cmn/io/manip/slot/param.h"
 
  "cmn/range/io.h"
- "cmn/enum/io/manip.h" 
+"cmn/range/io/fmt_spec.h" 
+ 
 
  "cmn/tuple/tuple.h"
  "cmn/tuple/ops.h"
@@ -102,18 +104,17 @@ add_library (
  "cmn/enum/detail/record_info.h"  
  "cmn/enum/detail/group_info.h" 
  "cmn/enum/detail/macro.h"  
-
  "cmn/enum/op.h" 
  "cmn/enum/traits.h" 
  "cmn/enum/enum.h" 
  "cmn/enum/bitfield.h" 
  "cmn/enum/combo.h" 
- "cmn/enum/formatter.h"
+ "cmn/enum/io/formatter.h"
  "cmn/enum/io.h" 
  "cmn/enum/io/print.h" 
- "cmn/enum/io/read.h" 
- "cmn/enum/io/read.cpp" 
+ "cmn/enum/io/format.h"
  "cmn/enum/io/manip.h" 
+ "cmn/enum/io/read.h" 
  "cmn/enum/io/parse.h" 
  "cmn/enum/io/parse.cpp"
 

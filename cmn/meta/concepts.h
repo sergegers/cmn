@@ -8,6 +8,7 @@
 #include <utility>
 #include <ios>
 #include <cstdint>
+#include <format>
 
 #include <boost/mp11.hpp>
 #include <boost/mpl/pair.hpp>

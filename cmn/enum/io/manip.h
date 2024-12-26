@@ -8,7 +8,7 @@
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/util.h>
 
-#include <cmn/enum/print_t.h>
+#include "fmt_specs.h"
 
 namespace cmn::enum_::io
 {

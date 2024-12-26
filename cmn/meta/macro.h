@@ -38,24 +38,3 @@
 #ifndef CMN_ANONYMOUS_VARIABLE
 #   define CMN_ANONYMOUS_VARIABLE(...) CMN_DISABLE_WARNING(4189, [[maybe_unused]] CMN_PP_VA_CAT(var_, __VA_ARGS__, __COUNTER__))
 #endif
-
-// prevents ADL
-#ifndef CMN_ANONYMOUS_NAMESPACE
-#   ifdef UNITY_BUILD
-#       define CMN_ANONYMOUS_NAMESPACE_IMPL(name, ...)    \
-            namespace name    \
-            {   \
-                __VA_ARGS_  \
-            }   \
-            using namespace name;   \
-        \
-#       define CMN_ANONYMOUS_NAMESPACE(...)    \
-        \ CMN_ANONYMOUS_NAMESPACE_IMPL(BOOST_PP_CAT(ns_, __COUNTER__))
-#   else
-#       define CMN_ANONYMOUS_NAMESPACE(...)     \
-            namespace \
-            {   \
-                __VA_ARGS__ \
-            }
-#   endif
-#endif

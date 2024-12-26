@@ -6,7 +6,7 @@
 
 #include <cmn/meta/concepts.h>
 
-#include "manip.h"
+#include <cmn/range/io/manip.h>
 
 namespace cmn::range_::io
 {

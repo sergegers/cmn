@@ -11,7 +11,6 @@
 #include <cmn/meta/type_traits.h>   // int_<>
 
 #include <cmn/enum/traits.h>
-#include <cmn/enum/print_t.h>
 #include <cmn/enum/detail/macro.h>
 #include <cmn/enum/detail/record_info.h>
 
@@ -19,29 +18,11 @@
 #include <cmn/util/feature.h>
 
 #include "manip.h"
+#include "fmt_specs.h"
+#include "format.h"
 
 namespace cmn::enum_
 {
-
-namespace detail
-{
-
-// keep print operations here to avoid circular dependencies
-template <typename Char, typename CharTraits, c::enum_ En>
-constexpr auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
-{
-    using enum io::print_t;
-
-    auto const &name = rec.name(ostr);
-    static auto const scope_resolution = symbols<Char, CharTraits>::scope_resolution;
-
-    auto const po = io::print_manip::value(ostr);
-    if (has_feature(po, ns)) ostr << name.m_ns << scope_resolution;
-    if (has_feature(po, class_prefix)) ostr << name.m_enum_name << scope_resolution;
-    return ostr << name.m_enum_member_name;
-}
-
-}
 
 using boost::fusion::sequence::operators::operator <<;
 

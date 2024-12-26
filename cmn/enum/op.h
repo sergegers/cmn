@@ -19,7 +19,7 @@ namespace cmn::enum_
 namespace io
 {
 
-template<c::adapted_enum E, kind_t Kind_>
+template<c::enum_ E, kind_t Kind_>
 struct reader
 {
     E                                   &m_val;

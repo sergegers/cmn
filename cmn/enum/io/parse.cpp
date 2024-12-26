@@ -22,8 +22,6 @@
 namespace cmn::enum_::io
 {
 
-//CMN_ANONYMOUS_NAMESPACE
-//(
 namespace
 {
 
@@ -238,7 +236,6 @@ auto try_parse_bitfield
 }
 
 }
-// unnamed namespace
 
 ///////////////////////////////////////////////////////////////////////////////
 

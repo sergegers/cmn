@@ -10,12 +10,14 @@
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
 
+#include <cmn/io/formatter.h>
+
 #include <cmn/enum/traits.h>
 #include <cmn/enum/op.h>
 #include <cmn/enum/enum.h>
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/combo.h>
-#include <cmn/enum/formatter.h>
+#include <cmn/enum/io/formatter.h>
 #include <cmn/enum/io.h>
 
 //====================================================================
@@ -862,26 +864,38 @@ BOOST_AUTO_TEST_CASE(anonymous_enum)
     // NOTE: what about using print_t::class_prefix option?
 }
 
+static_assert(cmn::io::traits<cl_en_t>::fmt_options == cmn::io::fo_brackers);
+static_assert(std::formattable<cl_en_t, char>);
+static_assert(std::formattable<cmn::io::fmt<cl_en_t>, char>);
+
 BOOST_AUTO_TEST_CASE(format_enum)
 {
     using enum cl_en_t;
+    using cmn::io::fmt;
+
     BOOST_TEST(std::format("{}", apple) == "[apple]");
-    BOOST_TEST(std::format("{0:<}", apple) == "<apple]");
-    BOOST_TEST(std::format("{:<}", apple) == "<apple]");
-    BOOST_TEST(std::format("{0:[[:>>}", apple) == "[[apple>>");
-    BOOST_TEST(std::format("{0:<<:>>}", apple) == "<<apple>>");
-    BOOST_TEST(std::format("{0::}", apple) == "apple");
+    BOOST_TEST(std::format("{0:<:>}", fmt{ apple }) == "<apple>");
+    BOOST_TEST(std::format("{0:[[:>>}", fmt{ apple }) == "[[apple>>");
+    BOOST_TEST(std::format("{0:<<:>>}", fmt{ apple }) == "<<apple>>");
+    BOOST_TEST(std::format("{0::>>}", fmt{ apple }) == "apple>>");
+    BOOST_TEST(std::format("{0::}", fmt{ apple }) == "apple");
 }
+
+static_assert(cmn::io::traits<cl_cmb_t>::fmt_options == (cmn::io::fo_brackers | cmn::io::fo_separator));
+static_assert(std::formattable<cl_cmb_t, char>);
+static_assert(std::formattable<cmn::io::fmt<cl_cmb_t>, char>);
 
 BOOST_AUTO_TEST_CASE(format_combo)
 {
     using enum cl_cmb_t;
+    using cmn::io::fmt;
+
     BOOST_TEST(std::format("{}", red) == "[zero red]");
     BOOST_TEST(std::format("{}", red | two) == "[two red]");
-    BOOST_TEST(std::format("{:<}", red | two) == "<two red]");
-    BOOST_TEST(std::format("{0:<}", red | two) == "<two red]");
-    BOOST_TEST(std::format("{0:<:__:>}", red | two) == "<two__red>");
-    BOOST_TEST(std::format("{0:::}", red | two) == "twored");
+    BOOST_TEST(std::format("{:<: :>}", fmt{ red | two }) == "<two red>");
+    BOOST_TEST(std::format("{:: :>}", fmt{ red | two }) == "two red>");
+    BOOST_TEST(std::format("{:::>}", fmt{ red | two }) == "twored>");
+    BOOST_TEST(std::format("{:::}", fmt{ red | two }) == "twored");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // enum_

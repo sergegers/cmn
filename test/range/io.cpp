@@ -6,6 +6,7 @@
 #include <boost/test/tools/output_test_stream.hpp>
 
 #include <cmn/range/io.h>
+#include <cmn/range/io/formatter.h>
 
 BOOST_AUTO_TEST_SUITE(cmn)
 BOOST_AUTO_TEST_SUITE(range_)

@@ -1,9 +1,11 @@
 #pragma once
 
+#include <string>
+
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
-#include <cmn/enum/op.h>
 
+#include <cmn/enum/op.h>
 #include <cmn/enum/detail/enum_info.h>
 #include <cmn/enum/detail/macro.h>
 
@@ -51,5 +53,22 @@ static_assert(ops_v<print_t> == (op_comparable | op_bitwise | op_interoperable))
 static_assert(c::bitfield<print_t>);
 
 #endif
+
+template
+<
+      typename Char
+    , typename CharTraits = std::char_traits<Char>
+>
+struct basic_fmt_specs
+{
+    using string_type = std::basic_string<Char, CharTraits>;
+
+    // TODO: + default enum values
+    string_type     open;
+    string_type     separator;
+    string_type     close;
+    print_t         po;
+    long            mask;
+};
 
 }
