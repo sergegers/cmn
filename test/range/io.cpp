@@ -1,6 +1,7 @@
 
 #include <vector>
 #include <ranges>
+#include <format>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/test/tools/output_test_stream.hpp>
@@ -22,9 +23,25 @@ BOOST_AUTO_TEST_CASE(std_cnt)
 
 BOOST_AUTO_TEST_CASE(range)
 {
+    using std::ranges::views::iota;
+
     boost::test_tools::output_test_stream ostr {};
-    ostr << std::ranges::views::iota(1, 4);
+    ostr << iota(1, 4);
     BOOST_CHECK(ostr.is_equal("<1, 2, 3>"));
+}
+
+BOOST_AUTO_TEST_CASE(format)
+{
+    using std::ranges::views::iota;
+    using cmn::io::fmt;
+
+    BOOST_TEST(std::format("{}", iota(1, 4)) == "[1, 2, 3]");
+    BOOST_TEST(std::format("{:n}", iota(1, 4)) == "1, 2, 3");
+    BOOST_TEST(std::format("{:<: :>}", fmt{ iota(1, 4) }) == "<1 2 3>");
+    BOOST_TEST(std::format("{:<<:  :>>}", fmt{ iota(1, 4) }) == "<<1  2  3>>");
+    BOOST_TEST(std::format("{::  :>>}", fmt{ iota(1, 4) }) == "1  2  3>>");
+    BOOST_TEST(std::format("{:::>>}", fmt{ iota(1, 4) }) == "123>>");
+    BOOST_TEST(std::format("{:::}", fmt{ iota(1, 4) }) == "123");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io

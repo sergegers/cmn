@@ -1,33 +1,20 @@
 #pragma once
 
-#include <format>
-#include <string>
-#include <stdexcept>
 #include <ranges>
-#include <type_traits>
-#include <concepts>
+#include <format>
+
+#include <boost/type_traits/promote.hpp>
 
 #include <cmn/io/formatter.h>
 
-namespace std
+namespace cmn::io
 {
 
-template
-<
-      std::ranges::input_range R
-    , typename Char
->
-    requires std::formattable<R, Char> && std::same_as<std::remove_cvref_t<R>, R>
-
-struct formatter<cmn::io::fmt<R>, Char>
+template <std::ranges::input_range R>
+struct traits<R>
 {
-    using underlying_formatter_type = std::range_formatter<R, Char>;
-
-    template <typename ParseContext>
-    constexpr auto parse(ParseContext &ctx) -> typename ParseContext::iteratror
-    {
-        
-    }
+    static constexpr boost::promote_t<fmt_options_t> fmt_options = fo_brackers | fo_separator;
 };
+
 
 }
