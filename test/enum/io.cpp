@@ -8,7 +8,6 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/error/exception.h>
-#include <cmn/util/lexical_cast.h>
 
 #include <cmn/io/formatter.h>
 
@@ -20,49 +19,7 @@
 #include <cmn/enum/io/formatter.h>
 #include <cmn/enum/io.h>
 
-//====================================================================
-/// Debugger return codes.
-/// Success if positive (> DRC_NONE).
-enum drc_t
-{
-  DRC_EVENTS = 3,   ///< success, there are pending events
-  DRC_CRC    = 2,   ///< success, but the input file crc does not match
-  DRC_OK     = 1,   ///< success
-  DRC_NONE   = 0,   ///< reaction to the event not implemented
-  DRC_FAILED = -1,  ///< failed or false
-  DRC_NETERR = -2,  ///< network error
-  DRC_NOFILE = -3,  ///< file not found
-  DRC_IDBSEG = -4,  ///< use idb segmentation
-  DRC_NOPROC = -5,  ///< the process does not exist anymore
-  DRC_NOCHG  = -6,  ///< no changes
-  DRC_ERROR  = -7,  ///< unclassified error, may be complemented by errbuf
-};
-
-CMN_ENUM_ADAPT_ENUM
-(
-    ::drc_t,
-    (DRC_ERROR)     // = -7,  ///< unclassified error, may be complemented by errbuf
-    (DRC_NOCHG)     // = -6,  ///< no changes
-    (DRC_NOPROC)    // = -5,  ///< the process does not exist anymore
-    (DRC_IDBSEG)    // = -4,  ///< use idb segmentation
-    (DRC_NOFILE)    // = -3,  ///< file not found
-    (DRC_NETERR)    // = -2,  ///< network error
-    (DRC_FAILED)    // = -1,  ///< failed or false
-    (DRC_NONE)      // = 0,   ///< reaction to the event not implemented
-    (DRC_OK)        // = 1,   ///< success
-    (DRC_CRC)       // = 2,   ///< success, but the input file crc does not match
-    (DRC_EVENTS)    // = 3,   ///< success, there are pending events
-);
-
-static_assert(cmn::enum_::kind_v< ::drc_t> == cmn::enum_::kind_t::enum_);
-static_assert(cmn::enum_::ops_v< ::drc_t> == cmn::enum_::op_io);
-
 BOOST_AUTO_TEST_SUITE(cmn)
-
-static_assert(enum_::next_on_mask(0b0111) == 0b1000);
-static_assert(enum_::next_on_mask(0b0111) != 0b1001);
-static_assert(enum_::next_on_mask(0b0100000100) == 0b1000000000);
-
 BOOST_AUTO_TEST_SUITE(enum_)
 
 using boost::test_tools::output_test_stream;
@@ -70,7 +27,7 @@ using boost::test_tools::per_element;
 
 using namespace io;
 
-enum class cl_cmb_t
+enum class cl_cmb_2_t
 {
     zero       = 0x0,
     one        = 0x1,
@@ -85,9 +42,9 @@ enum class cl_cmb_t
     color_mask = red | green | blue
 };
 
-consteval auto adapt_enum_info(cl_cmb_t en)
+consteval auto adapt_enum_info(cl_cmb_2_t en)
 {
-    using enum cl_cmb_t;
+    using enum cl_cmb_2_t;
     return enum_info
     {
           default_ops(en, kind_t::combo) | op_interoperable
@@ -97,66 +54,9 @@ consteval auto adapt_enum_info(cl_cmb_t en)
 
 CMN_ENUM_INJECT_OPS()
 
-static_assert(std::is_same_v<interop_type_t<cl_cmb_t>, int>);
-static_assert(c::adapted_enum<cl_cmb_t>);
-static_assert(ops_v<cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
-static_assert(std::tuple_size_v<decltype(groups_v<cl_cmb_t>)> == 2);
-static_assert(kind_v<cl_cmb_t> == kind_t::combo);
-static_assert(c::bitfield<cl_cmb_t>);
-
-// magic get
-static_assert(magic_enum_name_v<cl_cmb_t> == "cmn::enum_::cl_cmb_t");
-static_assert(magic_enum_wname_v<cl_cmb_t> == L"cmn::enum_::cl_cmb_t");
-static_assert(magic_enum_member_name_v<cl_cmb_t::one> == "cmn::enum_::cl_cmb_t::one");
-static_assert(magic_enum_member_wname_v<cl_cmb_t::one> == L"cmn::enum_::cl_cmb_t::one");
-
-// qualified name
-static_assert(qualified_name{ cl_cmb_t{} }.m_ns == "cmn::enum_");
-static_assert(qualified_name{ cl_cmb_t{} }.m_enum_name == "cl_cmb_t");
-// qualified member name
-static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_ns == "cmn::enum_");
-static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_name == "cl_cmb_t");
-static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_member_name == "green");
-
-BOOST_AUTO_TEST_CASE(masks)
-{
-    using enum cl_cmb_t;
-
-    static_assert
-    (
-        group_::make<zero, one, three, two>() ==
-        group_info{ int_<zero>{}, int_<one>{}, int_<two>{}, int_<three>{} }
-    );
-
-    constexpr decltype(auto) enum_info_ = enum_info_v<cl_cmb_t>;
-    static_assert(std::tuple_size_v<decltype(enum_info_.m_groups)> == 2, "Enum group count mismatch");
-
-    BOOST_TEST(boost::lexical_cast<std::string>(std::get<1>(enum_info_.m_groups).m_records[1]) == "green");
-
-    static_assert(std::get<0>(enum_info_.m_groups).get_values() == std::array { zero, one, two, three });
-    static_assert(std::get<1>(enum_info_.m_groups).get_values() == std::array { red, green, blue });
-
-    constexpr auto masks = enum_info_.m_masks;
-    static_assert(masks.size() == 2, "size mismatch");
-    static_assert(std::get<0>(masks) == digit_mask, "digit mask mismatch");
-    static_assert(std::get<1>(masks) == color_mask, "color mask mismatch");
-}
-
-BOOST_AUTO_TEST_CASE(enum_class_ops)
-{
-    using enum cl_cmb_t;
-
-    cl_cmb_t e{ two };
-    e |= blue;
-    BOOST_TEST(e == (cl_cmb_t::two | cl_cmb_t::blue));
-
-    e &= digit_mask;
-    BOOST_TEST(e == two);
-}
-
 BOOST_AUTO_TEST_CASE(enum_class_zero_out)
 {
-    cl_cmb_t e { cl_cmb_t::zero | cl_cmb_t::red };
+    cl_cmb_2_t e { cl_cmb_2_t::zero | cl_cmb_2_t::red };
     
     output_test_stream tstr;
     tstr << e;
@@ -165,7 +65,7 @@ BOOST_AUTO_TEST_CASE(enum_class_zero_out)
 
 BOOST_AUTO_TEST_CASE(enum_class_out)
 {
-    cl_cmb_t e { cl_cmb_t::one | cl_cmb_t::green };
+    cl_cmb_2_t e { cl_cmb_2_t::one | cl_cmb_2_t::green };
 
     {
         output_test_stream tstr;
@@ -175,13 +75,13 @@ BOOST_AUTO_TEST_CASE(enum_class_out)
 
     {
         output_test_stream tstr;
-        tstr << bitfield_mask(cl_cmb_t::digit_mask) << e;
+        tstr << bitfield_mask(cl_cmb_2_t::digit_mask) << e;
         BOOST_CHECK(tstr.is_equal("[one]"));
     }
 
     {
         output_test_stream tstr;
-        tstr << bitfield_mask(cl_cmb_t::color_mask) << e;
+        tstr << bitfield_mask(cl_cmb_2_t::color_mask) << e;
         BOOST_CHECK(tstr.is_equal("[green]"));
     }
 }
@@ -193,7 +93,7 @@ enum cmb_t
     three = 0x2,
 
     red = 0x0,
-    green   = 0x4,
+    green = 0x4,
     blue = 0x8,
 
     digit_mask = 0x3,
@@ -349,7 +249,7 @@ BOOST_AUTO_TEST_CASE(save_flags)
 
 BOOST_AUTO_TEST_CASE(lex_cast)
 {
-    using enum cl_cmb_t;
+    using enum cl_cmb_2_t;
     using namespace std::string_literals;
 
     BOOST_TEST(boost::lexical_cast<std::string>(one | green) == "[one green]"s);
@@ -357,19 +257,19 @@ BOOST_AUTO_TEST_CASE(lex_cast)
 
 BOOST_AUTO_TEST_CASE(read_combo)
 {
-    using enum cl_cmb_t;
+    using enum cl_cmb_2_t;
     using namespace std::string_literals;
 
     {
         std::istringstream sstr{ "[red three]" };
-        cl_cmb_t e{};
+        cl_cmb_2_t e{};
         sstr >> std::noskipws >> e;
         BOOST_TEST(e == (red | three));
     }
 
     {
         std::istringstream sstr{ " [ blue one ] " };
-        cl_cmb_t e{};
+        cl_cmb_2_t e{};
         sstr >> std::noskipws >> e;
         BOOST_TEST(e == (blue | one));
     }
@@ -377,13 +277,13 @@ BOOST_AUTO_TEST_CASE(read_combo)
     {
         std::istringstream sstr{ "red three" };
         sstr >> std::noskipws >> eopen() >> eclose();
-        cl_cmb_t e{};
+        cl_cmb_2_t e{};
         sstr >> e;
         BOOST_TEST(e == (red | three));
     }
 
-    BOOST_TEST((green | two) == boost::lexical_cast<cl_cmb_t>("[green two]"s));
-    BOOST_TEST(two == boost::lexical_cast<cl_cmb_t>("[two]"s));
+    BOOST_TEST((green | two) == boost::lexical_cast<cl_cmb_2_t>("[green two]"s));
+    BOOST_TEST(two == boost::lexical_cast<cl_cmb_2_t>("[two]"s));
 }
 
 CMN_ENUM_DEFINE_BITFIELD
@@ -412,36 +312,26 @@ BOOST_AUTO_TEST_CASE(read_bitfield)
 
 CMN_ENUM_DEFINE_ENUM
 (
-    en_t,
+    en_2_t,
     (en_apple, 4)
     (en_banana)
     (en_carrot, 17)
     (en_cherry)
 )
 
-// magic get
-static_assert(magic_enum_member_name_v<en_apple> == "cmn::enum_::en_apple");
-static_assert(magic_enum_member_wname_v<en_apple> == L"cmn::enum_::en_apple");
-// qualified member name
-static_assert(qualified_member_name{ int_<en_apple>{} }.m_ns == "cmn::enum_");
-static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_name == "en_t");
-static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_member_name == "en_apple");
-static_assert(kind_v<en_t> == kind_t::enum_);
-static_assert(ops_v<en_t> == (op_io));
-
 BOOST_AUTO_TEST_CASE(read_enum)
 {
     using namespace std::string_literals;
 
-    BOOST_TEST(en_apple == boost::lexical_cast<en_t>("[en_apple]"s));
-    BOOST_CHECK_THROW(boost::lexical_cast<en_t>("en_apple"s), cmn::io_error);
+    BOOST_TEST(en_apple == boost::lexical_cast<en_2_t>("[en_apple]"s));
+    BOOST_CHECK_THROW(boost::lexical_cast<en_2_t>("en_apple"s), cmn::io_error);
 
     std::stringstream sstr;
 
     sstr << eopen() << eclose();
     sstr << en_carrot;
 
-    en_t out = static_cast<en_t>(0);
+    en_2_t out = static_cast<en_2_t>(0);
     sstr >> std::skipws >> out;
     BOOST_TEST(out == en_carrot);
 }
@@ -459,15 +349,15 @@ BOOST_AUTO_TEST_CASE(class_prefix_)
 {
     using enum print_t;
     {
-        using enum cl_cmb_t;
+        using enum cl_cmb_2_t;
         std::stringstream sstr;
         sstr << eprint(class_prefix);
 
         constexpr auto in = two | green;
         sstr << in;
-        BOOST_TEST(sstr.str() == "[cl_cmb_t::two cl_cmb_t::green]");
+        BOOST_TEST(sstr.str() == "[cl_cmb_2_t::two cl_cmb_2_t::green]");
 
-        cl_cmb_t out;
+        cl_cmb_2_t out;
         sstr >> std::noskipws >> out;
         BOOST_TEST(out == in);
     }
@@ -570,13 +460,6 @@ CMN_ENUM_DEFINE_BITFIELD_CLASS
 
 static_assert(c::strong_bitfield<bf2_t>);
 static_assert(c::bitfield<bf2_t>);
-
-BOOST_AUTO_TEST_CASE(adapt_global_ns)
-{
-    std::ostringstream ostr;
-    ostr << ::DRC_NOCHG;
-    BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
-}
 
 enum class large_enum_t
 {
@@ -864,6 +747,14 @@ BOOST_AUTO_TEST_CASE(anonymous_enum)
     // NOTE: what about using print_t::class_prefix option?
 }
 
+BOOST_AUTO_TEST_CASE(tail)
+{
+    output_test_stream tstr;
+    tstr << eprint(print_t::tail) << static_cast<cmb_t>(one | green | 0x1000);
+    BOOST_CHECK(tstr.is_equal("[one green 0X1000]"));
+
+}
+
 static_assert(cmn::io::traits<cl_en_t>::fmt_options == cmn::io::fo_brackers);
 static_assert(std::formattable<cl_en_t, char>);
 static_assert(std::formattable<cmn::io::fmt<cl_en_t>, char>);
@@ -881,13 +772,13 @@ BOOST_AUTO_TEST_CASE(format_enum)
     BOOST_TEST(std::format("{0::}", fmt{ apple }) == "apple");
 }
 
-static_assert(cmn::io::traits<cl_cmb_t>::fmt_options == (cmn::io::fo_brackers | cmn::io::fo_separator));
-static_assert(std::formattable<cl_cmb_t, char>);
-static_assert(std::formattable<cmn::io::fmt<cl_cmb_t>, char>);
+static_assert(cmn::io::traits<cl_cmb_2_t>::fmt_options == (cmn::io::fo_brackers | cmn::io::fo_separator));
+static_assert(std::formattable<cl_cmb_2_t, char>);
+static_assert(std::formattable<cmn::io::fmt<cl_cmb_2_t>, char>);
 
 BOOST_AUTO_TEST_CASE(format_combo)
 {
-    using enum cl_cmb_t;
+    using enum cl_cmb_2_t;
     using cmn::io::fmt;
 
     BOOST_TEST(std::format("{}", red) == "[zero red]");

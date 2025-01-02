@@ -159,7 +159,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/main.cpp"
   "test/error.cpp"
   "test/algorithm.cpp"
-  "test/enum.cpp" 
+  "test/enum/enum.cpp" 
    
    "test/strong_typedef.cpp" 
    "test/tuple/tuple.cpp"
@@ -170,7 +170,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
    "test/manip.cpp" 
    "test/range/io.cpp"
    "test/tuple/io.cpp"
- )
+  "test/enum/io.cpp")
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})
