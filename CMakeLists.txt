@@ -74,6 +74,7 @@ add_library (
  "cmn/util/strong_typedef_io.h" 
  "cmn/util/strong_typedef_io.cpp" 
  "cmn/util/feature.h"
+ 
 
 "cmn/io/formatter.h"
 "cmn/io/manip/slot/fwd.h"
@@ -84,7 +85,7 @@ add_library (
  "cmn/io/manip/slot/param.h"
 
  "cmn/range/io.h"
-"cmn/range/io/fmt_spec.h" 
+ "cmn/range/io/fmt_spec.h" 
  
 
  "cmn/tuple/tuple.h"
@@ -160,7 +161,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test/error.cpp"
   "test/algorithm.cpp"
   "test/enum/enum.cpp" 
-   
+  "test/enum/io.cpp"
    "test/strong_typedef.cpp" 
    "test/tuple/tuple.cpp"
    "test/tuple/va.cpp"
@@ -170,7 +171,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
    "test/manip.cpp" 
    "test/range/io.cpp"
    "test/tuple/io.cpp"
-  "test/enum/io.cpp")
+ )
 
 target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

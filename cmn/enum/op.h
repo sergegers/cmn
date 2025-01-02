@@ -37,7 +37,7 @@ struct reader
     }
 };
 
-template<c::adapted_enum E, kind_t Kind_>
+template<c::enum_ E, kind_t Kind_>
 struct printer
 {
     E                                    m_val;

@@ -4,9 +4,6 @@
 #include <string>
 #include <iterator>
 
-// boost.io
-#include <boost/io/ios_state.hpp>
-
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>   // int_<>
 
@@ -24,184 +21,87 @@
 namespace cmn::enum_
 {
 
-using boost::fusion::sequence::operators::operator <<;
+//using boost::fusion::sequence::operators::operator <<;
 
 namespace io
 {
 
-namespace detail
-{
-
-template <typename Char, typename CharTraits>
-class print_record
-{
-private:
-    std::basic_ostream<Char, CharTraits>    &m_ostr;
-    bool                                    &m_first_time;
-
-public:
-    constexpr print_record
-    (
-        std::basic_ostream<Char, CharTraits>& ostr,
-        bool &first_time
-    ) noexcept
-        : m_ostr{ ostr }, m_first_time{ first_time } {}
-
-    template <c::enum_ En>
-    constexpr auto operator ()(record_info<En> const &rec) const -> void
-    {
-        using enum print_t;
-
-        auto const separator = basic_bitfield_separator_manip<Char>::value(m_ostr);
-        if (m_first_time) m_first_time = false; else m_ostr << separator;
-
-        m_ostr << rec;
-    }
-};
-
-template <typename Tail, typename Char, typename CharTraits>
-constexpr auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
-{
-    auto const po = print_manip::value(ostr);
-
-    if (has_feature(po, print_t::tail) && !empty(tail_))
-    {
-        boost::io::ios_flags_saver const ifs{ ostr };
-        auto const separator = basic_bitfield_separator_manip<Char, CharTraits>::value(ostr);
-
-        ostr << CMN_HEX_OUT() << separator << tail_;
-    }
-}
-
-} 
+//namespace detail
+//{
+//
+//template <typename Char, typename CharTraits>
+//class print_record
+//{
+//private:
+//    std::basic_ostream<Char, CharTraits>    &m_ostr;
+//    bool                                    &m_first_time;
+//
+//public:
+//    constexpr print_record
+//    (
+//        std::basic_ostream<Char, CharTraits>& ostr,
+//        bool &first_time
+//    ) noexcept
+//        : m_ostr{ ostr }, m_first_time{ first_time } {}
+//
+//    template <c::enum_ En>
+//    constexpr auto operator ()(record_info<En> const &rec) const -> void
+//    {
+//        using enum print_t;
+//
+//        auto const separator = basic_bitfield_separator_manip<Char>::value(m_ostr);
+//        if (m_first_time) m_first_time = false; else m_ostr << separator;
+//
+//        m_ostr << rec;
+//    }
+//};
+//
+//template <typename Tail, typename Char, typename CharTraits>
+//constexpr auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
+//{
+//    auto const po = print_manip::value(ostr);
+//
+//    if (has_feature(po, print_t::tail) && !empty(tail_))
+//    {
+//        boost::io::ios_flags_saver const ifs{ ostr };
+//        auto const separator = basic_bitfield_separator_manip<Char, CharTraits>::value(ostr);
+//
+//        ostr << CMN_HEX_OUT() << separator << tail_;
+//    }
+//}
+//
+//} 
 
 ///////////////////////////////////////////////////////////////////////////////
-template<c::enum_ Enum>
-struct printer<Enum, kind_t::enum_>
+template<c::adapted_enum E, kind_t Kind_>
+struct printer<E, Kind_>
 {
-    using kkind_type = int_<kind_t::enum_>;
+    using kkind_type = int_<Kind_>;
 
-    Enum                                    m_val;
+    E                                    m_val;
     [[no_unique_address]] kkind_type        m_kind;
 
-    constexpr printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
+    constexpr printer(E val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 
     template <typename Char, typename CharTraits>
     constexpr auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
     {
-        using print_record_type = detail::print_record<Char, CharTraits>;
+        using open_manip_type = basic_open_manip<Char, CharTraits>;
+        using close_manip_type = basic_close_manip<Char, CharTraits>;
+        using separator_manip_type = basic_bitfield_separator_manip<Char, CharTraits>;
+        using bitfield_mask_manip_type = bitfield_mask_manip<E>;
+        using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
 
-        // NOTE: don't make it static
-        auto const open = basic_open_manip<Char, CharTraits>::value(ostr);
-        auto const close = basic_close_manip<Char, CharTraits>::value(ostr);
+        fmt_specs_type const fmt_specs
+        {
+            .open = open_manip_type::value(ostr),
+            .separator = separator_manip_type::value(ostr),
+            .close = close_manip_type::value(ostr),
+            .po = print_manip::value(ostr),
+            .mask = static_cast<long>(bitfield_mask_manip_type::value(ostr))
+        };
 
-        ostr << open;
-
-        static auto groups = groups_v<Enum>;
-        static_assert
-        (
-            std::tuple_size_v<decltype(groups)> == 1,
-            "Enum must have the one and only one group"
-        );
-
-        static decltype(auto) group = std::get<0>(groups);
-
-        // ReSharper disable CppLocalVariableMayBeConst
-        bool first_time = true;
-        // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = group.exec(m_val, print_record_type{ ostr, first_time });
-        detail::print_tail(remain, ostr);
-
-        return ostr << close;
-    }
-};
-
-template<c::enum_ Enum>
-struct printer<Enum, kind_t::bitfield>
-{
-    using kkind_type = int_<kind_t::bitfield>;
-
-    Enum                                    m_val;
-    [[no_unique_address]] kkind_type        m_kind;
-
-    constexpr printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
-
-    template <typename Char, typename CharTraits>
-    constexpr auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
-    {
-        using print_record_type = detail::print_record<Char, CharTraits>;
-
-        auto const mask_ = to_interop(bitfield_mask_manip<Enum>::value(ostr));
-
-        // NOTE: don't make it static
-        auto const open = basic_open_manip<Char, CharTraits>::value(ostr);
-        auto const close = basic_close_manip<Char, CharTraits>::value(ostr);
-
-        ostr << open;
-
-        static auto groups = groups_v<Enum>;
-        bool first_time = true;
-        auto const remain = boost::fusion::fold
-        (
-            groups,
-            to_interop(m_val) & mask_,
-            [&ostr, &first_time]<typename Group>(auto val, Group const &group)
-            {
-                static_assert
-                (
-                    group_::size_v<Group> == 1, 
-                    "Bitfield group must contain the one and only one record"
-                );
-                decltype(auto) rec = group.m_records.front();
-                
-                if (rec.as_interop() & val)
-                {
-                    print_record_type prt { ostr, first_time };
-	                prt(rec);
-                }
-
-                return val & ~rec.as_interop();
-            }
-        );
-        detail::print_tail(remain, ostr);
-
-        return ostr << close;
-    }
-};
-
-template<c::enum_ Enum>
-struct printer<Enum, kind_t::combo>
-{
-    using kkind_type = int_<kind_t::combo>;
-
-    Enum                                    m_val;
-    [[no_unique_address]] kkind_type        m_kind;
-
-    constexpr printer(Enum val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
-
-    template <typename Char, typename CharTraits>
-    constexpr auto print(std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
-    {
-        using print_record_type = detail::print_record<Char, CharTraits>;
-
-        auto const mask_ = to_mask(bitfield_mask_manip<Enum>::value(ostr));
-
-        auto const open = basic_open_manip<Char, CharTraits>::value(ostr);
-        auto const close = basic_close_manip<Char, CharTraits>::value(ostr);
-
-        ostr << open;
-
-        static auto enum_info = enum_info_v<Enum>;
-        static auto masks = masks_v<Enum>;
-
-        // ReSharper disable CppLocalVariableMayBeConst
-        bool first_time = true;
-        // ReSharper restore CppLocalVariableMayBeConst
-        auto const remain = enum_info.exec(m_val, print_record_type{ ostr, first_time }, mask_);
-
-        detail::print_tail(remain, ostr);
-
-        return  ostr << close;
+        return io::format(m_kind, m_val, fmt_specs, ostr);
     }
 };
 

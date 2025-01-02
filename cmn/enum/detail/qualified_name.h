@@ -153,6 +153,9 @@ public:
         decompose(std::is_scoped_enum<decltype(En_)>{}, std::false_type{});
     }
 
+    //-----------------------------------------------------------------------------
+    constexpr auto empty() const noexcept -> bool { return m_name.empty(); }
+
     friend auto operator << (ostream_type &ostr, itself const &self) -> ostream_type &
     {
         return ostr << self.m_name;

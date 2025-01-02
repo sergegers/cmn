@@ -3,6 +3,8 @@
 #include <format>
 
 #include <boost/lexical_cast.hpp>
+#include <boost/io/ios_state.hpp>
+
 #include <boost/test/unit_test.hpp>
 #include <boost/test/tools/output_test_stream.hpp>
 
@@ -19,8 +21,49 @@
 #include <cmn/enum/io/formatter.h>
 #include <cmn/enum/io.h>
 
+//====================================================================
+/// Debugger return codes.
+/// Success if positive (> DRC_NONE).
+enum drc_t
+{
+  DRC_EVENTS = 3,   ///< success, there are pending events
+  DRC_CRC    = 2,   ///< success, but the input file crc does not match
+  DRC_OK     = 1,   ///< success
+  DRC_NONE   = 0,   ///< reaction to the event not implemented
+  DRC_FAILED = -1,  ///< failed or false
+  DRC_NETERR = -2,  ///< network error
+  DRC_NOFILE = -3,  ///< file not found
+  DRC_IDBSEG = -4,  ///< use idb segmentation
+  DRC_NOPROC = -5,  ///< the process does not exist anymore
+  DRC_NOCHG  = -6,  ///< no changes
+  DRC_ERROR  = -7,  ///< unclassified error, may be complemented by errbuf
+};
+
+CMN_ENUM_ADAPT_ENUM
+(
+    ::drc_t,
+    (DRC_ERROR)     // = -7,  ///< unclassified error, may be complemented by errbuf
+    (DRC_NOCHG)     // = -6,  ///< no changes
+    (DRC_NOPROC)    // = -5,  ///< the process does not exist anymore
+    (DRC_IDBSEG)    // = -4,  ///< use idb segmentation
+    (DRC_NOFILE)    // = -3,  ///< file not found
+    (DRC_NETERR)    // = -2,  ///< network error
+    (DRC_FAILED)    // = -1,  ///< failed or false
+    (DRC_NONE)      // = 0,   ///< reaction to the event not implemented
+    (DRC_OK)        // = 1,   ///< success
+    (DRC_CRC)       // = 2,   ///< success, but the input file crc does not match
+    (DRC_EVENTS)    // = 3,   ///< success, there are pending events
+);
+
 BOOST_AUTO_TEST_SUITE(cmn)
+
+static_assert(std::same_as<underlying_type_t< ::drc_t>, int>);
+static_assert(std::same_as<interop_type_t< ::drc_t>, int>);
+static_assert(std::same_as<mask_type_t< ::drc_t>, unsigned int>);
+static_assert(no_mask< ::drc_t> == 0xFFFF'FFFF);
+
 BOOST_AUTO_TEST_SUITE(enum_)
+BOOST_AUTO_TEST_SUITE(io)
 
 using boost::test_tools::output_test_stream;
 using boost::test_tools::per_element;
@@ -430,10 +473,15 @@ CMN_ENUM_ADAPT_ENUM
 
 }
 
+}
+
 namespace cmn
 {
 
 namespace enum_
+{
+
+namespace io
 {
 
 static_assert(kind_v<outer_ns::outer_t::inner_t> == kind_t::enum_);
@@ -789,6 +837,16 @@ BOOST_AUTO_TEST_CASE(format_combo)
     BOOST_TEST(std::format("{:::}", fmt{ red | two }) == "twored");
     BOOST_TEST(std::format("{:::}", fmt<cmb_t>{ cmb_t::two | cmb_t::green }) == "twogreen");
 }
+BOOST_AUTO_TEST_CASE(adapt_global_ns)
+{
+    static_assert(kind_v< ::drc_t> == kind_t::enum_);
+    static_assert(ops_v< ::drc_t> == op_io);
 
+    std::ostringstream ostr;
+    ostr << ::DRC_NOCHG;
+    BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
+}
+
+BOOST_AUTO_TEST_SUITE_END() // io
 BOOST_AUTO_TEST_SUITE_END() // enum_
 BOOST_AUTO_TEST_SUITE_END() // cmn

@@ -42,6 +42,7 @@ struct record_info
         m_wname{ int_<En_>{}, enum_member_wname }
     {}
 
+    //-----------------------------------------------------------------------------
     template <typename Char, typename CharTraits = std::char_traits<Char>>
     constexpr auto &name() const noexcept
     {

@@ -166,6 +166,14 @@ template <c::enumerable T>
 using underlying_type_t = typename underlying_type<T>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
+//
+// mask type
+//
+
+// always unsigned integer
+template <c::enumerable T> using mask_type_t = std::make_unsigned_t<interop_type_t<T>>;
+
+///////////////////////////////////////////////////////////////////////////////
 template <c::enumerable auto Int_> using int_ = std::integral_constant<decltype(Int_), Int_>;
 
 template <typename Int> constexpr auto value_v = Int::value;

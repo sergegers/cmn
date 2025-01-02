@@ -3,12 +3,17 @@
 #include <concepts>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
+
 #include <cmn/util/util.h>
 
 namespace cmn
 {
 
- // feature utils
+///////////////////////////////////////////////////////////////////////////////
+//
+// interop utils
+//
 template <c::enumerable Policy>
 [[nodiscard]] constexpr auto empty(Policy pol) noexcept -> bool { return static_cast<interop_type_t<Policy>>(pol) == 0; }
 
@@ -57,20 +62,6 @@ template <c::bitfield Policy>
     return is_feature_added(old_pol, new_pol, feat) || is_feature_removed(old_pol, new_pol, feat);
 }
 
-// mask is useful for combo, not required for bitfields
-template <c::bitfield Policy>
-[[nodiscard]] constexpr auto set_value(mask_type_t<Policy> pol, Policy val, mask_type_t<Policy> mask = no_mask<Policy>)
-    -> mask_type_t<Policy>
-{
-    return pol & ~mask | val;
-}
-
-template <c::bitfield Policy>
-[[nodiscard]] constexpr auto get_value(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept -> Policy
-{
-    return static_cast<Policy>(pol & mask);
-}
-
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto set_feature(mask_type_t<Policy> pol, Policy feat) noexcept -> mask_type_t<Policy>
 {
@@ -102,7 +93,56 @@ template <c::bitfield Policy>
     return (feat ^ pol) & feat | pol & ~feat;
 }
 
-//-----------------------------------------------------------------------------
+///////////////////////////////////////////////////////////////////////////////
+//
+// mask utils
+//
+namespace detail
+{
+
+template <c::enumerable Policy>
+[[nodiscard]] constexpr auto value_(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
+    -> mask_type_t<Policy>
+{
+    return to_mask(pol) & mask;
+}
+
+}
+
+template <c::enumerable Policy>
+[[nodiscard]] constexpr auto value(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept -> Policy
+{
+    return static_cast<Policy>(detail::value_(pol, mask));
+}
+
+template <c::enumerable Policy>
+[[nodiscard]] constexpr auto value(Policy pol, Policy val, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
+    -> Policy
+{
+    return static_cast<Policy>(detail::value_(pol, ~mask) | detail::value_(val, mask));
+}
+
+template <c::enumerable Policy>
+[[nodiscard]] constexpr auto has_value(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept -> bool
+{
+    return 0 != detail::value_(pol, mask);
+}
+
+template <c::enumerable Policy>
+[[nodiscard]] constexpr auto set_value(Policy pol, Policy val, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
+    -> Policy
+{
+    return value(pol, val, mask);
+}
+
+template <c::enumerable Policy>
+[[nodiscard]] constexpr auto reset_value(Policy pol, Policy val, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
+    -> Policy
+{
+    return static_cast<Policy>(to_mask(pol) & ~to_mask(val) & mask);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 template <c::enumerable I>
 [[nodiscard]] constexpr auto next(I i) noexcept { return static_cast<I>(to_underlying(i) + 1); }
 

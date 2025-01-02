@@ -8,6 +8,10 @@
 #include <utility>
 #include <compare>
 
+#include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
+#include <cmn/util/feature.h>
+
 #include "record_info.h"
 
 namespace cmn::enum_::detail
@@ -88,38 +92,6 @@ struct group_info
             (std::make_index_sequence<Sz_>{})
         ;
     }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    //
-    // execute operation Op if enum value chunk belongs to group and return unprocessed
-    // enum value remainder
-    //
-    ///////////////////////////////////////////////////////////////////////////////
-    constexpr auto exec(enum_type en, auto const &op, mask_type group_mask = no_mask<enum_type>) const -> interop_type
-    {
-        auto reminder = to_interop(en);
-        auto const mval = to_interop(en) & to_interop(group_mask);
-
-        std::ignore = std::ranges::find_if
-        (
-            m_records,
-            [&reminder, mval, &op](record_type const &rec) constexpr -> bool
-            {
-                static_assert(std::same_as<decltype(rec.as_interop()), interop_type>);
-                auto x = rec.as_interop();
-                auto y = x == mval;
-                bool const found = (rec.as_interop() == mval);
-                if (found)
-                {
-                    op(rec);
-                    reminder &= ~mval;
-                }
-                return found;
-            }
-        );
-
-        return reminder;
-    }
 };
 
 //-----------------------------------------------------------------------------
@@ -147,6 +119,43 @@ template <c::enum_ auto En_, decltype(En_) ... Ens_> consteval auto make()
     -> group_info<decltype(En_), (sizeof...(Ens_) + 1)>
 {
     return { int_<En_>{}, int_<Ens_>{}... };
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// execute operation Op if enum value chunk belongs to group and return unprocessed
+// enum value remainder
+//
+///////////////////////////////////////////////////////////////////////////////
+template <c::adapted_enum E>
+constexpr auto exec
+(
+      std::ranges::input_range auto records
+    , E en
+    , std::invocable<record_info<E> const &> auto const &op
+    , cmn::mask_type_t<E> group_mask = no_mask<E>
+) -> E
+{
+    using record_type = record_info<E>;
+
+    auto const mval = value(en, group_mask);
+
+    std::ignore = std::ranges::find_if
+    (
+        std::move(records),
+        [&en, mval, &op](record_type const &rec) constexpr -> bool
+        {
+            bool const found = (rec.as_mask() == to_mask(mval));
+            if (found)
+            {
+                op(rec);
+                en = reset_value(en, mval);
+            }
+            return found;
+        }
+    );
+
+    return en;
 }
 
 }

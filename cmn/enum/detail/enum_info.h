@@ -4,6 +4,7 @@
 #include <array>
 #include <type_traits>
 #include <algorithm>
+#include <ranges>
 
 #include <boost/fusion/container/vector.hpp>
 #include <boost/fusion/algorithm/iteration/fold.hpp>
@@ -12,6 +13,16 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/adapted/std_array.hpp>
 // ReSharper restore CppUnusedIncludeDirective
+#if __has_include(<boost/fusion/concepts.hpp>)
+#   include boost/fusion/concepts.hpp>
+#else
+#   include <cmn/meta/boost/fusion/concepts.hpp>
+#endif
+#if __has_include(<boost/fusion/type_traits.hpp>)
+#   include <boost/fusion/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/fusion/type_traits.hpp>
+#endif
 
 #include <cmn/fwd.h>  // kind_t, op_t
 #include <cmn/meta/concepts.h>
@@ -112,30 +123,6 @@ private:
     {
         return calc_masks_impl(std::make_index_sequence<sizeof... (Szs_)>{});
     }
-
-public:
-    constexpr auto exec(enum_type en, auto const &op, mask_type addditional_mask = no_mask<enum_type>) noexcept
-        -> interop_type // return remainder
-    {
-        namespace fus = boost::fusion;
-        using sequences_type = fus::vector<std::add_lvalue_reference_t<groups_type>, std::add_lvalue_reference_t<masks_type>>;
-
-        return fus::fold
-        (
-            fus::zip_view<sequences_type>{ sequences_type{ m_groups, m_masks } },
-            lazy_to_interop(en) & lazy_to_interop(addditional_mask),
-            [&op, addditional_mask](interop_type remainder, auto const &group_mask_pair)
-            {
-                auto const &current_group = fus::at_c<0>(group_mask_pair);
-                mask_type const current_mask = fus::at_c<1>(group_mask_pair);
-
-                if (!empty(lazy_to_interop(current_mask) & lazy_to_interop(addditional_mask)))
-                    return current_group.exec(static_cast<enum_type>(remainder), op, current_mask);
-                else
-                    return remainder;
-            }
-        );
-    }
 };
 
 //-----------------------------------------------------------------------------
@@ -146,5 +133,45 @@ consteval enum_info(interop_type_t<op_t> ops, Group &&, Groups &&... groups) ->
           group_::enum_type_t<std::remove_reference_t<Group>>
         , group_::size_v<std::remove_reference_t<Group>>, group_::size_v<std::remove_reference_t<Groups>>...
     >;
+
+///////////////////////////////////////////////////////////////////////////////
+template
+<
+      boost::c::fus_sequence Groups
+    , c::adapted_enum E
+>
+constexpr auto exec
+(
+      Groups const &groups
+    , std::array<mask_type_t<E>, boost::fusion::result_of::size_v<Groups>> const &masks
+    , E en
+    , std::invocable<record_info<E> const &> auto const &op
+    , mask_type_t<E> addditional_mask = no_mask<E>
+) noexcept
+    -> E // return remainder
+{
+    namespace fus = boost::fusion;
+    namespace rfus = fus::result_of;
+
+    using interop_type = interop_type_t<E>;
+    using masks_type = std::array<mask_type_t<E>, rfus::size_v<Groups>>;
+    using sequences_type = fus::vector<Groups const &, masks_type const &>;
+
+    return fus::fold
+    (
+        fus::zip_view<sequences_type>{ sequences_type{ groups, masks } },
+        value(en, addditional_mask),
+        [&op, addditional_mask](E remainder, auto const &group_mask_pair)
+        {
+            auto const &current_group = fus::at_c<0>(group_mask_pair);
+            auto const &current_mask = fus::at_c<1>(group_mask_pair);
+
+            if (!empty(current_mask & addditional_mask))
+                return group_::exec(current_group.m_records, remainder, op, current_mask);
+            else
+                return remainder;
+        }
+    );
+}
 
 }

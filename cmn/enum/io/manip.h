@@ -1,5 +1,7 @@
 #pragma once
 
+#include <limits>
+
 #include <cmn/meta/concepts.h> // c::enum_<>, print_t
 
 #include <cmn/util/symbols.h>
@@ -18,14 +20,12 @@ namespace cmn::enum_::io
 // Manipulator bitfield_mask_manip could be used with custom enums
 //
 ////////////////////////////////////////////////////////////////////////////////
-template <c::enum_ Enum>
-using bitfield_mask_manip =
-    cmn::io::int_slot_manip
-    <
-        struct bitfield_mask_
-      , static_cast<Enum>(std::numeric_limits<interop_type_t<Enum>>::max())
-    >
-;
+template <c::enum_ E>
+using bitfield_mask_manip = cmn::io::int_slot_manip
+<
+      struct bitfield_mask_
+    , static_cast<E>(std::numeric_limits<unsigned long>::max()) // fill with 0b11111...
+>;
 
 inline constexpr cmn::io::deduce_slot_manip_forwarder<bitfield_mask_manip> bitfield_mask {};
 

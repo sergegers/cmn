@@ -9,6 +9,7 @@
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
 #include <cmn/util/util.h>
+#include <cmn/util/feature.h>
 
 #include <cmn/enum/traits.h>
 // ReSharper disable CppUnusedIncludeDirective
@@ -22,21 +23,21 @@ namespace cmn::io
 namespace manip
 {
 
-auto get_mask(int_fmt_t en) -> int_fmt_t
+auto get_mask(int_fmt_t en) -> mask_type_t<int_fmt_t>
 {
     // NOTE: zero value isn't used, so we can get mask from value
     for (auto const mask: enum_::masks_v<int_fmt_t>)
-        if (has_feature( mask, en))
+        if (has_value(en, mask))
             return mask;
 
-    return int_fmt_t::empty;
+    return to_mask(int_fmt_t::empty);
 }
 
 auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t
 {
     for (auto const mask: enum_::masks_v<int_fmt_t>)
-        if (auto const mask_over = mask & over; int_fmt_t::empty != mask_over)
-            orig = set_value(orig, mask_over, mask);
+        if (auto const masked_over = value(over,  mask); has_value(masked_over))
+            orig = value(orig, masked_over, mask);
 
     return orig;
 }
@@ -61,9 +62,9 @@ auto int_fmt_storage_t::value(std::ios_base &ios, keep_type value) -> void
     auto const mask   = get_mask(fvalue);
 
     auto const old_fvalue = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios));
-    auto const new_fvalue = set_value(old_fvalue, fvalue, mask);
+    auto const new_fvalue = cmn::value(old_fvalue, fvalue, mask);
 
-    auto const new_value = static_cast<keep_type>(0) | static_cast<short>(new_fvalue);
+    auto const new_value = static_cast<keep_type>(0) | to_underlying(new_fvalue);
 
     ios.iword(index(ios)) = static_cast<int>(new_value);
 }

@@ -41,6 +41,7 @@ namespace group_
 {
 
 using detail::group_::make;
+using detail::group_::exec;
 using detail::group_::size_v;
 
 }
@@ -52,12 +53,7 @@ using detail::record_::make;
 
 }
 
-//-----------------------------------------------------------------------------
-template <c::enumerable E>
-constexpr auto to_mask(E en) -> mask_type_t<E>
-{
-    return static_cast<mask_type_t<E>>(en);
-}
+using detail::exec;
 
 //-----------------------------------------------------------------------------
 template <c::enum_ E, typename Char, typename CharTraits>

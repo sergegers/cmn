@@ -1,6 +1,7 @@
 
 #include <array>
 #include <format>
+#include <concepts>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/test/unit_test.hpp>
@@ -17,51 +18,28 @@
 #include <cmn/enum/combo.h>
 #include <cmn/enum/io.h>
 
-//====================================================================
-/// Debugger return codes.
-/// Success if positive (> DRC_NONE).
-enum drc_t
-{
-  DRC_EVENTS = 3,   ///< success, there are pending events
-  DRC_CRC    = 2,   ///< success, but the input file crc does not match
-  DRC_OK     = 1,   ///< success
-  DRC_NONE   = 0,   ///< reaction to the event not implemented
-  DRC_FAILED = -1,  ///< failed or false
-  DRC_NETERR = -2,  ///< network error
-  DRC_NOFILE = -3,  ///< file not found
-  DRC_IDBSEG = -4,  ///< use idb segmentation
-  DRC_NOPROC = -5,  ///< the process does not exist anymore
-  DRC_NOCHG  = -6,  ///< no changes
-  DRC_ERROR  = -7,  ///< unclassified error, may be complemented by errbuf
-};
-
-CMN_ENUM_ADAPT_ENUM
-(
-    ::drc_t,
-    (DRC_ERROR)     // = -7,  ///< unclassified error, may be complemented by errbuf
-    (DRC_NOCHG)     // = -6,  ///< no changes
-    (DRC_NOPROC)    // = -5,  ///< the process does not exist anymore
-    (DRC_IDBSEG)    // = -4,  ///< use idb segmentation
-    (DRC_NOFILE)    // = -3,  ///< file not found
-    (DRC_NETERR)    // = -2,  ///< network error
-    (DRC_FAILED)    // = -1,  ///< failed or false
-    (DRC_NONE)      // = 0,   ///< reaction to the event not implemented
-    (DRC_OK)        // = 1,   ///< success
-    (DRC_CRC)       // = 2,   ///< success, but the input file crc does not match
-    (DRC_EVENTS)    // = 3,   ///< success, there are pending events
-);
-
-
 BOOST_AUTO_TEST_SUITE(cmn)
 BOOST_AUTO_TEST_SUITE(enum_)
 
-static_assert(kind_v< ::drc_t> == kind_t::enum_);
-static_assert(ops_v< ::drc_t> == op_io);
+enum e: short {};
+
+static_assert(std::same_as<underlying_type_t<e>, short>);
+static_assert(std::same_as<interop_type_t<e>, int>);
+static_assert(std::same_as<mask_type_t<e>, unsigned int>);
+static_assert(no_mask<e> == 0xFFFF'FFFF);
+
+enum class ce: short {};
+
+static_assert(std::same_as<underlying_type_t<ce>, short>);
+static_assert(std::same_as<interop_type_t<ce>, short>);
+static_assert(std::same_as<mask_type_t<ce>, unsigned short>);
+static_assert(no_mask<ce> == 0xFFFF);
 
 static_assert(next_on_mask(0b0111) == 0b1000);
 static_assert(next_on_mask(0b0111) != 0b1001);
 static_assert(next_on_mask(0b0100000100) == 0b1000000000);
 
+//-----------------------------------------------------------------------------
 using boost::test_tools::output_test_stream;
 using boost::test_tools::per_element;
 
@@ -169,13 +147,6 @@ static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_name == "en_t");
 static_assert(qualified_member_name{ int_<en_apple>{} }.m_enum_member_name == "en_apple");
 static_assert(kind_v<en_t> == kind_t::enum_);
 static_assert(ops_v<en_t> == (op_io));
-
-BOOST_AUTO_TEST_CASE(adapt_global_ns)
-{
-    std::ostringstream ostr;
-    ostr << ::DRC_NOCHG;
-    BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
-}
 
 BOOST_AUTO_TEST_SUITE_END() // enum_
 BOOST_AUTO_TEST_SUITE_END() // cmn
