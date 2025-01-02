@@ -56,6 +56,12 @@ add_library (
  "cmn/meta/macro.h"
  "cmn/meta/type_traits.h"
  "cmn/meta/function_traits.h"
+
+"cmn/meta/boost/fusion/concepts.hpp"
+"cmn/meta/boost/fusion/type_traits.hpp"
+"cmn/meta/boost/mp11/concepts.hpp"
+"cmn/meta/boost/mp11/type_traits.hpp"
+"cmn/meta/boost/spirit/ext.hpp"
  
  "cmn/util/symbols.h"
 

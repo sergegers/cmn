@@ -113,16 +113,30 @@ template <typename E, typename Char, typename CharTraits>
 
     if (istr.rdstate() != std::ios_base::goodbit) return {};
 
-    auto const po = print_manip::value(istr);
+    using open_manip_type = basic_open_manip<Char, CharTraits>;
+    using close_manip_type = basic_close_manip<Char, CharTraits>;
+    using separator_manip_type = basic_bitfield_separator_manip<Char, CharTraits>;
+    using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
+    using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
-    static auto const items = prepare_enum_items<E, Char, CharTraits>(kind);
+    static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(kind);
+
+    fmt_specs_type const fmt_specs
+    {
+        .open = open_manip_type::value(istr),
+        .separator = separator_manip_type::value(istr),
+        .close = close_manip_type::value(istr),
+        .po = print_manip::value(istr)
+    };
 
     return try_parse
     (
           kind
         , items
         , name(en, istr)
-        , po
+        , fmt_specs
+        , istream_iterator_type{ istr }
+        , istream_iterator_type{}
     ).map([](std::ptrdiff_t res) { return static_cast<E>(res); });
 }
 

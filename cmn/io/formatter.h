@@ -9,6 +9,7 @@
 
 #include <boost/type_traits/promote.hpp>
 
+#include <cmn/meta/concepts.h>
 #include <cmn/util/symbols.h>
 #include <cmn/util/feature.h>
 
@@ -28,7 +29,26 @@ struct traits
     static constexpr boost::promote_t<fmt_options_t> fmt_options = fo_empty;
 };
 
-template <typename T> struct fmt{ T const &m_t; };
+//-----------------------------------------------------------------------------
+template <typename T>
+struct fmt
+{
+    T m_t;
+
+    template <c::explicitly_convertible_to<T> Arg>
+    constexpr fmt(Arg arg) noexcept: m_t{ static_cast<T>(arg) } {}
+};
+
+template <typename T>
+struct fmt<T const &>
+{
+    T const &m_t;
+
+    constexpr fmt(T const &arg) noexcept: m_t{ arg } {}
+};
+
+template <typename T> fmt(T const &) noexcept -> fmt<T const &>;
+
 
 ///////////////////////////////////////////////////////////////////////////////
 enum scroll_result_t
@@ -139,10 +159,11 @@ namespace std
 {
 
 template <typename T, typename Char>
-    requires same_as<T, std::remove_cvref_t<T>> && formattable<T, Char>
+    requires formattable<std::remove_cvref_t<T>, Char>
 struct formatter<cmn::io::fmt<T>, Char>
 {
-    using underlying_formatter_type = formatter<T, Char>;
+    using underlying_formatting_type = std::remove_cvref_t<T>;
+    using underlying_formatter_type = formatter<underlying_formatting_type, Char>;
     using string_view_type = std::basic_string_view<Char>;
 
     underlying_formatter_type m_underlying_formatter;
@@ -154,12 +175,13 @@ struct formatter<cmn::io::fmt<T>, Char>
 
         using char_type = typename ParseContext::char_type;
         using symbols_type = cmn::symbols<char_type>;
+        using traits_type = traits<underlying_formatting_type>;
 
         constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
         constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
-        constexpr bool has_brackets = cmn::has_feature(traits<T>::fmt_options, fo_brackers);
-        constexpr bool has_separator = cmn::has_feature(traits<T>::fmt_options, fo_separator);
+        constexpr bool has_brackets = cmn::has_feature(traits_type::fmt_options, fo_brackers);
+        constexpr bool has_separator = cmn::has_feature(traits_type::fmt_options, fo_separator);
 
         auto it = ctx.begin();
         auto const begin_it = it;

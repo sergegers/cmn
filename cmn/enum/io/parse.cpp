@@ -13,6 +13,12 @@
 #include <boost/spirit/include/qi.hpp>
 #include <boost/phoenix.hpp>
 
+#if __has_include(<boost/spirit/ext.hpp>)
+#   include <boost/spirit/ext.hpp>
+#else
+#   include <cmn/meta/boost/spirit/ext.hpp>
+#endif
+
 #include <cmn/meta/macro.h>
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
@@ -50,9 +56,12 @@ struct result
 };
 
 template </*std::input_iterator*/typename It>
-constexpr auto items_ot_empty(result<It> const &res) noexcept -> boost::optional<std::ptrdiff_t>
+constexpr auto items_or_empty(result<It> const &res) noexcept -> boost::optional<std::ptrdiff_t>
 {
-    return res.m_parse_result && res.m_last == res.m_end? boost::optional{ res.m_items }: boost::none;
+    return res.m_parse_result && res.m_last == res.m_end? 
+        boost::optional<std::ptrdiff_t>{ res.m_items }:
+        boost::none
+    ;
 }
 
 //-----------------------------------------------------------------------------
@@ -264,7 +273,7 @@ template
 <
       typename Char
     , typename CharTraits
-    , std::input_iterator It
+    , typename /*std::input_iterator*/ It
 >
 auto try_parse
 (
@@ -285,7 +294,7 @@ template
 <
       typename Char
     , typename CharTraits
-    , std::input_iterator It
+    , typename /*std::input_iterator*/ It
 >
 auto try_parse
 (
@@ -300,6 +309,28 @@ auto try_parse
 {
     return items_or_empty(try_parse_bitfield(item, enum_name, fmt_specs, begin, end));
 }
+
+#define CMN_INSTANTIATE_TRY_PARSE(kind, char, iterator) \
+    template auto try_parse    \
+    (   \
+          int_<BOOST_PP_CAT(kind_t::, kind)>   \
+        , boost::spirit::qi::symbols<char, std::ptrdiff_t> const &  \
+        , basic_qualified_name<char> const &    \
+        , basic_fmt_specs<char> const & \
+        , iterator const &   \
+        , iterator const &  \
+    )   \
+        noexcept -> boost::optional<std::ptrdiff_t>;
+
+CMN_INSTANTIATE_TRY_PARSE(enum_, char, boost::spirit::istream_iterator)
+CMN_INSTANTIATE_TRY_PARSE(bitfield, char, boost::spirit::istream_iterator)
+CMN_INSTANTIATE_TRY_PARSE(combo, char, boost::spirit::istream_iterator)
+
+CMN_INSTANTIATE_TRY_PARSE(enum_, wchar_t, boost::spirit::wistream_iterator)
+CMN_INSTANTIATE_TRY_PARSE(bitfield, wchar_t, boost::spirit::wistream_iterator)
+CMN_INSTANTIATE_TRY_PARSE(combo, wchar_t, boost::spirit::wistream_iterator)
+
+#undef CMN_INSTANTIATE_TRY_PARSE
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -382,6 +413,10 @@ auto parse
 CMN_INSTANTIATE_PARSE(enum_, char, boost::spirit::istream_iterator)
 CMN_INSTANTIATE_PARSE(bitfield, char, boost::spirit::istream_iterator)
 CMN_INSTANTIATE_PARSE(combo, char, boost::spirit::istream_iterator)
+
+CMN_INSTANTIATE_PARSE(enum_, wchar_t, boost::spirit::wistream_iterator)
+CMN_INSTANTIATE_PARSE(bitfield, wchar_t, boost::spirit::wistream_iterator)
+CMN_INSTANTIATE_PARSE(combo, wchar_t, boost::spirit::wistream_iterator)
 
 #undef CMN_INSTANTIATE_PARSE
 

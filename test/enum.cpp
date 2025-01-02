@@ -896,6 +896,7 @@ BOOST_AUTO_TEST_CASE(format_combo)
     BOOST_TEST(std::format("{:: :>}", fmt{ red | two }) == "two red>");
     BOOST_TEST(std::format("{:::>}", fmt{ red | two }) == "twored>");
     BOOST_TEST(std::format("{:::}", fmt{ red | two }) == "twored");
+    BOOST_TEST(std::format("{:::}", fmt<cmb_t>{ cmb_t::two | cmb_t::green }) == "twogreen");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // enum_
