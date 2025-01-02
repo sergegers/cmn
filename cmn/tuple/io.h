@@ -52,7 +52,7 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Seq const &seq) ->
 
            return ostr; 
         }
-    );
+    ) << close;
 }
 
 //-----------------------------------------------------------------------------

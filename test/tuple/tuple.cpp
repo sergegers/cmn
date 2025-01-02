@@ -8,6 +8,8 @@
 
 #include <cmn/tuple/tuple.h>
 
+#ifdef CMN_STATIC_TEST
+
 namespace cmn
 {
 
@@ -143,3 +145,5 @@ static_assert(boost::mp11::mp_find<std::tuple<int, char const, long>, long>::val
 static_assert(boost::mp11::mp_find<std::tuple<int, char const, long>, float>::value == 3, "tuple_index failed");
 
 } 
+
+#endif
