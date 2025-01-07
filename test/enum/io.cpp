@@ -807,6 +807,16 @@ static_assert(cmn::io::traits<cl_en_t>::fmt_options == cmn::io::fo_brackers);
 static_assert(std::formattable<cl_en_t, char>);
 static_assert(std::formattable<cmn::io::fmt<cl_en_t>, char>);
 
+BOOST_AUTO_TEST_CASE(adapt_global_ns)
+{
+    static_assert(kind_v< ::drc_t> == kind_t::enum_);
+    static_assert(ops_v< ::drc_t> == op_io);
+
+    std::ostringstream ostr;
+    ostr << ::DRC_NOCHG;
+    BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
+}
+
 BOOST_AUTO_TEST_CASE(format_enum)
 {
     using enum cl_en_t;
@@ -837,14 +847,13 @@ BOOST_AUTO_TEST_CASE(format_combo)
     BOOST_TEST(std::format("{:::}", fmt{ red | two }) == "twored");
     BOOST_TEST(std::format("{:::}", fmt<cmb_t>{ cmb_t::two | cmb_t::green }) == "twogreen");
 }
-BOOST_AUTO_TEST_CASE(adapt_global_ns)
-{
-    static_assert(kind_v< ::drc_t> == kind_t::enum_);
-    static_assert(ops_v< ::drc_t> == op_io);
 
-    std::ostringstream ostr;
-    ostr << ::DRC_NOCHG;
-    BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
+BOOST_AUTO_TEST_CASE(format_tail)
+{
+    using enum cl_cmb_2_t;
+    using cmn::io::fmt;
+
+    BOOST_TEST(std::format("{}", red | 0x1000) == "[zero red 0X1000]");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io

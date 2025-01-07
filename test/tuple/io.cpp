@@ -29,13 +29,10 @@ BOOST_AUTO_TEST_CASE(format)
 {
     using cmn::io::fmt;
 
-    //BOOST_TEST(std::format("{}", iota(1, 4)) == "[1, 2, 3]");
-    //BOOST_TEST(std::format("{:n}", iota(1, 4)) == "1, 2, 3");
-    //BOOST_TEST(std::format("{:<: :>}", fmt{ iota(1, 4) }) == "<1 2 3>");
-    //BOOST_TEST(std::format("{:<<:  :>>}", fmt{ iota(1, 4) }) == "<<1  2  3>>");
-    //BOOST_TEST(std::format("{::  :>>}", fmt{ iota(1, 4) }) == "1  2  3>>");
-    //BOOST_TEST(std::format("{:::>>}", fmt{ iota(1, 4) }) == "123>>");
-    //BOOST_TEST(std::format("{:::}", fmt{ iota(1, 4) }) == "123");
+    BOOST_TEST(std::format("{}", std::tuple{ 1, 'a', 2.f }) == "(1, 'a', 2)");
+    BOOST_TEST(std::format("{:n}", std::tuple{ 1, 'a', 2.f }) == "1, 'a', 2");
+    BOOST_TEST(std::format("{:>>> : , : <<<}", fmt{ std::tuple{ 1, 'a', 2.f } }) == ">>> 1 , 'a' , 2 <<<");
+    BOOST_TEST(std::format("{:::}", fmt{ std::tuple{ 1, 'a', 2.f } }) == "1'a'2");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io
