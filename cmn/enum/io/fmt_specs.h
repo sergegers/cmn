@@ -50,6 +50,7 @@ CMN_ENUM_INJECT_OPS()
 
 static_assert(std::same_as<interop_type_t<print_t>, int>);
 static_assert(ops_v<print_t> == (op_comparable | op_bitwise | op_interoperable));
+static_assert(c::strong_bitfield<print_t>);
 static_assert(c::bitfield<print_t>);
 
 #endif

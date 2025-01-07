@@ -82,7 +82,7 @@ auto print_tail(basic_fmt_specs<Char, CharTraits> const &fmt_specs, std::basic_o
 {
     if (has_feature(fmt_specs.po, print_t::tail) && !empty(remain))
     {
-        boost::io::ios_all_saver CMN_ANONYMOUS_VARIABLE(_){ ostr };
+        boost::io:: basic_ios_all_saver CMN_ANONYMOUS_VARIABLE(){ ostr };
 
         if (!first) ostr << fmt_specs.separator;
         ostr << std::hex << std::showbase << std::uppercase << remain;

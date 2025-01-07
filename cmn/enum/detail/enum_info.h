@@ -14,7 +14,7 @@
 #include <boost/fusion/adapted/std_array.hpp>
 // ReSharper restore CppUnusedIncludeDirective
 #if __has_include(<boost/fusion/concepts.hpp>)
-#   include boost/fusion/concepts.hpp>
+#   include <boost/fusion/concepts.hpp>
 #else
 #   include <cmn/meta/boost/fusion/concepts.hpp>
 #endif
