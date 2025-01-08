@@ -33,6 +33,7 @@ set(Boost_USE_STATIC_RUNTIME ON)
 set(BOOST_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/boost/)
 
 find_package(Boost REQUIRED COMPONENTS 
+    system
     exception
     serialization
     unit_test_framework 
@@ -50,8 +51,6 @@ endif()
 add_library (
  cmn 
  STATIC
-
- 
 
  "cmn/meta/macro.h"
  "cmn/meta/type_traits.h"
@@ -72,14 +71,15 @@ add_library (
  "cmn/util/inverse.h" 
  "cmn/util/feature.h"
  
-
-"cmn/io/formatter.h"
 "cmn/io/manip/slot/fwd.h"
  "cmn/io/manip/slot/decoder.h"
  "cmn/io/manip/slot/forwarder.h"
  "cmn/io/manip/slot/traits.h"
  "cmn/io/manip/slot/storage.h"
  "cmn/io/manip/slot/param.h"
+
+"cmn/io/formatter.h"
+"cmn/io/formatter_mixins.h"
 
  "cmn/range/io.h"
  "cmn/range/io/fmt_spec.h" 
@@ -117,6 +117,7 @@ add_library (
  "cmn/enum/io.h" 
  "cmn/enum/io/print.h" 
  "cmn/enum/io/format.h"
+ "cmn/enum/io/formatter.h"
  "cmn/enum/io/manip.h" 
  "cmn/enum/io/read.h" 
  "cmn/enum/io/parse.h" 
@@ -126,7 +127,8 @@ add_library (
  "cmn/strong_typedef/strong_typedef.h" 
  "cmn/strong_typedef/io.h" 
  "cmn/strong_typedef/io.cpp" 
- 
+ "cmn/strong_typedef/formatter.h"
+
  "cmn/algorithm/detail/result.h"
  "cmn/algorithm/detail/visitor.h"
  "cmn/algorithm/switch/ordered.h"
@@ -145,7 +147,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  "cmn/strong_typedef/formatter.h")
+  )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -157,29 +159,33 @@ target_include_directories(cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_D
 target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
 
  add_executable (
-  test
+  test_cmn
   
-  "test/main.cpp"
-  "test/error.cpp"
-  "test/algorithm.cpp"
-  "test/enum/enum.cpp" 
-  "test/enum/io.cpp"
-   "test/strong_typedef.cpp" 
-   "test/tuple/tuple.cpp"
-   "test/tuple/va.cpp"
-   "test/util.cpp" 
-   "test/meta.cpp"
-   "test/test_accessor.h"
-   "test/manip.cpp" 
-   "test/range/io.cpp"
-   "test/tuple/io.cpp"
+  "test_cmn/main.cpp"
+  "test_cmn/error.cpp"
+  "test_cmn/algorithm.cpp"
+  "test_cmn/enum/enum.cpp" 
+  "test_cmn/enum/io.cpp"
+  "test_cmn/strong_typedef.cpp" 
+  "test_cmn/tuple/tuple.cpp"
+  "test_cmn/tuple/va.cpp"
+  "test_cmn/util.cpp" 
+  "test_cmn/meta.cpp"
+  "test_cmn/test_accessor.h"
+  "test_cmn/manip.cpp" 
+  "test_cmn/range/io.cpp"
+  "test_cmn/tuple/io.cpp"
  )
 
-target_include_directories(test PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
-set_target_properties(test PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})
+target_include_directories(test_cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+set_target_properties(test_cmn PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})
 
-target_link_libraries(test ${Boost_LIBRARIES})
-target_link_libraries(test cmn)
+target_link_libraries(
+    test_cmn 
+    
+    ${Boost_LIBRARIES}
+    cmn
+)
 
- # TODO: Add tests and install targets if needed.
-
+add_test(test_cmn test_cmn)
+enable_testing()

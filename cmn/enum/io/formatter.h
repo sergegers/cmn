@@ -16,10 +16,12 @@
 #include <cmn/util/fixed_string.h>
 
 #include <cmn/io/formatter.h>
+#include <cmn/io/formatter_mixins.h>
 
 #include <cmn/enum/traits.h>
 #include <cmn/enum/io/manip.h>
 #include <cmn/range/io/manip.h>
+#include <cmn/enum/op.h>
 
 namespace cmn::io
 {
@@ -36,8 +38,11 @@ namespace std
 {
 
 template <cmn::c::adapted_enum E, typename Char>
-struct formatter<E, Char>
+struct formatter<E, Char>: 
+      cmn::io::mix::out_to_stream<formatter<E, Char>, E, Char>
+    , cmn::io::mix::skip_parse<formatter<E, Char>, E, Char>
 {
+    using ostream_type = typename cmn::io::mix::out_to_stream<formatter, E, Char>::ostream_type;
     using symbols_type = cmn::symbols<Char>;
     using string_view_type = basic_string_view<Char>;
 
@@ -67,48 +72,10 @@ struct formatter<E, Char>
         m_separator = separator_manip_type{ separator };
     }
 
-    template<typename ParseContext>
-    constexpr auto parse(ParseContext &ctx) -> typename ParseContext::iterator
+    constexpr auto prepare_stream(ostream_type &ostr) const -> ostream_type &
     {
-        return ctx.begin();
-        //using enum cmn::enum_::io::detail::scroll_result_t;
-        //using cmn::enum_::io::detail::parse_chunk;
-        //using cmn::enum_::io::detail::check_state;
-
-        //auto it = ctx.begin();
-        //auto state = check_state(ctx, it, sr_unk | sr_next | sr_last);
-        //if (state == sr_last) return it;            // {}
-
-        ////-----------------------------------------------------------------------------
-        //auto const open_end = parse_chunk(ctx, it, separator_fmt, end_fmt);
-        //state = check_state(ctx, open_end, sr_next | sr_last);
-
-        //m_open = open_manip_type{ manip_str_type { it, open_end } };
-        //if (state == sr_last) return open_end;      // {0:[}
-
-        //it = open_end; ++it;
-
-        ////-----------------------------------------------------------------------------
-        //auto const close_end = parse_chunk(ctx, it, end_fmt);
-        //check_state(ctx, close_end, sr_last);
-
-        //m_close = close_manip_type{ manip_str_type { it, close_end } };
-        //return close_end;                           // {0:[:]}
+        return ostr << m_open << m_separator << m_close;
     }
- 
-    template<typename FmtContext>
-    constexpr auto format(E en, FmtContext &ctx) const -> typename FmtContext::iterator
-    {
-        using ostring_stream_type = basic_ostringstream<Char>;
-        using namespace cmn::enum_;
-
-        ostring_stream_type ostr;
-        ostr << m_open << m_separator << m_close;
-
-        io::printer<E, kind_v<E>>{ en, cmn::int_<kind_v<E>>{} }.print(ostr);
- 
-        return ranges::copy(std::move(ostr).str(), ctx.out()).out;
-    }    
 };
 
 }
