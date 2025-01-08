@@ -803,10 +803,6 @@ BOOST_AUTO_TEST_CASE(tail)
 
 }
 
-static_assert(cmn::io::traits<cl_en_t>::fmt_options == cmn::io::fo_brackers);
-static_assert(std::formattable<cl_en_t, char>);
-static_assert(std::formattable<cmn::io::fmt<cl_en_t>, char>);
-
 BOOST_AUTO_TEST_CASE(adapt_global_ns)
 {
     static_assert(kind_v< ::drc_t> == kind_t::enum_);
@@ -817,20 +813,26 @@ BOOST_AUTO_TEST_CASE(adapt_global_ns)
     BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
 }
 
+using enum cmn::io::fmt_options_t;
+
+static_assert(cmn::io::traits<cl_en_t>::fmt_options == (fo_brackers | fo_separator));
+static_assert(std::formattable<cl_en_t, char>);
+static_assert(std::formattable<cmn::io::fmt<cl_en_t>, char>);
+
 BOOST_AUTO_TEST_CASE(format_enum)
 {
     using enum cl_en_t;
     using cmn::io::fmt;
 
     BOOST_TEST(std::format("{}", apple) == "[apple]");
-    BOOST_TEST(std::format("{0:<:>}", fmt{ apple }) == "<apple>");
-    BOOST_TEST(std::format("{0:[[:>>}", fmt{ apple }) == "[[apple>>");
-    BOOST_TEST(std::format("{0:<<:>>}", fmt{ apple }) == "<<apple>>");
-    BOOST_TEST(std::format("{0::>>}", fmt{ apple }) == "apple>>");
-    BOOST_TEST(std::format("{0::}", fmt{ apple }) == "apple");
+    BOOST_TEST(std::format("{0:<: :>}", fmt{ apple }) == "<apple>");
+    BOOST_TEST(std::format("{0:[[: :>>}", fmt{ apple }) == "[[apple>>");
+    BOOST_TEST(std::format("{0:<<: :>>}", fmt{ apple }) == "<<apple>>");
+    BOOST_TEST(std::format("{0:: :>>}", fmt{ apple }) == "apple>>");
+    BOOST_TEST(std::format("{0:::}", fmt{ apple }) == "apple");
 }
 
-static_assert(cmn::io::traits<cl_cmb_2_t>::fmt_options == (cmn::io::fo_brackers | cmn::io::fo_separator));
+static_assert(cmn::io::traits<cl_cmb_2_t>::fmt_options == (fo_brackers | fo_separator));
 static_assert(std::formattable<cl_cmb_2_t, char>);
 static_assert(std::formattable<cmn::io::fmt<cl_cmb_2_t>, char>);
 

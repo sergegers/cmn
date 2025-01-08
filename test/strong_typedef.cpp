@@ -9,6 +9,7 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/strong_typedef.h>
+#include <cmn/strong_typedef/io.h>
 #include <boost/test/tools/output_test_stream.hpp>
 
 BOOST_AUTO_TEST_SUITE(cmn)

@@ -3,9 +3,9 @@
 #include <format>
 #include <stdexcept>
 #include <string_view>
-#include <sstream>
 #include <algorithm>
 #include <utility>
+#include <ostream>
 
 #include <boost/type_traits/promote.hpp>
 
@@ -14,7 +14,6 @@
 
 #include <cmn/util/symbols.h>
 #include <cmn/util/fixed_string.h>
-#include <cmn/util/feature.h>
 
 #include <cmn/io/formatter.h>
 
@@ -26,14 +25,6 @@ namespace cmn::io
 {
 
 template <c::adapted_enum E>
-    requires (enum_::kind_v<E> == enum_::kind_t::enum_)
-struct traits<E>
-{
-    static constexpr boost::promote_t<fmt_options_t> fmt_options = fo_brackers;
-};
-
-template <c::adapted_enum E>
-    requires (enum_::kind_v<E> == enum_::kind_t::bitfield || enum_::kind_v<E> == enum_::kind_t::combo)
 struct traits<E>
 {
     static constexpr boost::promote_t<fmt_options_t> fmt_options = fo_brackers | fo_separator;
