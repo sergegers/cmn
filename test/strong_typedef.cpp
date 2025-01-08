@@ -1,12 +1,14 @@
 
+#include <format>
+
+#include <boost/io/ios_state.hpp>
 #include <boost/archive/xml_oarchive.hpp>
 #include <boost/archive/xml_iarchive.hpp>
 
 #include <boost/test/unit_test.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/util/strong_typedef.h>
-#include <cmn/util/strong_typedef_io.h>
+#include <cmn/strong_typedef.h>
 #include <boost/test/tools/output_test_stream.hpp>
 
 BOOST_AUTO_TEST_SUITE(cmn)
@@ -124,6 +126,12 @@ static_assert(c::ptr_ariphmetic<my_ptr>);
 
 using my_bitfield = strong_typedef_flag<unsigned int, struct my_strong_bitfield_>;
 static_assert(c::bitfield<my_bitfield>);
+
+BOOST_AUTO_TEST_CASE(strong_typedef_format)
+{
+    BOOST_TEST(std::format("{}", my_int{ 4 }) == "4");
+    BOOST_TEST(std::format("{:#x}", my_int{ 4 }) == "0x4");
+}
 
 BOOST_AUTO_TEST_SUITE_END() // io
 BOOST_AUTO_TEST_SUITE_END() // cmn

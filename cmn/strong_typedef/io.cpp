@@ -15,7 +15,7 @@
 // ReSharper disable CppUnusedIncludeDirective
 #include <cmn/enum/io.h>
 // ReSharper restore CppUnusedIncludeDirective
-#include "strong_typedef_io.h"
+#include "io.h"
 
 namespace cmn::io
 {

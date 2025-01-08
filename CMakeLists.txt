@@ -70,9 +70,6 @@ add_library (
  "cmn/util/lexical_cast.h"
  "cmn/util/lexical_cast.cpp"
  "cmn/util/inverse.h" 
- "cmn/util/strong_typedef.h" 
- "cmn/util/strong_typedef_io.h" 
- "cmn/util/strong_typedef_io.cpp" 
  "cmn/util/feature.h"
  
 
@@ -87,7 +84,6 @@ add_library (
  "cmn/range/io.h"
  "cmn/range/io/fmt_spec.h" 
  
-
  "cmn/tuple/tuple.h"
  "cmn/tuple/ops.h"
  "cmn/tuple/io.h"
@@ -104,7 +100,8 @@ add_library (
  "cmn/tuple/va/adapt/fusion.h" 
  "cmn/tuple/va/adapt/mpl.h"
  "cmn/tuple/va/adapt.h"
- 
+ "cmn/tuple/formatter.h"
+
  "cmn/enum/detail/magic_get.h"
  "cmn/enum/detail/qualified_name.h" 
  "cmn/enum/detail/name_info.h" 
@@ -125,6 +122,11 @@ add_library (
  "cmn/enum/io/parse.h" 
  "cmn/enum/io/parse.cpp"
 
+ "cmn/strong_typedef.h"
+ "cmn/strong_typedef/strong_typedef.h" 
+ "cmn/strong_typedef/io.h" 
+ "cmn/strong_typedef/io.cpp" 
+ 
  "cmn/algorithm/detail/result.h"
  "cmn/algorithm/detail/visitor.h"
  "cmn/algorithm/switch/ordered.h"
@@ -143,7 +145,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  "cmn/tuple/formatter.h")
+  "cmn/strong_typedef/formatter.h")
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

@@ -14,7 +14,8 @@
 #include <cmn/tuple/va/traits.h>
 #include <cmn/tuple/va/event.h>
 #include <cmn/tuple/va/detail/util.h>
-#include <cmn/util/strong_typedef.h>
+
+#include <cmn/strong_typedef.h>
 
 BOOST_AUTO_TEST_SUITE(cmn)
 BOOST_AUTO_TEST_SUITE(va)

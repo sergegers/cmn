@@ -15,8 +15,9 @@
 #include <cmn/io/manip/slot/forwarder.h>
 
 #include <cmn/enum/combo.h>
-#include <cmn/util/strong_typedef.h>
 #include <cmn/util/feature.h>
+
+#include "strong_typedef.h"
 
 namespace cmn
 {
