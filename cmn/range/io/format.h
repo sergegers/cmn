@@ -5,7 +5,7 @@
 
 #include <boost/type_traits/promote.hpp>
 
-#include <cmn/io/formatter.h>
+#include <cmn/io/format.h>
 
 template <std::ranges::input_range R>
 struct cmn::io::traits<R>

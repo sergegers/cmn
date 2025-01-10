@@ -11,14 +11,13 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/error/exception.h>
 
-#include <cmn/io/formatter.h>
+#include <cmn/io/format.h>
 
 #include <cmn/enum/traits.h>
 #include <cmn/enum/op.h>
 #include <cmn/enum/enum.h>
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/combo.h>
-#include <cmn/enum/io/formatter.h>
 #include <cmn/enum/io.h>
 
 //====================================================================

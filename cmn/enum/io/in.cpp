@@ -23,7 +23,7 @@
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
 
-#include "parse.h"
+#include "in.h"
 
 namespace cmn::enum_::io
 {

@@ -11,7 +11,11 @@
 #include <boost/fusion/sequence/io/out.hpp>
 #include <boost/fusion/sequence/hash.hpp>
 
-#include <cmn/meta/concepts.h>
+#if __has_include(<boost/fusion/concepts.hpp>)
+#   include <boost/fusion/concepts.hpp>
+#else
+#   include <cmn/meta/boost/fusion/concepts.hpp>
+#endif
 
 namespace boost::fusion::sequence
 {

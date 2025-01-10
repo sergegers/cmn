@@ -10,7 +10,7 @@
 #   include <cmn/meta/boost/fusion/concepts.hpp>
 #endif
 
-#include <cmn/io/formatter.h>
+#include <cmn/io/format.h>
 
 template <boost::c::fus_sequence S>
 struct cmn::io::traits<S>

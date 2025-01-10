@@ -9,7 +9,6 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 
 #include <cmn/tuple/io.h>
-#include <cmn/tuple/formatter.h>
 
 BOOST_AUTO_TEST_SUITE(cmn)
 BOOST_AUTO_TEST_SUITE(tuple_)

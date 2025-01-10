@@ -1,192 +1,80 @@
 #pragma once
 
 #include <format>
-#include <string>
-#include <ios>
-#include <concepts>
+#include <stdexcept>
+#include <string_view>
+#include <algorithm>
+#include <utility>
+#include <ostream>
 
-#include <boost/io/ios_state.hpp>
+#include <boost/type_traits/promote.hpp>
 
-// ReSharper disable CppUnusedIncludeDirective
-#include <boost/fusion/adapted/std_tuple.hpp>
-// ReSharper restore CppUnusedIncludeDirective
-#if __has_include(<boost/fusion/type_traits.hpp>)
-#   include <boost/fusion/type_traits.hpp>
-#else
-#   include <cmn/meta/boost/fusion/type_traits.hpp>
-#endif
-
-#include <cmn/fwd.h>
+#include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
 
-#include <cmn/util/feature.h>
-#include <cmn/util/util.h>
+#include <cmn/util/symbols.h>
+#include <cmn/util/fixed_string.h>
+
+#include <cmn/io/format.h>
 
 #include <cmn/enum/traits.h>
-#include <cmn/enum/detail/record_info.h>
+#include <cmn/enum/io/manip.h>
+#include <cmn/range/io/manip.h>
+#include <cmn/enum/op.h>
 
-#include "fmt_specs.h"
-
-namespace cmn::enum_
+namespace cmn::io
 {
 
-namespace detail
+template <c::adapted_enum E>
+struct traits<E>
 {
-
-// keep print operations here to avoid circular dependencies
-template <typename Char, typename CharTraits, c::enum_ En>
-auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
-{
-    using enum io::print_t;
-    auto const po = io::print_manip::value(ostr);
-
-    auto const &name = rec.name(ostr);
-    static auto const scope_resolution = symbols<Char, CharTraits>::scope_resolution;
-
-    if (has_feature(po, ns) )ostr << name.m_ns << scope_resolution;
-    if (has_feature(po, class_prefix)) ostr << name.m_enum_name << scope_resolution;
-    return ostr << name.m_enum_member_name;
-}
-
-}
-
-
-namespace io
-{
-
-namespace detail
-{
-
-template
-<
-      typename Char
-    , typename CharTraits
->
-struct print_group_op
-{
-    basic_fmt_specs<Char, CharTraits> const &m_fmt_specs;
-    std::basic_ostream<Char, CharTraits>    &m_ostr;
-    bool                                    &m_first;
-
-    template <c::adapted_enum E>
-    constexpr auto operator ()(record_info<E> const &rec) const
-    {
-        if (!m_first) m_ostr << m_fmt_specs.separator; else m_first = false;
-        m_ostr << rec;
-    }
+    static constexpr boost::promote_t<fmt_options_t> fmt_options = fo_brackers | fo_separator;
 };
 
-template <typename Char, typename CharTraits>
-auto print_tail(basic_fmt_specs<Char, CharTraits> const &fmt_specs, std::basic_ostream<Char, CharTraits> &ostr, 
-    bool first, std::integral auto remain) -> void
+}
+
+namespace std
 {
-    if (has_feature(fmt_specs.po, print_t::tail) && !empty(remain))
+
+template <cmn::c::adapted_enum E, typename Char>
+struct formatter<E, Char>: 
+      cmn::io::mix::out_to_stream<formatter<E, Char>, E, Char>
+    , cmn::io::mix::skip_parse<formatter<E, Char>, E, Char>
+{
+    using ostream_type = typename cmn::io::mix::out_to_stream<formatter, E, Char>::ostream_type;
+    using symbols_type = cmn::symbols<Char>;
+    using string_view_type = basic_string_view<Char>;
+
+    static constexpr auto max_slot_size = sizeof(long) / sizeof(Char);
+    using manip_str_type = cmn::basic_fixed_string<Char, max_slot_size>;
+
+    // custom format {0:[:]}
+    static constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
+    static constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
+
+    using open_manip_type = cmn::enum_::io::basic_open_manip<Char>;
+    using separator_manip_type  = cmn::enum_::io::basic_bitfield_separator_manip<Char>;
+    using close_manip_type =cmn::enum_::io::basic_close_manip<Char>;
+
+    open_manip_type         m_open          = open_manip_type { cmn::io::reset_ };
+    separator_manip_type    m_separator     = separator_manip_type{ cmn::io::reset_ };
+    close_manip_type        m_close         = close_manip_type { cmn::io::reset_ };
+
+    constexpr auto set_brackets(string_view_type open_bracket, string_view_type close_bracket)
     {
-        boost::io:: basic_ios_all_saver CMN_ANONYMOUS_VARIABLE(){ ostr };
-
-        if (!first) ostr << fmt_specs.separator;
-        ostr << std::hex << std::showbase << std::uppercase << remain;
+        m_open = open_manip_type{ open_bracket };
+        m_close = close_manip_type{ close_bracket };
     }
-}
 
-template
-<
-      typename Char
-    , typename CharTraits
-    , c::adapted_enum E
->
-constexpr auto format_enum(E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs, 
-    std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
-{
-    namespace fus = boost::fusion;
-    namespace rfus = fus::result_of;
+    constexpr auto set_separator(string_view_type separator) -> void
+    {
+        m_separator = separator_manip_type{ separator };
+    }
 
-    using mask_type = mask_type_t<E>;
-
-    static auto groups = groups_v<E>;
-    static_assert
-    (
-        rfus::size_v<decltype(groups)> == 1,
-        "Enum must have the one and only one group"
-    );
-
-    static decltype(auto) group = std::get<0>(groups);
-
-    ostr << fmt_specs.open;
-
-    bool first = true;
-    auto const remain = group_::exec(group.m_records, en, print_group_op{ fmt_specs, ostr, first }, 
-        static_cast<mask_type>(fmt_specs.mask));
-
-    print_tail(fmt_specs, ostr, first, to_interop(remain));
-
-    return ostr << fmt_specs.close;
-}
-
-template
-<
-      typename Char
-    , typename CharTraits
-    , c::adapted_enum E
->
-constexpr auto format_bitfield(E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs,
-    std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
-{
-    using mask_type = mask_type_t<E>;
-
-    static auto groups = groups_v<E>;
-    static auto masks = masks_v<E>;
-    bool first = true;
-
-    ostr << fmt_specs.open;
-
-    auto const remain = exec(groups, masks, en, print_group_op{ fmt_specs, ostr, first }, 
-        static_cast<mask_type>(fmt_specs.mask));
-
-    print_tail(fmt_specs, ostr, first, to_interop(remain));
-
-    return ostr << fmt_specs.close;
-}
-
-}
-
-//-----------------------------------------------------------------------------
-template
-<
-      typename Char
-    , typename CharTraits
-    , c::adapted_enum E
->
-constexpr auto format(int_<kind_t::enum_>, E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs, 
-    std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
-{
-    return detail::format_enum(en, fmt_specs, ostr);
-}
-
-template
-<
-      typename Char
-    , typename CharTraits
-    , c::adapted_enum E
->
-constexpr auto format(int_<kind_t::bitfield>, E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs,
-    std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
-{
-    return detail::format_bitfield(en, fmt_specs, ostr);
-}
-
-template
-<
-      typename Char
-    , typename CharTraits
-    , c::adapted_enum E
->
-constexpr auto format(int_<kind_t::combo>, E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs, 
-    std::basic_ostream<Char, CharTraits> &ostr) -> decltype(ostr)
-{
-    return detail::format_bitfield(en, fmt_specs, ostr);
-}
-
-}
+    constexpr auto prepare_stream(ostream_type &ostr) const -> ostream_type &
+    {
+        return ostr << m_open << m_separator << m_close;
+    }
+};
 
 }

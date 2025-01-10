@@ -21,7 +21,7 @@
 #include <cmn/enum/traits.h>
 
 #include "manip.h"
-#include "parse.h"
+#include "in.h"
 #include "fmt_specs.h"
 
 namespace cmn::enum_::io

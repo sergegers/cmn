@@ -16,63 +16,14 @@
 
 #include "manip.h"
 #include "fmt_specs.h"
-#include "format.h"
+#include "out.h"
 
 namespace cmn::enum_
 {
 
-//using boost::fusion::sequence::operators::operator <<;
-
 namespace io
 {
 
-//namespace detail
-//{
-//
-//template <typename Char, typename CharTraits>
-//class print_record
-//{
-//private:
-//    std::basic_ostream<Char, CharTraits>    &m_ostr;
-//    bool                                    &m_first_time;
-//
-//public:
-//    constexpr print_record
-//    (
-//        std::basic_ostream<Char, CharTraits>& ostr,
-//        bool &first_time
-//    ) noexcept
-//        : m_ostr{ ostr }, m_first_time{ first_time } {}
-//
-//    template <c::enum_ En>
-//    constexpr auto operator ()(record_info<En> const &rec) const -> void
-//    {
-//        using enum print_t;
-//
-//        auto const separator = basic_bitfield_separator_manip<Char>::value(m_ostr);
-//        if (m_first_time) m_first_time = false; else m_ostr << separator;
-//
-//        m_ostr << rec;
-//    }
-//};
-//
-//template <typename Tail, typename Char, typename CharTraits>
-//constexpr auto print_tail(Tail tail_, std::basic_ostream<Char, CharTraits> &ostr) -> void
-//{
-//    auto const po = print_manip::value(ostr);
-//
-//    if (has_feature(po, print_t::tail) && !empty(tail_))
-//    {
-//        boost::io::ios_flags_saver const ifs{ ostr };
-//        auto const separator = basic_bitfield_separator_manip<Char, CharTraits>::value(ostr);
-//
-//        ostr << CMN_HEX_OUT() << separator << tail_;
-//    }
-//}
-//
-//} 
-
-///////////////////////////////////////////////////////////////////////////////
 template<c::adapted_enum E, kind_t Kind_>
 struct printer<E, Kind_>
 {
@@ -101,7 +52,7 @@ struct printer<E, Kind_>
             .mask = static_cast<long>(bitfield_mask_manip_type::value(ostr))
         };
 
-        return io::format(m_kind, m_val, fmt_specs, ostr);
+        return io::out(m_kind, m_val, fmt_specs, ostr);
     }
 };
 
