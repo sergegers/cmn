@@ -14,7 +14,7 @@ struct out_to_stream
 {
     using ostream_type = std::basic_ostream<Char>;
 
-    constexpr auto prepare_stream(ostream_type &ostr) -> ostream_type & = delete;
+    constexpr auto prepare_stream(ostream_type &ostr) const -> ostream_type & = delete;
 
     template<typename FmtContext>
     constexpr auto format(T const &t, FmtContext &ctx) const -> typename FmtContext::iterator
