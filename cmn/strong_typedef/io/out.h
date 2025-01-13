@@ -32,24 +32,24 @@ namespace io
 // NOTE: zero value isn't used, so we can get mask from value
 enum class int_fmt_t: short
 {
-    dec                 = 0b0000'0000'0000'0001,
-    hex                 = 0b0000'0000'0000'0010,
+    dec                 = 0b0000'0000'0000'0001,    // default
+    hex                 = 0b0000'0000'0000'0010,    // x
 
-    showbase            = 0b0000'0000'0000'0100,
-    hidebase            = 0b0000'0000'0000'1000,
+    showbase            = 0b0000'0000'0000'0100,    // #
+    hidebase            = 0b0000'0000'0000'1000,    // default
 
-    asm_                = 0b0000'0000'0001'0000,
-    c                   = 0b0000'0000'0010'0000,
+    asm_                = 0b0000'0000'0001'0000,    // a
+    c                   = 0b0000'0000'0010'0000,    // default
                             
-    short_              = 0b0000'0000'0100'0000,
-    long_               = 0b0000'0000'1000'0000,
+    short_              = 0b0000'0000'0100'0000,    // default
+    long_               = 0b0000'0000'1000'0000,    // l
                             
-    uppercase           = 0b0000'0001'0000'0000,
-    lowercase           = 0b0000'0010'0000'0000,
+    uppercase           = 0b0000'0001'0000'0000,    // u
+    lowercase           = 0b0000'0010'0000'0000,    // default
                             
-    sign                = 0b0000'0100'0000'0000,      // space for zero
-    nosign              = 0b0000'1000'0000'0000,
-    forcesign           = 0b0001'0000'0000'0000,      // + for zero
+    sign                = 0b0000'0100'0000'0000,    // ( ) space for zero
+    nosign              = 0b0000'1000'0000'0000,    // default
+    forcesign           = 0b0001'0000'0000'0000,    // (+) + for zero
     
     empty               = 0b0000'0000'0000'0000,
     default_            = dec | hidebase | c    | short_ | lowercase | nosign,      // must be synced with

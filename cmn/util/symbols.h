@@ -54,6 +54,7 @@ struct symbols<char>
     static constexpr auto asterisk                  = "*"_fs;
     static constexpr auto ampersand                 = "&"_fs;
     static constexpr auto circumflex                = "^"_fs;
+    static constexpr auto octothorpe                = "#"_fs;
     static constexpr auto end                       = "end"_fs;
     static constexpr auto empty                     = "empty"_fs;
     static constexpr auto nullptr_                  = "nullptr"_fs;
@@ -66,6 +67,12 @@ struct symbols<char>
     static constexpr auto class_                    = "class"_fs;
     static constexpr auto struct_                   = "struct"_fs;
     static constexpr auto enum_                     = "enum"_fs;
+    static constexpr auto a                         = "a"_fs;
+    static constexpr auto b                         = "b"_fs;
+    static constexpr auto h                         = "h"_fs;
+    static constexpr auto l                         = "l"_fs;
+    static constexpr auto u                         = "u"_fs;
+    static constexpr auto x                         = "x"_fs;
 };
 
 template <>
@@ -93,6 +100,7 @@ struct symbols<wchar_t>
     static constexpr auto asterisk                  = L"*"_wfs;
     static constexpr auto ampersand                 = L"&"_wfs;
     static constexpr auto circumflex                = L"^"_wfs;
+    static constexpr auto octothorpe                = L"#"_wfs;
     static constexpr auto end                       = L"end"_wfs;
     static constexpr auto empty                     = L"empty"_wfs;
     static constexpr auto nullptr_                  = L"nullptr"_wfs;
@@ -105,6 +113,12 @@ struct symbols<wchar_t>
     static constexpr auto class_                    = L"class"_wfs;
     static constexpr auto struct_                   = L"struct"_wfs;
     static constexpr auto enum_                     = L"enum"_wfs;
+    static constexpr auto a                         = L"a"_wfs;
+    static constexpr auto b                         = L"b"_wfs;
+    static constexpr auto h                         = L"h"_wfs;
+    static constexpr auto l                         = L"l"_wfs;
+    static constexpr auto u                         = L"u"_wfs;
+    static constexpr auto x                         = L"x"_wfs;
 };
 
 }
