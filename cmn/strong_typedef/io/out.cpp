@@ -2,6 +2,7 @@
 #include <string_view>
 #include <iomanip>
 #include <ios>
+#include <cassert>
 
 #include <boost/lexical_cast.hpp>
 
@@ -37,7 +38,7 @@ auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t
 {
     for (auto const mask: enum_::masks_v<int_fmt_t>)
         if (auto const masked_over = value(over,  mask); has_value(masked_over))
-            orig = value(orig, masked_over, mask);
+            orig = set_value(orig, masked_over, mask);
 
     return orig;
 }
@@ -60,9 +61,11 @@ auto int_fmt_storage_t::value(std::ios_base &ios, keep_type value) -> void
     // set mask
     auto const fvalue = static_cast<int_fmt_t>(value);
     auto const mask   = get_mask(fvalue);
+    // check that one and only one format option is set at once
+    assert(fvalue == value);
 
     auto const old_fvalue = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios));
-    auto const new_fvalue = cmn::value(old_fvalue, fvalue, mask);
+    auto const new_fvalue = set_value(old_fvalue, fvalue, mask);
 
     auto const new_value = static_cast<keep_type>(0) | to_underlying(new_fvalue);
 
@@ -716,7 +719,12 @@ template auto read(std::istream &istr, int_fmt_t fmt, te_reader<char, std::char_
 template auto read(std::istream &istr, int_fmt_t fmt, te_reader<char, std::char_traits<char>, unsigned> rdr, unsigned &unit) -> std::istream &;
 template auto read(std::istream &istr, int_fmt_t fmt, te_reader<char, std::char_traits<char>, unsigned char> rdr, unsigned char &unit) -> std::istream &;
 
-[[nodiscard]] auto try_read_(c::instance_of<std::basic_istream> auto &istr) noexcept -> boost::optional<std::ptrdiff_t>
+template
+<
+      typename Char
+    , typename CharTraits
+>
+[[nodiscard]] auto try_read_(std::basic_istream<Char, CharTraits> &istr) noexcept -> boost::optional<std::ptrdiff_t>
 {
     boost::io::basic_ios_all_saver const _{ istr };
     istr.exceptions(std::ios_base::goodbit);    // disable exceptions
@@ -743,5 +751,6 @@ namespace cmn::enum_::op
 {
 
 template auto operator << (std::ostream &, cmn::io::int_fmt_t) -> std::ostream &;
+template auto operator << (std::wostream &, cmn::io::int_fmt_t) -> std::wostream &;
 
 }

@@ -185,7 +185,7 @@ template <c::enumerable Policy>
 }
 
 template <c::enumerable Policy>
-[[nodiscard]] constexpr auto value(Policy pol, Policy val, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
+[[nodiscard]] constexpr auto set_value(Policy pol, Policy val, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
     -> Policy
 {
     return static_cast<Policy>(detail::value_(pol, ~mask) | detail::value_(val, mask));

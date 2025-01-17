@@ -26,7 +26,10 @@ struct strong_typedef_formatter:
 
     /* CRTP override */ constexpr auto prepare_stream(ostream_type &ostr) const -> ostream_type &
     {
-        return ostr << int_fmt(m_fmt_options);
+        /*return*/ ostr << int_fmt(m_fmt_options);
+        auto x = manip::int_fmt_slot_manip::value(ostr);
+
+        return ostr;
     }
 
     template<typename ParseContext>
@@ -42,7 +45,7 @@ struct strong_typedef_formatter:
         constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
         auto it = ctx.begin();
-        int_fmt_t fmt_options = empty;
+        m_fmt_options = empty;
 
         switch (check_state_at(ctx, it,  sr_unk | sr_sep | sr_end))  // NOLINT(clang-diagnostic-switch-enum)
         {
@@ -58,20 +61,15 @@ struct strong_typedef_formatter:
         {
             switch (*it++)
             {
-            case to_char(symbols_type::x): fmt_options |= hex; break;
-            case to_char(symbols_type::octothorpe): fmt_options |= showbase; break;
-            case to_char(symbols_type::a): fmt_options |= asm_; break;
-            case to_char(symbols_type::l): fmt_options |= long_; break;
-            case to_char(symbols_type::u): fmt_options |= uppercase; break;
-            case to_char(symbols_type::whitespace): fmt_options |= sign; break;
-            case to_char(symbols_type::plus): fmt_options |= forcesign; break;
+            case to_char(symbols_type::octothorpe): m_fmt_options |= showbase | lowercase; break;
+            case to_char(symbols_type::x): m_fmt_options |= hex | c | long_ | nosign; break;
+            case to_char(symbols_type::a): m_fmt_options |= long_asm_up_hex; break;
 
             default:
                     throw std::format_error{ "Unexpected "};
             }
         }
 
-        m_fmt_options = fmt_options;
         return it;
     }
 };

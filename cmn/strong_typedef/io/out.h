@@ -91,6 +91,7 @@ namespace manip
 
 auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t;
 
+// set one group at once
 struct int_fmt_storage_t
 {
     using keep_type = int_keep_type;
@@ -297,8 +298,7 @@ template
 >
     requires true
 
-auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Unit const &unit)->
-    std::basic_ostream<Char, CharTraits> &
+auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Unit const &unit) -> std::basic_ostream<Char, CharTraits> &
 { 
     using namespace io::detail;
     using writer_type = writer<Char, CharTraits, Unit>;
@@ -315,7 +315,7 @@ template
 >
     requires true
 
-auto operator >> (std::basic_istream<Char, CharTraits> &istr, Unit &unit)-> std::basic_istream<Char, CharTraits> &
+auto operator >> (std::basic_istream<Char, CharTraits> &istr, Unit &unit) -> std::basic_istream<Char, CharTraits> &
 {
     using namespace io::detail;
     using reader_type = reader<Char, CharTraits, Unit>;
@@ -328,6 +328,7 @@ namespace enum_::op
 {
 
 extern template auto operator << (std::ostream &, cmn::io::int_fmt_t) -> std::ostream &;
+extern template auto operator << (std::wostream &, cmn::io::int_fmt_t) -> std::wostream &;
 
 }
 
