@@ -34,13 +34,15 @@ auto get_mask(int_fmt_t en) -> mask_type_t<int_fmt_t>
     return to_mask(int_fmt_t::empty);
 }
 
-auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t
+// remain not affected options unchanged
+auto override_value(int_fmt_t old, int_fmt_t new_) -> int_fmt_t
 {
+    int_fmt_t res = old;
     for (auto const mask: enum_::masks_v<int_fmt_t>)
-        if (auto const masked_over = value(over,  mask); has_value(masked_over))
-            orig = set_value(orig, masked_over, mask);
+        if (auto const masked_new = value(new_,  mask); has_value(masked_new))
+            res = set_value(res, masked_new, mask);
 
-    return orig;
+    return res;
 }
 
 auto int_fmt_storage_t::index(std::ios_base &ios) -> int
@@ -58,16 +60,8 @@ auto int_fmt_storage_t::value(std::ios_base &ios) -> keep_type
 
 auto int_fmt_storage_t::value(std::ios_base &ios, keep_type value) -> void
 {
-    // set mask
-    auto const fvalue = static_cast<int_fmt_t>(value);
-    auto const mask   = get_mask(fvalue);
-    // check that one and only one format option is set at once
-    assert(fvalue == value);
-
-    auto const old_fvalue = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios));
-    auto const new_fvalue = set_value(old_fvalue, fvalue, mask);
-
-    auto const new_value = static_cast<keep_type>(0) | to_underlying(new_fvalue);
+    auto const old_value = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios));
+    auto const new_value = override_value(old_value, static_cast<int_fmt_t>(value));
 
     ios.iword(index(ios)) = static_cast<int>(new_value);
 }

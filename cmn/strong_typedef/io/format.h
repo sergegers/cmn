@@ -26,10 +26,7 @@ struct strong_typedef_formatter:
 
     /* CRTP override */ constexpr auto prepare_stream(ostream_type &ostr) const -> ostream_type &
     {
-        /*return*/ ostr << int_fmt(m_fmt_options);
-        auto x = manip::int_fmt_slot_manip::value(ostr);
-
-        return ostr;
+        return ostr << int_fmt(m_fmt_options);
     }
 
     template<typename ParseContext>
@@ -62,7 +59,7 @@ struct strong_typedef_formatter:
             switch (*it++)
             {
             case to_char(symbols_type::octothorpe): m_fmt_options |= showbase | lowercase; break;
-            case to_char(symbols_type::x): m_fmt_options |= hex | c | long_ | nosign; break;
+            case to_char(symbols_type::x): m_fmt_options |= hex | c | nosign; break;
             case to_char(symbols_type::a): m_fmt_options |= long_asm_up_hex; break;
 
             default:

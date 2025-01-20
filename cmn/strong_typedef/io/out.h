@@ -89,7 +89,7 @@ CMN_ENUM_INJECT_OPS()
 namespace manip
 {
 
-auto override_value(int_fmt_t orig, int_fmt_t over) -> int_fmt_t;
+auto override_value(int_fmt_t old, int_fmt_t new_) -> int_fmt_t;
 
 // set one group at once
 struct int_fmt_storage_t
