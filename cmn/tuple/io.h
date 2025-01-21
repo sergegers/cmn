@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cmn/tuple/io/out.h>
+#include <cmn/tuple/io/io.h>
 #include <cmn/tuple/io/manip.h>
 #include <cmn/tuple/io/format.h>
 

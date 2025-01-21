@@ -115,7 +115,7 @@ consteval auto is_char() -> bool
 
 }
 
-template <typename T> concept char_ = detail::is_char<T>();
+template <typename T> concept char_ = std::integral<T> && detail::is_char<T>();
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -173,6 +173,7 @@ concept unit =
  && std::constructible_from<typename T::underlying_type>
 ;
 
+// rich format support
 template <typename T>
 concept fmt_unit =
     unit<T>

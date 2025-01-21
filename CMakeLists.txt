@@ -116,7 +116,6 @@ add_library (
  "cmn/enum/io/format.h"
  "cmn/enum/io.h" 
  "cmn/enum/io/printer.h" 
- "cmn/enum/io/out.h"
  "cmn/enum/io/manip.h" 
  "cmn/enum/io/reader.h" 
  "cmn/enum/io/in.h" 
@@ -124,8 +123,8 @@ add_library (
 
  "cmn/strong_typedef.h"
  "cmn/strong_typedef/strong_typedef.h" 
- "cmn/strong_typedef/io/out.h" 
- "cmn/strong_typedef/io/out.cpp" 
+ "cmn/strong_typedef/io/io.h" 
+ "cmn/strong_typedef/io/io.cpp" 
  "cmn/strong_typedef/io/format.h"
  "cmn/strong_typedef/io.h" 
 

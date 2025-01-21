@@ -12,7 +12,10 @@
 #include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/meta/type_traits.h>
 #include <cmn/meta/macro.h>
+
+#include <cmn/util/util.h>
 
 namespace cmn
 {
@@ -24,15 +27,64 @@ template <c::unit Unit> constexpr bool enable_luxury_io_v = strong_typedef_fmt_t
 template <c::unit Unit> constexpr int_fmt_t default_v = strong_typedef_fmt_traits<Unit>::default_;
 
 //-----------------------------------------------------------------------------
+template
+<
+      typename Char
+    , typename CharTraits
+    , std::integral Int
+>
+auto out_int(std::basic_ostream<Char, CharTraits> &ostr, Int unit) -> void { ostr << unit; }
+
+template
+<
+      typename Char
+    , typename CharTraits
+    , c::char_ Int
+>
+
+// unary plus (+) here to promote char types to int ones
+// https://isocpp.org/wiki/faq/input-output#print-char-or-ptr-as-number
+auto out_int(std::basic_ostream<Char, CharTraits> &ostr, Int unit) -> void { ostr << +unit; }
+
+//-----------------------------------------------------------------------------
+template
+<
+      typename Char
+    , typename CharTraits
+    , std::integral Int
+>
+auto in_int(std::basic_istream<Char, CharTraits> &istr, Int &unit) -> void { istr >> unit; }
+
+template
+<
+      typename Char
+    , typename CharTraits
+    , c::char_ Int
+>
+auto in_int(std::basic_istream<Char, CharTraits> &istr, Int &unit) -> void
+{
+    decltype(+unit) t;   // to be consistent with char output
+    istr >> t;
+    unit = t;
+}
+
+//-----------------------------------------------------------------------------
 struct access
 {
     template <typename Char, typename CharTraits>
-    static auto out(std::basic_ostream<Char, CharTraits> &ostr, c::unit auto const &unit) -> void { unit.out(ostr), ostr; }
+    static auto out(std::basic_ostream<Char, CharTraits> &ostr, c::unit auto const &unit) -> decltype(ostr)
+    {
+        return unit.out(ostr), ostr;
+    }
 
     template <typename Char, typename CharTraits>
-    static auto in(std::basic_istream<Char, CharTraits> &istr, c::unit auto &unit) -> void { unit.in(istr), istr; }
+    static auto in(std::basic_istream<Char, CharTraits> &istr, c::unit auto &unit) -> decltype(istr)
+    {
+        return unit.in(istr), istr;
+    }
 
-    static auto value_ref(c::unit auto &unit) -> auto& { return unit.m_t; }
+    //-----------------------------------------------------------------------------
+    static auto &value_ref(c::unit auto &unit) { return unit.m_t; }
 };
 
 }
@@ -54,6 +106,11 @@ class RS_PASS_BY_VALUE_ATTR strong_typedef_impl :
 private:
     using itself = strong_typedef_impl;
     friend io::access;
+public:
+    //-----------------------------------------------------------------------------
+    // unit concept interface
+    using underlying_type = T;
+    //-----------------------------------------------------------------------------
 protected:
     T m_t = Default_;
 
@@ -62,30 +119,13 @@ protected:
 
     //-----------------------------------------------------------------------------
     template <typename Char, typename CharTraits>
-    /* CRTP polymorphic*/ auto out(std::basic_ostream<Char, CharTraits> &ostr) const -> void { ostr << m_t; }
+    /* CRTP polymorphic*/ auto out(std::basic_ostream<Char, CharTraits> &ostr) const -> void { io::out_int(ostr, m_t); }
 
-    // unary plus (+) here to promote char types to int ones
-    // https://isocpp.org/wiki/faq/input-output#print-char-or-ptr-as-number
-    template <c::char_ Char, typename CharTraits>
-    /* CRTP polymorphic*/ auto out(std::basic_ostream<Char, CharTraits> &ostr) const -> void { ostr << +m_t; }
-
-    //-----------------------------------------------------------------------------
     template <typename Char, typename CharTraits>
-    /* CRTP polymorphic*/ auto in(std::basic_istream<Char, CharTraits> &istr) -> void { istr >> m_t; }
+    /* CRTP polymorphic*/ auto in(std::basic_istream<Char, CharTraits> &istr) -> void { io::in_int(istr, m_t); }
 
-    template <c::char_ Char, typename CharTraits>
-    /* CRTP polymorphic*/ auto in(std::basic_istream<Char, CharTraits> &istr) -> void
-    {
-        decltype(+m_t) t;   // to be consistent with char output
-        istr >> t;
-        m_t = t;
-    }
 public:
     using strong_typedef_type = U;
-    //-----------------------------------------------------------------------------
-    // unit concept interface
-    using underlying_type = T;
-    //-----------------------------------------------------------------------------
 
     constexpr strong_typedef_impl() = default;
     constexpr explicit strong_typedef_impl(T t) noexcept : m_t { t } {}
@@ -110,8 +150,7 @@ public:
     constexpr auto operator == (itself const & rhs) const noexcept -> bool { return m_t == rhs.m_t; }
     constexpr auto operator == (T rhs) const noexcept -> bool { return m_t == rhs; }
 
-    /* CRTP polymorphic */
-    constexpr auto operator !() const noexcept -> bool { return !m_t; }
+    /* CRTP polymorphic */ constexpr auto operator !() const noexcept -> bool { return !m_t; }
     constexpr explicit operator bool() const noexcept { return !!static_cast<U const &>(*this); }
 
     friend auto hash_value(U const &u) noexcept { return boost::hash<T>{}(u.m_t); }

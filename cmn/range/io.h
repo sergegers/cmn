@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cmn/range/io/out.h>
+#include <cmn/range/io/io.h>
 #include <cmn/range/io/manip.h>
 #include <cmn/range/io/format.h>
 

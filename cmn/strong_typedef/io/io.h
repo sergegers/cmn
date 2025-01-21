@@ -2,9 +2,7 @@
 
 #include <iosfwd>
 #include <concepts>
-#include <functional>
 
-#include <boost/implicit_cast.hpp>
 #include <boost/optional.hpp>
 
 #include <cmn/meta/concepts.h>
@@ -147,104 +145,24 @@ auto get_value(std::basic_ios<Char, CharTraits> &ios, Unit const &/*unit*/) -> i
     return manip::override_value(unit_default, manip_value); // override default values by the stream ones
 }
 
-//-----------------------------------------------------------------------------
+///////////////////////////////////////////////////////////////////////////////
 template
 <
       typename Char
     , typename CharTraits
-    , c::fmt_unit Unit
+    , std::integral Int
 >
-struct reader
-{
-    using te_type = underlying_type_t<Unit>;
-
-    auto operator ()(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, te_type &te_unit) const
-        -> std::basic_istream<Char, CharTraits> &
-    {
-        using enum int_fmt_t;
-
-        if (Unit unit; has_any_feature(fmt, sign, forcesign))
-        {
-            auto const sgn = te_unit;
-            access::in(istr, unit);
-            // does not require unary minus
-            te_unit = sgn < 0? -unit.value(): unit.value();
-
-            return istr;
-        }
-        else
-        {
-            access::in(istr, unit);
-            te_unit = unit.value();
-            return istr;
-        }
-    }
-};
+auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, Int const &unit) -> std::basic_ostream<Char, CharTraits> &;
 
 template
 <
       typename Char
     , typename CharTraits
-    , std::integral Unit
+    , std::integral Int
 >
-using te_reader = std::function<auto (std::basic_istream<Char, CharTraits> &, int_fmt_t, Unit &) ->
-    std::basic_istream<Char, CharTraits> &>;
+auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, Int &unit) -> std::basic_istream<Char, CharTraits> &;
 
 //-----------------------------------------------------------------------------
-template
-<
-      typename Char
-    , typename CharTraits
-    , c::fmt_unit Unit
->
-struct writer
-{
-    using te_type = underlying_type_t<Unit>;
-    
-    auto operator ()(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, te_type const &te_unit) const
-        -> std::basic_ostream<Char, CharTraits> &
-    {
-        using enum int_fmt_t;
-        if (has_any_feature(fmt, sign, forcesign) && te_unit < 0)
-        {
-            using signed_type = std::make_signed_t<te_type>;
-            // does not require unary minus
-            te_type const neg = -boost::implicit_cast<signed_type>(te_unit);
-            return access::out(ostr, Unit{ neg }), ostr;
-        }
-        else
-            return access::out(ostr, Unit{ te_unit }), ostr;        
-    }
-};
-
-template
-<
-      typename Char
-    , typename CharTraits
-    , std::integral Unit
->
-using te_writer = std::function<auto (std::basic_ostream<Char, CharTraits> &, int_fmt_t, Unit const &)
-    -> std::basic_ostream<Char, CharTraits> &>;
-
-//-----------------------------------------------------------------------------
-template
-<
-      typename Char
-    , typename CharTraits
-    , std::integral Unit
->
-auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, te_writer<Char, CharTraits, Unit> wtr, 
-    Unit const &unit) -> std::basic_ostream<Char, CharTraits> &;
-
-template
-<
-      typename Char
-    , typename CharTraits
-    , std::integral Unit
->
-auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, te_reader<Char, CharTraits, Unit> rdr, 
-    Unit &unit) -> std::basic_istream<Char, CharTraits> &;
-
 template
 <
       typename Char
@@ -299,12 +217,9 @@ template
     requires true
 
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Unit const &unit) -> std::basic_ostream<Char, CharTraits> &
-{ 
+{
     using namespace io::detail;
-    using writer_type = writer<Char, CharTraits, Unit>;
-    using te_writer_type = te_writer<Char, CharTraits, underlying_type_t<Unit>>;
-
-    return write(ostr, get_value(ostr, unit), te_writer_type{ writer_type{} }, unit.value());
+    return write(ostr, get_value(ostr, unit), io::access::value_ref(unit));
 }
 
 template
@@ -318,10 +233,7 @@ template
 auto operator >> (std::basic_istream<Char, CharTraits> &istr, Unit &unit) -> std::basic_istream<Char, CharTraits> &
 {
     using namespace io::detail;
-    using reader_type = reader<Char, CharTraits, Unit>;
-    using te_reader_type = te_reader<Char, CharTraits, underlying_type_t<Unit>>;
-
-    return read(istr,  get_value(istr, unit), te_reader_type{ reader_type{} }, io::access::value_ref(unit));
+    return read(istr,  get_value(istr, unit), io::access::value_ref(unit));
 }
 
 namespace enum_::op
