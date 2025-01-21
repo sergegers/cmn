@@ -26,12 +26,12 @@ BOOST_AUTO_TEST_CASE(std_cnt)
 
 BOOST_AUTO_TEST_CASE(format)
 {
-    using cmn::io::fmt;
+    using cmn::io::list;
 
     BOOST_TEST(std::format("{}", std::tuple{ 1, 'a', 2.f }) == "(1, 'a', 2)");
     BOOST_TEST(std::format("{:n}", std::tuple{ 1, 'a', 2.f }) == "1, 'a', 2");
-    BOOST_TEST(std::format("{:>>> : , : <<<}", fmt{ std::tuple{ 1, 'a', 2.f } }) == ">>> 1 , 'a' , 2 <<<");
-    BOOST_TEST(std::format("{:::}", fmt{ std::tuple{ 1, 'a', 2.f } }) == "1'a'2");
+    BOOST_TEST(std::format("{:>>> : , : <<<}", list{ std::tuple{ 1, 'a', 2.f } }) == ">>> 1 , 'a' , 2 <<<");
+    BOOST_TEST(std::format("{:::}", list{ std::tuple{ 1, 'a', 2.f } }) == "1'a'2");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io

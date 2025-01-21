@@ -133,7 +133,7 @@ struct default_read_char final
 
     [[noreturn]] auto operator ()(Char c) const -> void
     {
-        throw format_error{ "Input error. Unknown symbol [%1%]. Allowed [%2%] only.", c, char_list{} }
+        throw format_error{ "Input error. Unknown symbol [{}]. Allowed [{}] only.", c, char_list{} }
             << make_steam_err_info(m_istr, 1);
     }
 };
@@ -252,14 +252,14 @@ struct base final
 };
 //-----------------------------------------------------------------------------
 template <std::integral Unit>
-struct sign_pfx final
+struct sign_prefix final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct sign_pfx_ final
+    struct sign_prefix_ final
     {
         using signed_type = std::make_signed_t<Unit>;
         using symbols_type = symbols<Char, CharTraits>;
@@ -273,12 +273,12 @@ struct sign_pfx final
         Unit                                &m_unit;
         int_fmt_t const                     m_fmt;
 
-        sign_pfx_(std::basic_ios<Char, CharTraits> &ios, Unit &unit, int_fmt_t fmt)
+        sign_prefix_(std::basic_ios<Char, CharTraits> &ios, Unit &unit, int_fmt_t fmt)
             : m_ios { ios },
               m_unit { unit },
               m_fmt { fmt } {}
 
-        friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, sign_pfx_ const &pfx_)
+        friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, sign_prefix_ const &pfx_)
         {
             using enum int_fmt_t;
             if (has_feature(pfx_.m_fmt, sign))
@@ -309,7 +309,7 @@ struct sign_pfx final
             return ostr;
         }
 
-        friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, sign_pfx_ pfx_)
+        friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, sign_prefix_ pfx_)
         {
             using enum int_fmt_t;
             if (has_feature(pfx_.m_fmt, sign))
@@ -348,30 +348,30 @@ struct sign_pfx final
     Unit                &m_unit;
     int_fmt_t const     m_fmt;
 
-    sign_pfx(Unit &unit, int_fmt_t fmt)
+    sign_prefix(Unit &unit, int_fmt_t fmt)
         : m_unit { unit },
           m_fmt { fmt } {}
 
-    friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, sign_pfx const &pfx)
+    friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, sign_prefix const &pfx)
     {
-        return ostr << sign_pfx_ { ostr, pfx.m_unit, pfx.m_fmt };
+        return ostr << sign_prefix_ { ostr, pfx.m_unit, pfx.m_fmt };
     }
 
-    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, sign_pfx pfx)
+    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, sign_prefix pfx)
     {
-        return istr >> sign_pfx_ { istr, pfx.m_unit, pfx.m_fmt };
+        return istr >> sign_prefix_ { istr, pfx.m_unit, pfx.m_fmt };
     }
 };
 
 //-----------------------------------------------------------------------------
-struct c_pfx final
+struct c_prefix final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct c_pfx_ final
+    struct c_prefix_ final
     {
         using symbols_type = symbols<Char, CharTraits>;
         static constexpr auto endl = to_char(symbols_type::endl);
@@ -379,11 +379,11 @@ struct c_pfx final
         std::basic_ios<Char, CharTraits>    &m_ios;
         int_fmt_t const                     m_fmt;
 
-        c_pfx_(std::basic_ios<Char, CharTraits> &ios, int_fmt_t fmt)
+        c_prefix_(std::basic_ios<Char, CharTraits> &ios, int_fmt_t fmt)
             : m_ios { ios },
               m_fmt { fmt } {}
 
-        friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, c_pfx_ const &pfx_)
+        friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, c_prefix_ const &pfx_)
         {
             using enum int_fmt_t;
             if (has_all_features(pfx_.m_fmt, c, hex, showbase))
@@ -393,7 +393,7 @@ struct c_pfx final
             return ostr;
         }
 
-        friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, c_pfx_ pfx_)
+        friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, c_prefix_ pfx_)
         {
             using enum int_fmt_t;
             if (has_all_features(pfx_.m_fmt, c, hex, showbase))
@@ -421,37 +421,37 @@ struct c_pfx final
 
     int_fmt_t const   m_fmt;
 
-    friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, c_pfx const &pfx)
+    friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, c_prefix const &pfx)
     {
-        return ostr << c_pfx_{ ostr, pfx.m_fmt };
+        return ostr << c_prefix_{ ostr, pfx.m_fmt };
     }
 
-    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, c_pfx pfx)
+    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, c_prefix pfx)
     {
-        return istr >> c_pfx_{ istr, pfx.m_fmt };
+        return istr >> c_prefix_{ istr, pfx.m_fmt };
     }
 };
 
 //-----------------------------------------------------------------------------
-struct asm_pfx final
+struct asm_postfix final
 {
     template
     <
           typename Char
         , typename CharTraits
     >
-    struct asm_pfx_ final
+    struct asm_postfix_ final
     {
         using symbols_type = symbols<Char, CharTraits>;
 
         std::basic_ios<Char, CharTraits>    &m_ios;
         int_fmt_t const                     m_fmt;
 
-        asm_pfx_(std::basic_ios<Char, CharTraits> &ios, int_fmt_t fmt)
+        asm_postfix_(std::basic_ios<Char, CharTraits> &ios, int_fmt_t fmt)
             : m_ios { ios },
               m_fmt { fmt } {}
 
-        friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, asm_pfx_ const &pfx_)
+        friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, asm_postfix_ const &pfx_)
         {
             using enum int_fmt_t;
             if (has_all_features(pfx_.m_fmt, asm_, hex, showbase))
@@ -459,7 +459,7 @@ struct asm_pfx final
             return ostr;
         }
 
-        friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, asm_pfx_ pfx_)
+        friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, asm_postfix_ pfx_)
         {
             using enum int_fmt_t;
             if (has_all_features(pfx_.m_fmt, asm_, hex, showbase))
@@ -475,14 +475,14 @@ struct asm_pfx final
 
     int_fmt_t const   m_fmt;
 
-    friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, asm_pfx const &pfx)
+    friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, asm_postfix const &pfx)
     {
-        return ostr << asm_pfx_{ ostr, pfx.m_fmt };
+        return ostr << asm_postfix_{ ostr, pfx.m_fmt };
     }
 
-    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, asm_pfx pfx)
+    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, asm_postfix pfx)
     {
-        return istr >> asm_pfx_{ istr, pfx.m_fmt };
+        return istr >> asm_postfix_{ istr, pfx.m_fmt };
     }
 };
 
@@ -677,13 +677,13 @@ template
     , typename CharTraits
     , std::integral Unit
 >
-auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, te_writer<Char, CharTraits, Unit> wtr, Unit const &unit)->
-    std::basic_ostream<Char, CharTraits> &
+auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, te_writer<Char, CharTraits, Unit> wtr, 
+    Unit const &unit) -> std::basic_ostream<Char, CharTraits> &
 {
     boost::io::basic_ios_all_saver const _{ ostr };
 
-    ostr << base{ fmt } << sign_pfx{ unit, fmt } << c_pfx{ fmt } << radix{ fmt };
-    ostr << width{ unit, fmt } << case_{ fmt } << writer_{ unit, fmt, wtr } << asm_pfx{ fmt };
+    ostr << base{ fmt } << sign_prefix{ unit, fmt } << c_prefix{ fmt } << radix{ fmt };
+    ostr << width{ unit, fmt } << case_{ fmt } << writer_{ unit, fmt, wtr } << asm_postfix{ fmt };
     return ostr;    
 }
 
@@ -697,15 +697,15 @@ template
     , typename CharTraits
     , std::integral Unit
 >
-auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, te_reader<Char, CharTraits, Unit> rdr, Unit &unit)->
-    std::basic_istream<Char, CharTraits> &
+auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, te_reader<Char, CharTraits, Unit> rdr, Unit &unit)
+    -> std::basic_istream<Char, CharTraits> &
 {
     boost::io::basic_ios_all_saver const _{ istr };
     istr.exceptions(std::ios_base::eofbit | std::ios_base::badbit);    // enable exceptions
     //istr.ignore(std::numeric_limits<std::streamsize>::max(), symbols_type::c_eos());
 
-    istr >> base{ fmt } >> sign_pfx{ unit, fmt } >> c_pfx{ fmt } >> radix{ fmt };
-    istr >> width { unit, fmt } >> case_{ fmt } >> reader_{ unit, fmt, rdr } >> asm_pfx{ fmt };
+    istr >> base{ fmt } >> sign_prefix{ unit, fmt } >> c_prefix{ fmt } >> radix{ fmt };
+    istr >> width { unit, fmt } >> case_{ fmt } >> reader_{ unit, fmt, rdr } >> asm_postfix{ fmt };
     return istr;    
 }
 

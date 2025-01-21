@@ -16,38 +16,38 @@
 namespace cmn::io
 {
 
-enum fmt_options_t
+enum list_options_t
 {
-    fo_empty        = 0x0,
-    fo_brackers     = 0x1,
-    fo_separator    = 0x2
+    lo_empty        = 0x0,
+    lo_brackers     = 0x1,
+    lo_separator    = 0x2
 };
 
 template <typename T>
 struct traits
 {
-    static constexpr boost::promote_t<fmt_options_t> fmt_options = fo_empty;
+    static constexpr boost::promote_t<list_options_t> fmt_options = lo_empty;
 };
 
 //-----------------------------------------------------------------------------
 template <typename T>
-struct fmt
+struct list
 {
     T m_t;
 
     template <c::explicitly_convertible_to<T> Arg>
-    constexpr fmt(Arg arg) noexcept: m_t{ static_cast<T>(arg) } {}
+    constexpr list(Arg arg) noexcept: m_t{ static_cast<T>(arg) } {}
 };
 
 template <typename T>
-struct fmt<T const &>
+struct list<T const &>
 {
     T const &m_t;
 
-    constexpr fmt(T const &arg) noexcept: m_t{ arg } {}
+    constexpr list(T const &arg) noexcept: m_t{ arg } {}
 };
 
-template <typename T> fmt(T const &) noexcept -> fmt<T const &>;
+template <typename T> list(T const &) noexcept -> list<T const &>;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -160,7 +160,7 @@ namespace std
 
 template <typename T, typename Char>
     requires formattable<std::remove_cvref_t<T>, Char>
-struct formatter<cmn::io::fmt<T>, Char>
+struct formatter<cmn::io::list<T>, Char>
 {
     using underlying_formatting_type = std::remove_cvref_t<T>;
     using underlying_formatter_type = formatter<underlying_formatting_type, Char>;
@@ -180,8 +180,8 @@ struct formatter<cmn::io::fmt<T>, Char>
         constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
         constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
-        constexpr bool has_brackets = cmn::has_feature(traits_type::fmt_options, fo_brackers);
-        constexpr bool has_separator = cmn::has_feature(traits_type::fmt_options, fo_separator);
+        constexpr bool has_brackets = cmn::has_feature(traits_type::fmt_options, lo_brackers);
+        constexpr bool has_separator = cmn::has_feature(traits_type::fmt_options, lo_separator);
 
         auto it = ctx.begin();
         auto const begin_it = it;
@@ -268,7 +268,7 @@ struct formatter<cmn::io::fmt<T>, Char>
     }
 
     template<typename FmtContext>
-    constexpr auto format(cmn::io::fmt<T> const &t, FmtContext &ctx) const -> typename FmtContext::iterator
+    constexpr auto format(cmn::io::list<T> const &t, FmtContext &ctx) const -> typename FmtContext::iterator
     {
         return m_underlying_formatter.format(t.m_t, ctx);
     }    

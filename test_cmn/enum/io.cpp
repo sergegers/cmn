@@ -812,47 +812,47 @@ BOOST_AUTO_TEST_CASE(adapt_global_ns)
     BOOST_TEST(ostr.str() == "[DRC_NOCHG]");
 }
 
-using enum cmn::io::fmt_options_t;
+using enum cmn::io::list_options_t;
 
-static_assert(cmn::io::traits<cl_en_t>::fmt_options == (fo_brackers | fo_separator));
+static_assert(cmn::io::traits<cl_en_t>::fmt_options == (lo_brackers | lo_separator));
 static_assert(std::formattable<cl_en_t, char>);
-static_assert(std::formattable<cmn::io::fmt<cl_en_t>, char>);
+static_assert(std::formattable<cmn::io::list<cl_en_t>, char>);
 
 BOOST_AUTO_TEST_CASE(format_enum)
 {
     using enum cl_en_t;
-    using cmn::io::fmt;
+    using cmn::io::list;
 
     BOOST_TEST(std::format("{}", apple) == "[apple]");
-    BOOST_TEST(std::format("{0:<: :>}", fmt{ apple }) == "<apple>");
-    BOOST_TEST(std::format("{0:[[: :>>}", fmt{ apple }) == "[[apple>>");
-    BOOST_TEST(std::format("{0:<<: :>>}", fmt{ apple }) == "<<apple>>");
-    BOOST_TEST(std::format("{0:: :>>}", fmt{ apple }) == "apple>>");
-    BOOST_TEST(std::format("{0:::}", fmt{ apple }) == "apple");
+    BOOST_TEST(std::format("{0:<: :>}", list{ apple }) == "<apple>");
+    BOOST_TEST(std::format("{0:[[: :>>}", list{ apple }) == "[[apple>>");
+    BOOST_TEST(std::format("{0:<<: :>>}", list{ apple }) == "<<apple>>");
+    BOOST_TEST(std::format("{0:: :>>}", list{ apple }) == "apple>>");
+    BOOST_TEST(std::format("{0:::}", list{ apple }) == "apple");
 }
 
-static_assert(cmn::io::traits<cl_cmb_2_t>::fmt_options == (fo_brackers | fo_separator));
+static_assert(cmn::io::traits<cl_cmb_2_t>::fmt_options == (lo_brackers | lo_separator));
 static_assert(std::formattable<cl_cmb_2_t, char>);
-static_assert(std::formattable<cmn::io::fmt<cl_cmb_2_t>, char>);
+static_assert(std::formattable<cmn::io::list<cl_cmb_2_t>, char>);
 
 BOOST_AUTO_TEST_CASE(format_combo)
 {
     using enum cl_cmb_2_t;
-    using cmn::io::fmt;
+    using cmn::io::list;
 
     BOOST_TEST(std::format("{}", red) == "[zero red]");
     BOOST_TEST(std::format("{}", red | two) == "[two red]");
-    BOOST_TEST(std::format("{:<: :>}", fmt{ red | two }) == "<two red>");
-    BOOST_TEST(std::format("{:: :>}", fmt{ red | two }) == "two red>");
-    BOOST_TEST(std::format("{:::>}", fmt{ red | two }) == "twored>");
-    BOOST_TEST(std::format("{:::}", fmt{ red | two }) == "twored");
-    BOOST_TEST(std::format("{:::}", fmt<cmb_t>{ cmb_t::two | cmb_t::green }) == "twogreen");
+    BOOST_TEST(std::format("{:<: :>}", list{ red | two }) == "<two red>");
+    BOOST_TEST(std::format("{:: :>}", list{ red | two }) == "two red>");
+    BOOST_TEST(std::format("{:::>}", list{ red | two }) == "twored>");
+    BOOST_TEST(std::format("{:::}", list{ red | two }) == "twored");
+    BOOST_TEST(std::format("{:::}", list<cmb_t>{ cmb_t::two | cmb_t::green }) == "twogreen");
 }
 
 BOOST_AUTO_TEST_CASE(format_tail)
 {
     using enum cl_cmb_2_t;
-    using cmn::io::fmt;
+    using cmn::io::list;
 
     BOOST_TEST(std::format("{}", red | 0x1000) == "[zero red 0X1000]");
 }

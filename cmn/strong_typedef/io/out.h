@@ -181,14 +181,14 @@ struct reader
     }
 };
 
-// BUG: couldn't use auto function type
 template
 <
       typename Char
     , typename CharTraits
     , std::integral Unit
 >
-using te_reader = std::function<std::basic_istream<Char, CharTraits> & (std::basic_istream<Char, CharTraits> &, int_fmt_t, Unit &)>;
+using te_reader = std::function<auto (std::basic_istream<Char, CharTraits> &, int_fmt_t, Unit &) ->
+    std::basic_istream<Char, CharTraits> &>;
 
 //-----------------------------------------------------------------------------
 template
@@ -217,14 +217,14 @@ struct writer
     }
 };
 
-// BUG: couldn't use auto function type
 template
 <
       typename Char
     , typename CharTraits
     , std::integral Unit
 >
-using te_writer = std::function<std::basic_ostream<Char, CharTraits> & (std::basic_ostream<Char, CharTraits> &, int_fmt_t, Unit const &)>;
+using te_writer = std::function<auto (std::basic_ostream<Char, CharTraits> &, int_fmt_t, Unit const &)
+    -> std::basic_ostream<Char, CharTraits> &>;
 
 //-----------------------------------------------------------------------------
 template
@@ -233,8 +233,8 @@ template
     , typename CharTraits
     , std::integral Unit
 >
-auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, te_writer<Char, CharTraits, Unit> wtr, Unit const &unit)->
-    std::basic_ostream<Char, CharTraits> &;
+auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, te_writer<Char, CharTraits, Unit> wtr, 
+    Unit const &unit) -> std::basic_ostream<Char, CharTraits> &;
 
 template
 <
@@ -242,8 +242,8 @@ template
     , typename CharTraits
     , std::integral Unit
 >
-auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, te_reader<Char, CharTraits, Unit> rdr, Unit &unit)->
-    std::basic_istream<Char, CharTraits> &;
+auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, te_reader<Char, CharTraits, Unit> rdr, 
+    Unit &unit) -> std::basic_istream<Char, CharTraits> &;
 
 template
 <

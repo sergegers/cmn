@@ -77,7 +77,7 @@ add_library (
  "cmn/io/manip/slot/storage.h"
  "cmn/io/manip/slot/param.h"
 
-"cmn/io/format/fmt.h"
+"cmn/io/format/list.h"
 "cmn/io/format/mixins.h"
 "cmn/io/format.h"
 
@@ -147,7 +147,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  )
+   "cmn/io/format/stream.h")
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
