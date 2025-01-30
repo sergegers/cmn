@@ -10,4 +10,6 @@ build_script:
   - md build
   - cd build
   - cmake --build . --config x64-Debug
-  - ctest --verbose
+
+  test script:
+  - ctest
