@@ -44,17 +44,17 @@ struct strong_typedef_formatter:
         auto it = ctx.begin();
         m_fmt_options = empty;
 
-        switch (check_state_at(ctx, it,  sr_unk | sr_sep | sr_end))  // NOLINT(clang-diagnostic-switch-enum)
+        switch (check_state_at(ctx, it,  sr_sym | sr_sep | sr_close))  // NOLINT(clang-diagnostic-switch-enum)
         {
         case sr_sep: ++it; break;
-        case sr_end: return it;
-        case sr_unk: break;
+        case sr_close: return it;
+        case sr_sym: break;
 
         default:
             throw std::format_error("Unexpected");
         }
 
-        while (sr_end != check_state_at(ctx, it,  sr_unk | sr_end))
+        while (sr_close != check_state_at(ctx, it,  sr_sym | sr_close))
         {
             switch (*it++)
             {

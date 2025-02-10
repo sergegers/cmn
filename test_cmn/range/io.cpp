@@ -41,6 +41,7 @@ BOOST_AUTO_TEST_CASE(format)
     BOOST_TEST(std::format("{::  :>>}", list{ iota(1, 4) }) == "1  2  3>>");
     BOOST_TEST(std::format("{:::>>}", list{ iota(1, 4) }) == "123>>");
     BOOST_TEST(std::format("{:::}", list{ iota(1, 4) }) == "123");
+    BOOST_TEST(std::format("{:{{: :}}}", list{ iota(1, 4) }) == "{1 2 3}");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io

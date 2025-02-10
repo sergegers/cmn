@@ -847,6 +847,7 @@ BOOST_AUTO_TEST_CASE(format_combo)
     BOOST_TEST(std::format("{:::>}", list{ red | two }) == "twored>");
     BOOST_TEST(std::format("{:::}", list{ red | two }) == "twored");
     BOOST_TEST(std::format("{:::}", list<cmb_t>{ cmb_t::two | cmb_t::green }) == "twogreen");
+    BOOST_TEST(std::format("{:{{: :}}}", list{ red | two }) == "{two red}");
 }
 
 BOOST_AUTO_TEST_CASE(format_tail)

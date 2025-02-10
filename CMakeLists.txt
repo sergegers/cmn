@@ -22,6 +22,10 @@ if(POLICY CMP0167)
   cmake_policy(SET CMP0167 NEW)
 endif()
 
+if(POLICY CMP0074)
+  cmake_policy(SET CMP0074 NEW)
+endif()
+
 add_compile_definitions("$<$<CONFIG:Debug>:CMN_STATIC_TEST>")
 
 project ("cmn")

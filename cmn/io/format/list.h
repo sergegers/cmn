@@ -6,6 +6,7 @@
 #include <string_view>
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 #include <boost/type_traits/promote.hpp>
 
@@ -51,106 +52,183 @@ template <typename T> list(T const &) noexcept -> list<T const &>;
 
 
 ///////////////////////////////////////////////////////////////////////////////
-enum scroll_result_t
+enum scroll_result_t: char
 {
-    sr_end = 0x0,       // end of format string, iterator is pointed to '}'
-    sr_sep  = 0x1,      // next formatting item, iterator is pointed to separator ':'
-    sr_eos  = 0x2,      // end of format string, iterator in equal to the end iterator
-    sr_unk  = 0x4       // state is unknown
+    sr_close    = 0x0,      // end of format string, iterator is pointed to '}'
+    sr_sep      = 0x1,      // next formatting item, iterator is pointed to separator ':'
+    sr_eos      = 0x2,      // end of format string, iterator in equal to the end iterator
+    sr_sym      = 0x4,      // ordinary symbol
+    sr_esc      = 0x8,      // escape flag
+
+    sr_naked    = sr_close | sr_sep | sr_eos | sr_sym
 };
 
 //-----------------------------------------------------------------------------
-template <typename ParseContext>
-[[nodiscard]] constexpr auto decode_state_at(ParseContext const &ctx, typename ParseContext::iterator it) noexcept -> scroll_result_t
+template <typename Char> using scroll_to = std::pair<Char, scroll_result_t>;
+
+template <typename Char> constexpr scroll_to<Char> scroll_to_sep_ = scroll_to{ cmn::to_char(symbols<Char>::colon), sr_sep };
+template <typename Char> constexpr scroll_to<Char> scroll_to_close_ = scroll_to{ cmn::to_char(symbols<Char>::close_figure_bracket), sr_close };
+
+//-----------------------------------------------------------------------------
+template <typename Iterator> using scroll_pos = std::pair<Iterator, boost::promote_t<scroll_result_t>>;
+
+//-----------------------------------------------------------------------------
+template <typename ParseContext> using context_iterator_t = typename ParseContext::iterator;
+template <typename ParseContext> using context_char_t = typename ParseContext::char_type;
+
+template <typename ParseContext> using context_scroll_to_t = scroll_to<context_char_t<ParseContext>>;
+template <typename ParseContext> using context_scroll_pos_t = scroll_pos<context_iterator_t<ParseContext>>;
+
+namespace detail
 {
-    using char_type = typename ParseContext::char_type;
+
+//-----------------------------------------------------------------------------
+//
+// return parse state including sr_esc flag
+//
+template <typename ParseContext>
+[[nodiscard]] constexpr auto decode_state_at(ParseContext const &ctx, context_iterator_t<ParseContext> it) noexcept
+    -> boost::promote_t<scroll_result_t>
+{
+    using char_type = context_char_t<ParseContext>;
     using symbols_type = symbols<char_type>;
 
-    constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
-    constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
+    constexpr char_type separator_fmt = cmn::to_char(symbols_type::colon);
+    constexpr char_type open_fmt = cmn::to_char(symbols_type::open_figure_bracket);
+    constexpr char_type close_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
-    scroll_result_t state;
+    boost::promote_t<scroll_result_t> state;
     if  (it == ctx.end()) state = sr_eos;
     else 
         switch (*it)
         {
-        case end_fmt: state = sr_end; break;
+        case open_fmt:
+            // check to escaped { symbol
+            ++it;
+            state = it != ctx.end() && *it == open_fmt? sr_sym | sr_esc: sr_sym;
+        break;
+
+        case close_fmt:
+            // check to escaped } symbol
+            ++it;
+            state = it != ctx.end() && *it == close_fmt? sr_sym | sr_esc: sr_close;
+        break;
+
         case separator_fmt: state = sr_sep; break;
-        default: state = sr_unk;
+        default: state = sr_sym;
         }
 
     return state;
 }
 
+}
+
 //-----------------------------------------------------------------------------
+//
+// check parse position state ignoring sr_esc flag
+// return parse state including sr_esc flag
+//
 template <typename ParseContext>
-constexpr auto check_state_at(ParseContext const &ctx, typename ParseContext::iterator it, 
-    boost::promote_t<scroll_result_t> expected_states)  -> scroll_result_t
+[[nodiscard]] constexpr auto check_state_at(ParseContext const &ctx, context_iterator_t<ParseContext> it, 
+    boost::promote_t<scroll_result_t> expected_states) -> boost::promote_t<scroll_result_t>
 {
-    auto const state = decode_state_at(ctx, it);
-    switch (state)
+    auto const state = detail::decode_state_at(ctx, it);    
+    switch (auto const naked_state = feature(state, sr_naked); naked_state)
     {
-    case sr_end:
+    case sr_close:
     {
-        if (!has_feature(expected_states, state))
-            throw std::format_error("Invalid format string for adapted enum. Additional arguments");
+        if (!has_feature(expected_states, naked_state))
+            throw std::format_error("Invalid format string for list. Additional arguments");
     }
         break;
 
     case sr_sep:
     {
-        if (!has_feature(expected_states, state))
-            throw std::format_error("Invalid format string for adapted enum. Not enough arguments");
+        if (!has_feature(expected_states, naked_state))
+            throw std::format_error("Invalid format string for list. Not enough arguments");
     }
         break;
 
     case sr_eos:
-        throw std::format_error("Invalid format string for adapted enum. Missing closing '}'");
+        throw std::format_error("Invalid format string for list. Missing closing '}'");
 
-    case sr_unk:
+    case sr_sym:
     {
-        if (!has_feature(expected_states, state))
-            throw std::format_error("Invalid format string for adapted enum. State is unknown");
+        if (!has_feature(expected_states, naked_state))
+            throw std::format_error("Invalid format string for list. State is unknown");
     }
         break;
 
     default:
-        throw std::format_error("Invalid format string for adapted enum. State is unknown");
+        throw std::format_error("Invalid format string for list. State is unknown");
     }
 
     return state;
 };
 
+namespace detail
+{
+
+template <typename ParseContext>
+constexpr auto check_find
+(
+      ParseContext const &ctx
+    , context_iterator_t<ParseContext> it
+    , context_scroll_to_t<ParseContext> tgt
+) 
+    -> context_iterator_t<ParseContext>
+{
+    auto const [sym, sr] = tgt;
+    auto res_it = std::find(it, ctx.end(), sym);
+
+    auto state = decode_state_at(ctx, res_it);
+    if (has_feature(state, sr_esc))
+    {
+        // scroll escape sequence
+        ++res_it; ++res_it;
+
+        return check_find(ctx, res_it, tgt);
+    }
+
+    // verify target
+    std::ignore = check_state_at(ctx, res_it, sr);
+    return  res_it;
+}
+
+}
+
 //-----------------------------------------------------------------------------
+//
+// return iterator pointed to the target
+//
 template
 <
       typename ParseContext
     , typename... Tgts
 >
-constexpr auto find_symbol(ParseContext &ctx, typename ParseContext::iterator it, typename ParseContext::char_type tgt, 
-    Tgts... tgts) noexcept -> typename ParseContext::iterator
+[[nodiscard]] constexpr auto check_find_symbol
+(
+      ParseContext const &ctx
+    , context_iterator_t<ParseContext> it
+    , context_scroll_to_t<ParseContext> tgt
+    , Tgts... tgts
+)
+    -> context_iterator_t<ParseContext>
 
-    requires (std::same_as<Tgts, typename ParseContext::char_type> && ...)
+    requires (std::same_as<Tgts, context_scroll_to_t<ParseContext>> && ...)
 {
-    typename ParseContext::iterator res;
+    using target_type = context_scroll_to_t<ParseContext>;
+    using iterator_type = context_iterator_t<ParseContext>;
+
+    iterator_type res;
     std::ignore = 
     (
-        (ctx.end() != (res = std::find(it, ctx.end(), tgt))) 
+        (ctx.end() != (res = detail::check_find(ctx, it, tgt)))
         || ... || 
-        (ctx.end() != (res = std::find(it, ctx.end(), tgts)))
+        (ctx.end() != (res = detail::check_find(ctx, it, tgts)))
     );
 
     return res;
-}
-
-template <typename ParseContext>
-constexpr auto find_next(ParseContext &ctx, typename ParseContext::iterator it) noexcept -> typename ParseContext::iterator
-{
-    using char_type = typename ParseContext::char_type;
-    using symbols_type = symbols<char_type>;
-    static constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
-
-    return find_symbol(ctx, it, separator_fmt);
 }
 
 }
@@ -173,12 +251,19 @@ struct formatter<cmn::io::list<T>, Char>
     {
         using namespace cmn::io;
 
-        using char_type = typename ParseContext::char_type;
-        using symbols_type = cmn::symbols<char_type>;
+        using char_type = context_char_t<ParseContext>;
+        using iterator_type = context_iterator_t<ParseContext>;
+        using scroll_pos_type = context_scroll_pos_t<ParseContext>;
         using traits_type = traits<underlying_formatting_type>;
 
-        constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
-        constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
+        constexpr auto scroll_to_sep = scroll_to_sep_<char_type>;
+        constexpr auto scroll_to_close = scroll_to_close_<char_type>;
+
+        // set iterator to the beginning of escaped symbol sequence
+        constexpr auto get_begin_it_ = [](boost::promote_t<scroll_result_t> sr,  iterator_type it) constexpr -> iterator_type
+        {
+            return cmn::has_feature(sr, sr_esc)? ++it: it;
+        };
 
         constexpr bool has_brackets = cmn::has_feature(traits_type::fmt_options, lo_brackers);
         constexpr bool has_separator = cmn::has_feature(traits_type::fmt_options, lo_separator);
@@ -193,7 +278,7 @@ struct formatter<cmn::io::list<T>, Char>
                 //-----------------------------------------------------------------------------
                 // no brackets, no separator
 
-                check_state_at(ctx, it, sr_end);
+                std::ignore = check_state_at(ctx, it, sr_close);
                 return m_underlying_formatter.parse(ctx);
             }
             else
@@ -201,10 +286,9 @@ struct formatter<cmn::io::list<T>, Char>
                 //-----------------------------------------------------------------------------
                 // separator only
 
-                check_state_at(ctx, it,  sr_unk | sr_end);
-                auto const end_sep_it = find_symbol(ctx, it, end_fmt);
-                check_state_at(ctx, end_sep_it, sr_end);
-                string_view_type const separator { it, end_sep_it };
+                auto const sep_sr = check_state_at(ctx, it,  sr_sym | sr_close);
+                auto const end_sep_it = check_find_symbol(ctx, it, scroll_to_close);
+                string_view_type const separator { get_begin_it_(sep_sr, it), end_sep_it };
 
                 m_underlying_formatter.set_separator(separator);
 
@@ -219,16 +303,14 @@ struct formatter<cmn::io::list<T>, Char>
                 //-----------------------------------------------------------------------------
                 // brackets only
 
-                check_state_at(ctx, it, sr_unk | sr_sep);
-                auto const end_open_br_it = find_symbol(ctx, it, separator_fmt);
-                check_state_at(ctx, end_open_br_it, sr_sep);
-                string_view_type const open_br { it, end_open_br_it };
+                auto const open_sr = check_state_at(ctx, it, sr_sym | sr_sep);
+                auto const end_open_br_it = check_find_symbol(ctx, it, scroll_to_sep);
+                string_view_type const open_br { get_begin_it_(open_sr, it), end_open_br_it };
 
                 it = end_open_br_it; ++it;
-                check_state_at(ctx, it, sr_unk);
-                auto const end_close_br_it = find_symbol(ctx, it, end_fmt);
-                check_state_at(ctx, end_close_br_it, sr_end);
-                string_view_type const close_br { it, end_close_br_it };
+                auto const close_sr = check_state_at(ctx, it, sr_sym);
+                auto const end_close_br_it = check_find_symbol(ctx, it, scroll_to_close);
+                string_view_type const close_br { get_begin_it_(close_sr, it), end_close_br_it };
 
                 m_underlying_formatter.set_brackets(open_br, close_br);
 
@@ -240,22 +322,19 @@ struct formatter<cmn::io::list<T>, Char>
                 //-----------------------------------------------------------------------------
                 // brackets & separator
 
-                check_state_at(ctx, it, sr_unk | sr_sep);
-                auto const end_open_br_it = find_symbol(ctx, it, separator_fmt);
-                check_state_at(ctx, end_open_br_it, sr_sep);
-                string_view_type const open_br { it, end_open_br_it };
+                auto const open_sr = check_state_at(ctx, it, sr_sym | sr_sep);
+                auto const end_open_br_it = check_find_symbol(ctx, it, scroll_to_sep);
+                string_view_type const open_br{ get_begin_it_(open_sr, it), end_open_br_it };
 
                 it = end_open_br_it; ++it;
-                check_state_at(ctx, it,  sr_unk | sr_sep);
-                auto const end_sep_it = find_symbol(ctx, it, separator_fmt);
-                check_state_at(ctx, end_sep_it, sr_sep);
-                string_view_type const separator { it, end_sep_it };
+                auto const sep_sr = check_state_at(ctx, it,  sr_sym | sr_sep);
+                auto const end_sep_it = check_find_symbol(ctx, it, scroll_to_sep);
+                string_view_type const separator { get_begin_it_(sep_sr, it), end_sep_it };
 
                 it = end_sep_it; ++it;
-                check_state_at(ctx, it, sr_unk);
-                auto const end_close_br_it = find_symbol(ctx, it, end_fmt);
-                check_state_at(ctx, end_close_br_it, sr_end);
-                string_view_type const close_br { it, end_close_br_it };
+                auto const close_sr = check_state_at(ctx, it, sr_sym);
+                auto const end_close_br_it = check_find_symbol(ctx, it, scroll_to_close);
+                string_view_type const close_br { get_begin_it_(close_sr, it), end_close_br_it };
 
                 m_underlying_formatter.set_brackets(open_br, close_br);
                 m_underlying_formatter.set_separator(separator);

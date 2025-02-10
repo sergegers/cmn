@@ -32,6 +32,7 @@ BOOST_AUTO_TEST_CASE(format)
     BOOST_TEST(std::format("{:n}", std::tuple{ 1, 'a', 2.f }) == "1, 'a', 2");
     BOOST_TEST(std::format("{:>>> : , : <<<}", list{ std::tuple{ 1, 'a', 2.f } }) == ">>> 1 , 'a' , 2 <<<");
     BOOST_TEST(std::format("{:::}", list{ std::tuple{ 1, 'a', 2.f } }) == "1'a'2");
+    BOOST_TEST(std::format("{:{{:, :}}}", list{ std::tuple{ 1, 'a', 2.f } }) == "{1, 'a', 2}");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io
