@@ -39,7 +39,7 @@ enum class int_fmt_t: short
     asm_                = 0b0000'0000'0001'0000,    // a
     c                   = 0b0000'0000'0010'0000,    // default
                             
-    short_              = 0b0000'0000'0100'0000,    // default
+    short_              = 0b0000'0000'0100'0000,    // s, default
     long_               = 0b0000'0000'1000'0000,    // l
                             
     uppercase           = 0b0000'0001'0000'0000,    // u

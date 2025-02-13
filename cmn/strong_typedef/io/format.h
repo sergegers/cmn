@@ -7,6 +7,8 @@
 
 #include <cmn/strong_typedef/strong_typedef.h>
 
+#include "io.h"
+
 namespace cmn::io
 {
 
@@ -61,6 +63,7 @@ struct strong_typedef_formatter:
             case to_char(symbols_type::octothorpe): m_fmt_options |= showbase | lowercase; break;
             case to_char(symbols_type::x): m_fmt_options |= hex | c | nosign; break;
             case to_char(symbols_type::a): m_fmt_options |= long_asm_up_hex; break;
+            case to_char(symbols_type::s): m_fmt_options |= short_; break;
             case to_char(symbols_type::u): m_fmt_options |= uppercase; break;
 
             default:
