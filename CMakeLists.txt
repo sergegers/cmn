@@ -85,8 +85,10 @@ add_library (
 "cmn/io/format/mixins.h"
 "cmn/io/format.h"
 
+ "cmn/range/io/format.h"
+ "cmn/range/io/io.h"
+ "cmn/range/io/manip.h"
  "cmn/range/io.h"
- "cmn/range/io/fmt_spec.h" 
  
  "cmn/tuple/tuple.h"
  "cmn/tuple/op.h"
@@ -150,7 +152,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-   "cmn/io/format/stream.h")
+  )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

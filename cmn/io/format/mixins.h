@@ -5,11 +5,21 @@
 #include <algorithm>
 #include <utility>
 #include <type_traits>
+#include <string>
+
+#include <cmn/meta/concepts.h>
 
 namespace cmn::io::mix
 {
 
-template <typename D, typename T, typename Char>
+template
+<
+      typename D
+    , typename T
+    , typename Char
+>
+    requires c::printable<T, Char, std::char_traits<Char>>
+
 struct out_to_stream
 {
     using ostream_type = std::basic_ostream<Char>;
@@ -27,7 +37,12 @@ struct out_to_stream
 };
 
 //-----------------------------------------------------------------------------
-template <typename D, typename T, typename Char>
+template
+<
+      typename D
+    , typename T
+    , typename Char
+>
 struct skip_parse
 {
     template<typename ParseContext>

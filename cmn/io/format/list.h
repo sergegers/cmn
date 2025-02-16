@@ -217,7 +217,6 @@ template
 
     requires (std::same_as<Tgts, context_scroll_to_t<ParseContext>> && ...)
 {
-    using target_type = context_scroll_to_t<ParseContext>;
     using iterator_type = context_iterator_t<ParseContext>;
 
     iterator_type res;
