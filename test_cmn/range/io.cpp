@@ -32,7 +32,6 @@ BOOST_AUTO_TEST_CASE(range)
 BOOST_AUTO_TEST_CASE(format)
 {
     using std::ranges::views::iota;
-    using cmn::io::list;
 
     BOOST_TEST(std::format("{}", iota(1, 4)) == "[1, 2, 3]");
     BOOST_TEST(std::format("{:n}", iota(1, 4)) == "1, 2, 3");
@@ -42,6 +41,15 @@ BOOST_AUTO_TEST_CASE(format)
     BOOST_TEST(std::format("{:::>>}", list{ iota(1, 4) }) == "123>>");
     BOOST_TEST(std::format("{:::}", list{ iota(1, 4) }) == "123");
     BOOST_TEST(std::format("{:{{: :}}}", list{ iota(1, 4) }) == "{1 2 3}");
+    BOOST_TEST(std::format("{:t}", list{ iota(1, 4) }) == 
+R"(<
+1
+2
+3
+>)"
+);
+    BOOST_TEST(std::format("{:c}", list{ iota(1, 4) }) == R"(<1, 2, 3>)");
+
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io

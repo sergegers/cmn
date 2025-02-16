@@ -29,7 +29,7 @@ struct table_out_
         using symbols = symbols<Char, CharTraits>;
         return ostr << 
             basic_range_open<Char, CharTraits>(symbols::open_angle_bracket + symbols::endl) << 
-            basic_range_close<Char, CharTraits>(symbols::close_angle_bracket + symbols::endl) <<
+            basic_range_close<Char, CharTraits>(symbols::endl + symbols::close_angle_bracket) <<
             basic_range_separator<Char, CharTraits>(symbols::endl)
         ;
     }

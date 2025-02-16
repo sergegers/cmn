@@ -69,9 +69,11 @@ struct symbols<char>
     static constexpr auto enum_                     = "enum"_fs;
     static constexpr auto a                         = "a"_fs;
     static constexpr auto b                         = "b"_fs;
+    static constexpr auto c                         = "c"_fs;
     static constexpr auto h                         = "h"_fs;
     static constexpr auto l                         = "l"_fs;
     static constexpr auto s                         = "s"_fs;
+    static constexpr auto t                         = "t"_fs;
     static constexpr auto u                         = "u"_fs;
     static constexpr auto x                         = "x"_fs;
 };
@@ -116,9 +118,11 @@ struct symbols<wchar_t>
     static constexpr auto enum_                     = L"enum"_wfs;
     static constexpr auto a                         = L"a"_wfs;
     static constexpr auto b                         = L"b"_wfs;
+    static constexpr auto c                         = L"c"_wfs;
     static constexpr auto h                         = L"h"_wfs;
     static constexpr auto l                         = L"l"_wfs;
     static constexpr auto s                         = L"s"_wfs;
+    static constexpr auto t                         = L"t"_wfs;
     static constexpr auto u                         = L"u"_wfs;
     static constexpr auto x                         = L"x"_wfs;
 };

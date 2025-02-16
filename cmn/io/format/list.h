@@ -230,17 +230,18 @@ template
     return res;
 }
 
-}
-
-namespace std
-{
-
-template <typename T, typename Char>
-    requires formattable<std::remove_cvref_t<T>, Char>
-struct formatter<cmn::io::list<T>, Char>
+///////////////////////////////////////////////////////////////////////////////
+template
+<
+      typename T
+    , typename Char
+    , std::derived_from<list<T>> List = list<T>
+>
+    requires std::formattable<std::remove_cvref_t<T>, Char>
+struct list_formatter
 {
     using underlying_formatting_type = std::remove_cvref_t<T>;
-    using underlying_formatter_type = formatter<underlying_formatting_type, Char>;
+    using underlying_formatter_type = std::formatter<underlying_formatting_type, Char>;
     using string_view_type = std::basic_string_view<Char>;
 
     underlying_formatter_type m_underlying_formatter;
@@ -252,7 +253,6 @@ struct formatter<cmn::io::list<T>, Char>
 
         using char_type = context_char_t<ParseContext>;
         using iterator_type = context_iterator_t<ParseContext>;
-        using scroll_pos_type = context_scroll_pos_t<ParseContext>;
         using traits_type = traits<underlying_formatting_type>;
 
         constexpr auto scroll_to_sep = scroll_to_sep_<char_type>;
@@ -346,10 +346,19 @@ struct formatter<cmn::io::list<T>, Char>
     }
 
     template<typename FmtContext>
-    constexpr auto format(cmn::io::list<T> const &t, FmtContext &ctx) const -> typename FmtContext::iterator
+    constexpr auto format(list<T> const &t, FmtContext &ctx) const -> typename FmtContext::iterator
     {
         return m_underlying_formatter.format(t.m_t, ctx);
     }    
 };
+
+}
+
+namespace std
+{
+
+template <typename T, typename Char>
+    requires formattable<std::remove_cvref_t<T>, Char>
+struct formatter<cmn::io::list<T>, Char>: cmn::io::list_formatter<T, Char> {};
 
 }

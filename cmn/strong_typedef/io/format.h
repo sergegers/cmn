@@ -12,16 +12,10 @@
 namespace cmn::io
 {
 
-template <typename StrongTypedef, typename Char>
-struct strong_typedef_formatter:
-    mix::out_to_stream
-    <
-          strong_typedef_formatter<StrongTypedef, Char>
-        , StrongTypedef
-        , Char
-    >
+template <typename T, typename Char>
+struct strong_typedef_formatter: mix::out_to_stream<T, Char>
 {
-    using out_to_stream_mix_type = mix::out_to_stream<strong_typedef_formatter, StrongTypedef, Char>;
+    using out_to_stream_mix_type = mix::out_to_stream<T, Char>;
     using ostream_type = typename out_to_stream_mix_type::ostream_type;
 
     int_fmt_t m_fmt_options = int_fmt_t::default_;
@@ -37,7 +31,7 @@ struct strong_typedef_formatter:
         using namespace cmn::io;
         using enum int_fmt_t;
 
-        using char_type = typename ParseContext::char_type;
+        using char_type = context_char_t<ParseContext>;
         using symbols_type = symbols<char_type>;
 
         constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
