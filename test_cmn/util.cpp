@@ -1,10 +1,14 @@
 
+#include <string_view>
+
+#include <boost/test/unit_test.hpp>
+
 #include <cmn/meta/concepts.h>
 #include <cmn/util/util.h>
 #include <cmn/util/fixed_string.h>
 
-namespace cmn
-{
+BOOST_AUTO_TEST_SUITE(cmn)
+BOOST_AUTO_TEST_SUITE(util)
 
 using namespace literals;
 
@@ -51,4 +55,13 @@ static_assert(std::same_as<copy_reference_t<int, char &&>, char>);
 static_assert(std::same_as<copy_cvr_t<int &, char>, char &>);
 static_assert(std::same_as<copy_cvr_t<int const &, char const>, char const &>);
 
+BOOST_AUTO_TEST_CASE(fixed_string_)
+{
+    using namespace std::string_view_literals;
+
+    BOOST_TEST("abc"_fs == "abc"_fs);
+    BOOST_TEST("abc"_fs == "abc"sv);
 }
+
+BOOST_AUTO_TEST_SUITE_END() // util
+BOOST_AUTO_TEST_SUITE_END() // cmn

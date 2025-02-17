@@ -601,7 +601,7 @@ struct std::hash<cmn::basic_fixed_string<Char, N_, CharTraits>>  // NOLINT(cert-
 {
     using argument_type = cmn::basic_fixed_string<Char, N_, CharTraits>;
 
-    auto operator()(argument_type const &str) const -> size_t
+    constexpr auto operator ()(argument_type const &str) const -> size_t
     {
         using sv_type = typename argument_type::string_view_type;
         return hash<sv_type>()(static_cast<sv_type>(str));

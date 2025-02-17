@@ -76,6 +76,10 @@ struct symbols<char>
     static constexpr auto t                         = "t"_fs;
     static constexpr auto u                         = "u"_fs;
     static constexpr auto x                         = "x"_fs;
+    static constexpr auto vm                        = "vm"_fs;
+    static constexpr auto vah                       = "vah"_fs;
+    static constexpr auto vap                       = "vap"_fs;
+    static constexpr auto vach                      = "vach"_fs;
 };
 
 template <>
@@ -125,6 +129,10 @@ struct symbols<wchar_t>
     static constexpr auto t                         = L"t"_wfs;
     static constexpr auto u                         = L"u"_wfs;
     static constexpr auto x                         = L"x"_wfs;
+    static constexpr auto vm                        = L"vm"_wfs;
+    static constexpr auto vah                       = L"vah"_wfs;
+    static constexpr auto vap                       = L"vap"_wfs;
+    static constexpr auto vach                      = L"vach"_wfs;
 };
 
 }

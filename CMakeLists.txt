@@ -81,6 +81,8 @@ add_library (
  "cmn/io/manip/slot/storage.h"
  "cmn/io/manip/slot/param.h"
 
+"cmn/io/format/util.h"
+"cmn/io/format/context_traits.h"
 "cmn/io/format/list.h"
 "cmn/io/format/mixins.h"
 "cmn/io/format.h"

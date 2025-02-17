@@ -9,6 +9,7 @@
 
 #include <cmn/meta/concepts.h>
 
+
 namespace cmn::io::mix
 {
 
@@ -16,19 +17,20 @@ template
 <
       typename T
     , typename Char
+    , typename CharTraits = std::char_traits<Char>
 >
-    requires c::printable<T, Char, std::char_traits<Char>>
+    requires c::printable<T, Char, CharTraits>
 
 struct out_to_stream
 {
-    using ostream_type = std::basic_ostream<Char>;
+    using ostream_type = std::basic_ostream<Char, CharTraits>;
 
-    constexpr auto prepare_stream(ostream_type &ostr) const -> ostream_type & = delete;
+    constexpr auto prepare_stream(this auto const &, ostream_type &ostr) -> ostream_type & = delete;
 
-    template<typename Self, typename FmtContext>
-    constexpr auto format(this Self const &self_, T const &t, FmtContext &ctx) -> typename FmtContext::iterator
+    template<typename FmtContext>
+    constexpr auto format(this auto &self_, T const &t, FmtContext &ctx) -> typename FmtContext::iterator
     {
-        std::basic_ostringstream<Char> ostr;
+        std::basic_ostringstream<Char, CharTraits> ostr;
         self_.prepare_stream(ostr) << t;
 
         return std::ranges::copy(std::move(ostr).str(), ctx.out()).out;
@@ -43,8 +45,8 @@ template
 >
 struct skip_parse
 {
-    template<typename Self, typename ParseContext>
-    constexpr auto parse(this Self const &, ParseContext &ctx) -> typename ParseContext::iterator
+    template<typename ParseContext>
+    constexpr auto parse(this auto const &, ParseContext &ctx) -> typename ParseContext::iterator
     {
         return ctx.begin();
     }    
