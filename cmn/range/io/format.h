@@ -36,7 +36,8 @@ namespace std
 {
 
 template <std::ranges::input_range R, typename Char>
-    requires formattable<std::remove_cvref_t<R>, Char>
+    // TODO:
+    //requires formattable<std::remove_cvref_t<R>, Char>
 struct formatter<cmn::range_::io::list<R>, Char>: cmn::io::list_formatter<R, Char>
 {
 private:
@@ -53,15 +54,15 @@ private:
 public:
 
     template<typename ParseContext>
-    constexpr auto parse(ParseContext &ctx) -> typename ParseContext::iterator
+    constexpr auto parse(ParseContext &ctx) -> cmn::io::context_iterator_t<ParseContext>
     {
         using namespace cmn::io;
 
 
         auto it = ctx.begin();
-        switch (*it++)                 // t - table_out     
+        switch (*it++)
         {
-        case to_char(symbols_type::t):
+        case to_char(symbols_type::t):  // t - table_out
         {
             this->m_underlying_formatter.set_brackets(table_open_br, table_close_br);
             this->m_underlying_formatter.set_separator(table_sep);
@@ -69,9 +70,10 @@ public:
         return it;
 
         case to_char(symbols_type::c): // c - compact_table_out
+        {
             this->m_underlying_formatter.set_brackets(compact_table_open_br, compact_table_close_br);
             this->m_underlying_formatter.set_separator(compact_table_sep);
-
+        }
         return it;
 
         default:

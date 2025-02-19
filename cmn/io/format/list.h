@@ -12,7 +12,7 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/util/feature.h>
 
-#include "util.h"
+#include "parse_arg_helper.h"
 
 namespace cmn::io
 {
@@ -55,19 +55,21 @@ template
 <
       typename T
     , typename Char
-    , std::derived_from<list<T>> List = list<T>
 >
     requires std::formattable<std::remove_cvref_t<T>, Char>
-struct list_formatter
+struct list_formatter: parse_arg_helper<Char>
 {
+private:
+    using inherited = parse_arg_helper<Char>;
+protected:
     using underlying_formatting_type = std::remove_cvref_t<T>;
     using underlying_formatter_type = std::formatter<underlying_formatting_type, Char>;
     using string_view_type = std::basic_string_view<Char>;
 
     underlying_formatter_type m_underlying_formatter;
-
+public:
     template<typename ParseContext>
-    constexpr auto parse(ParseContext &ctx) -> typename ParseContext::iterator
+    constexpr auto parse(ParseContext &ctx) -> context_iterator_t<ParseContext>
     {
         using namespace cmn::io;
 
@@ -87,17 +89,14 @@ struct list_formatter
         constexpr bool has_brackets = cmn::has_feature(traits_type::fmt_options, lo_brackers);
         constexpr bool has_separator = cmn::has_feature(traits_type::fmt_options, lo_separator);
 
-        auto it = ctx.begin();
-        auto const begin_it = it;
-
         if constexpr (!has_brackets)
         {
             if constexpr (!has_separator)
             {
                 //-----------------------------------------------------------------------------
                 // no brackets, no separator
-
-                std::ignore = check_state_at(ctx, it, sr_close);
+                
+                inherited::parse_no_arg(ctx);
                 return m_underlying_formatter.parse(ctx);
             }
             else
@@ -105,13 +104,9 @@ struct list_formatter
                 //-----------------------------------------------------------------------------
                 // separator only
 
-                auto const sep_sr = check_state_at(ctx, it,  sr_sym | sr_close);
-                auto const end_sep_it = check_find_symbol(ctx, it, scroll_to_close);
-                string_view_type const separator { get_begin_it_(sep_sr, it), end_sep_it };
-
+                string_view_type const separator { inherited::parse_last_arg(ctx) };
                 m_underlying_formatter.set_separator(separator);
 
-                ctx.advance_to(end_sep_it);
                 return m_underlying_formatter.parse(ctx);
             }
         }
@@ -122,18 +117,12 @@ struct list_formatter
                 //-----------------------------------------------------------------------------
                 // brackets only
 
-                auto const open_sr = check_state_at(ctx, it, sr_sym | sr_sep);
-                auto const end_open_br_it = check_find_symbol(ctx, it, scroll_to_sep);
-                string_view_type const open_br { get_begin_it_(open_sr, it), end_open_br_it };
+                string_view_type const open_br { inherited::parse_arg(ctx) };
 
-                it = end_open_br_it; ++it;
-                auto const close_sr = check_state_at(ctx, it, sr_sym);
-                auto const end_close_br_it = check_find_symbol(ctx, it, scroll_to_close);
-                string_view_type const close_br { get_begin_it_(close_sr, it), end_close_br_it };
+                inherited::next(ctx);
+                string_view_type const close_br { inherited::parse_last_arg(ctx) };
 
                 m_underlying_formatter.set_brackets(open_br, close_br);
-
-                ctx.advance_to(end_close_br_it);
                 return m_underlying_formatter.parse(ctx);
             }
             else
@@ -141,24 +130,17 @@ struct list_formatter
                 //-----------------------------------------------------------------------------
                 // brackets & separator
 
-                auto const open_sr = check_state_at(ctx, it, sr_sym | sr_sep);
-                auto const end_open_br_it = check_find_symbol(ctx, it, scroll_to_sep);
-                string_view_type const open_br{ get_begin_it_(open_sr, it), end_open_br_it };
+                string_view_type const open_br{ inherited::parse_arg(ctx) };
 
-                it = end_open_br_it; ++it;
-                auto const sep_sr = check_state_at(ctx, it,  sr_sym | sr_sep);
-                auto const end_sep_it = check_find_symbol(ctx, it, scroll_to_sep);
-                string_view_type const separator { get_begin_it_(sep_sr, it), end_sep_it };
+                inherited::next(ctx);
+                string_view_type const separator { inherited::parse_arg(ctx) };
 
-                it = end_sep_it; ++it;
-                auto const close_sr = check_state_at(ctx, it, sr_sym);
-                auto const end_close_br_it = check_find_symbol(ctx, it, scroll_to_close);
-                string_view_type const close_br { get_begin_it_(close_sr, it), end_close_br_it };
+                inherited::next(ctx);
+                string_view_type const close_br { inherited::parse_last_arg(ctx) };
 
                 m_underlying_formatter.set_brackets(open_br, close_br);
                 m_underlying_formatter.set_separator(separator);
 
-                ctx.advance_to(end_close_br_it);
                 return m_underlying_formatter.parse(ctx);
             }
         }

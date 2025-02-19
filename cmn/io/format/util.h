@@ -52,6 +52,15 @@ template <typename ParseContext>
 
 //-----------------------------------------------------------------------------
 //
+// drop escape flag
+//
+[[nodiscard]] constexpr auto naked(boost::promote_t<scroll_result_t> sr) -> scroll_result_t
+{
+    return feature(sr, sr_naked);
+}
+
+//-----------------------------------------------------------------------------
+//
 // check parse position state ignoring sr_esc flag
 // return parse state including sr_esc flag
 //
@@ -60,7 +69,7 @@ template <typename ParseContext>
     boost::promote_t<scroll_result_t> expected_states) -> boost::promote_t<scroll_result_t>
 {
     auto const state = decode_state_at(ctx, it);    
-    switch (auto const naked_state = feature(state, sr_naked); naked_state)
+    switch (auto const naked_state = naked(state); naked_state)
     {
     case sr_close:
     {

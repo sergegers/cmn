@@ -83,6 +83,7 @@ add_library (
 
 "cmn/io/format/util.h"
 "cmn/io/format/context_traits.h"
+"cmn/io/format/parse_arg_helper.h"
 "cmn/io/format/list.h"
 "cmn/io/format/mixins.h"
 "cmn/io/format.h"
@@ -154,7 +155,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  )
+ )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

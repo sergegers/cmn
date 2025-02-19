@@ -450,5 +450,5 @@ using strong_typedef_integral_interop = st_facade<T, Tag, Default_, strong_typed
 }
 
 #ifdef UNITY_BUILD
-#   include <cmn/util/strong_typedef_io.h>
+#   include <cmn/strong_typedef/io/io.h>
 #endif

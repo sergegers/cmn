@@ -30,10 +30,14 @@ template <typename Char> constexpr scroll_to<Char> scroll_to_close_ = scroll_to{
 template <typename Iterator> using scroll_pos = std::pair<Iterator, boost::promote_t<scroll_result_t>>;
 
 //-----------------------------------------------------------------------------
-template <typename ParseContext> using context_iterator_t = typename ParseContext::iterator;
-template <typename ParseContext> using context_char_t = typename ParseContext::char_type;
+//
+// parse context and format context helpers
+//
+//-----------------------------------------------------------------------------
+template <typename Context> using context_iterator_t = typename Context::iterator;
+template <typename Context> using context_char_t = typename Context::char_type;
 
-template <typename ParseContext> using context_scroll_to_t = scroll_to<context_char_t<ParseContext>>;
-template <typename ParseContext> using context_scroll_pos_t = scroll_pos<context_iterator_t<ParseContext>>;
+template <typename Context> using context_scroll_to_t = scroll_to<context_char_t<Context>>;
+template <typename Context> using context_scroll_pos_t = scroll_pos<context_iterator_t<Context>>;
 
 }
