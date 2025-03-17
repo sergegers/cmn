@@ -73,7 +73,7 @@ constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
     auto const int_idx = static_cast<std::size_t>(idx);
     static constexpr auto size = mp_size_v<L>;
 
-    if (int_idx >= size) throw std::domain_error{ "Index is out of bounds" };
+    if (int_idx >= size) throw std::out_of_range { "Index is out of bounds" };
 
     static auto const tbl = []<std::size_t... Indices>(std::index_sequence<Indices...>) constexpr
     {
@@ -104,7 +104,7 @@ constexpr auto at_fus(Sequence &&seq, Idx idx, Visitor &&vis = detail::empty_vis
     namespace rfus = fus::result_of;
 
     static constexpr auto size = rfus::size_v<Sequence>;
-    if (idx >= size) throw std::domain_error{ "Index is out of bounds" };
+    if (idx >= size) throw std::out_of_range { "Index is out of bounds" };
 
     static auto const tbl = []<std::size_t... Indices>
         (Sequence && seq, std::index_sequence<Indices...>)
