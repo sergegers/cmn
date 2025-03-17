@@ -9,6 +9,7 @@
 
 #include <cmn/meta/concepts.h>
 
+#include "context_traits.h"
 
 namespace cmn::io::mix
 {
@@ -28,7 +29,7 @@ struct out_to_stream
     constexpr auto prepare_stream(this auto const &, ostream_type &ostr) -> ostream_type & = delete;
 
     template<typename FmtContext>
-    constexpr auto format(this auto &self_, T const &t, FmtContext &ctx) -> typename FmtContext::iterator
+    constexpr auto format(this auto &self_, T const &t, FmtContext &ctx) -> context_iterator_t<FmtContext>
     {
         std::basic_ostringstream<Char, CharTraits> ostr;
         self_.prepare_stream(ostr) << t;
@@ -46,7 +47,7 @@ template
 struct skip_parse
 {
     template<typename ParseContext>
-    constexpr auto parse(this auto const &, ParseContext &ctx) -> typename ParseContext::iterator
+    constexpr auto parse(this auto const &, ParseContext &ctx) -> context_iterator_t<ParseContext>
     {
         return ctx.begin();
     }    

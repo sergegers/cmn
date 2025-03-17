@@ -106,12 +106,12 @@ namespace detail
 {
 
 template <typename ParseContext>
-constexpr auto check_find
+[[nodiscard]] constexpr auto find_tgt
 (
       ParseContext const &ctx
     , context_iterator_t<ParseContext> it
     , context_scroll_to_t<ParseContext> tgt
-) 
+) noexcept
     -> context_iterator_t<ParseContext>
 {
     auto const [sym, sr] = tgt;
@@ -123,7 +123,7 @@ constexpr auto check_find
         // scroll escape sequence
         ++res_it; ++res_it;
 
-        return check_find(ctx, res_it, tgt);
+        return find_tgt(ctx, res_it, tgt);
     }
 
     // verify target
@@ -136,6 +136,39 @@ constexpr auto check_find
 //-----------------------------------------------------------------------------
 //
 // return iterator pointed to the target
+//
+template
+<
+      typename ParseContext
+    , typename... Tgts
+>
+[[nodiscard]] constexpr auto find_symbol
+(
+      ParseContext const &ctx
+    , context_iterator_t<ParseContext> it
+    , context_scroll_to_t<ParseContext> tgt
+    , Tgts... tgts
+) noexcept
+    -> context_iterator_t<ParseContext>
+
+    requires (std::same_as<Tgts, context_scroll_to_t<ParseContext>> && ...)
+{
+    using iterator_type = context_iterator_t<ParseContext>;
+
+    iterator_type res;
+    std::ignore = 
+    (
+        (ctx.end() != (res = detail::find_tgt(ctx, it, tgt)))
+        || ... || 
+        (ctx.end() != (res = detail::find_tgt(ctx, it, tgts)))
+    );
+
+    return res;
+}
+
+//-----------------------------------------------------------------------------
+//
+// return iterator pointed to the target or throw
 //
 template
 <
@@ -158,9 +191,9 @@ template
     iterator_type res;
     std::ignore = 
     (
-        (ctx.end() != (res = detail::check_find(ctx, it, tgt)))
+        (ctx.end() != (res = detail::find_tgt(ctx, it, tgt)))
         || ... || 
-        (ctx.end() != (res = detail::check_find(ctx, it, tgts)))
+        (ctx.end() != (res = detail::find_tgt(ctx, it, tgts)))
     );
 
     if (ctx.end() == it) throw std::format_error("Targets are not found");

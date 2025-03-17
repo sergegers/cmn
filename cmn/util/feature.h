@@ -98,13 +98,22 @@ template <c::bitfield Policy, c::bitfield... Features>
     return (... && has_feature(pol, feats));
 }
 
+//-----------------------------------------------------------------------------
 template <c::bitfield Policy, c::bitfield... Features>
     requires (... && std::same_as<Policy, Features>)
-[[nodiscard]] constexpr auto has_any_feature(Policy pol, Features ...feats) noexcept -> bool
+[[nodiscard]] constexpr auto has_any_feature(Policy pol, Policy feat, Features ...feats) noexcept -> bool
 {
-    return (... || has_feature(pol, feats));
+    return (has_feature(pol, feat) || ... || has_feature(pol, feats));
 }
 
+template <c::bitfield Policy, c::bitfield... Features>
+    requires (... && std::same_as<Policy, Features>)
+[[nodiscard]] constexpr auto has_any_feature(interop_type_t<Policy> pol, Policy feat, Features ...feats) noexcept -> bool
+{
+    return (has_feature(pol, feat) || ... || has_feature(pol, feats));
+}
+
+//-----------------------------------------------------------------------------
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto is_feature_added(Policy old_pol, Policy new_pol, Policy feat) noexcept -> bool
 {

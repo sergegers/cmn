@@ -4,6 +4,7 @@
 #include <utility>
 #include <string_view>
 #include <ranges>
+#include <optional>
 
 #include <boost/type_traits/promote.hpp>
 
@@ -59,6 +60,25 @@ public:
         ctx.advance_to(end_sep_it);
 
         return std::ranges::subrange { get_begin_it(sep_sr, it), end_sep_it };
+    }
+
+    template <typename ParseContext>
+    using try_parser_arg_result_type = std::optional<std::ranges::subrange<context_iterator_t<ParseContext>>>;
+
+    template <typename ParseContext>
+    [[nodiscard]] static constexpr auto try_parse_arg(ParseContext &ctx) noexcept
+        -> try_parser_arg_result_type<ParseContext>
+    {
+        auto const it = ctx.begin();
+        auto const sep_sr = decode_state_at(ctx, it);
+        if (!has_any_feature(sep_sr, sr_sym, sr_sep)) return std::nullopt;
+
+        auto const end_sep_it = find_symbol(ctx, it, scroll_to_sep, scroll_to_close);
+        ctx.advance_to(end_sep_it);
+        if (end_sep_it == ctx.end()) return std::nullopt;
+
+        return std::ranges::subrange{ get_begin_it(sep_sr, it), end_sep_it };
+        
     }
 
     static constexpr auto parse_no_arg(auto &ctx) -> void

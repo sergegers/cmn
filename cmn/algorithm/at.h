@@ -2,7 +2,9 @@
 
 #include <type_traits>
 #include <array>
-#include <cassert>
+#include <stdexcept>
+#include <variant>
+#include <utility>
 
 // ReSharper disable CppUnusedIncludeDirective
 
@@ -12,8 +14,6 @@
 
 // boost.fusion
 #include <boost/fusion/sequence/intrinsic/at_c.hpp>
-// boost.variant
-#include <boost/variant.hpp>
 
 // ReSharper restore CppUnusedIncludeDirective
 
@@ -69,22 +69,21 @@ template
 constexpr auto at_mp11(Idx idx, Visitor &&vis = detail::empty_visitor{})
 {
     using namespace boost::mp11;
-    using int_type = underlying_type_t<Idx>;
 
-    auto const int_idx = static_cast<int_type>(idx);
+    auto const int_idx = static_cast<std::size_t>(idx);
     static constexpr auto size = mp_size_v<L>;
 
-    assert(int_idx < size); // Index is out of bounds
+    if (int_idx >= size) throw std::domain_error{ "Index is out of bounds" };
 
-    static auto const tbl = []<int_type... Indices>(std::integer_sequence<int_type, Indices...>)
+    static auto const tbl = []<std::size_t... Indices>(std::index_sequence<Indices...>) constexpr
     {
-        using elem_type = mp_apply<boost::variant, L>;
+        using elem_type = mp_apply<std::variant, L>;
         return std::array<elem_type, sizeof... (Indices)>{ mp_at_c<L, Indices>{}... };
     }
-    (std::make_integer_sequence<int_type, size>());
+    (std::make_index_sequence<size>());
 
     decltype(auto) elem = tbl[int_idx];
-    return boost::apply_visitor(detail::result_{ std::forward<Visitor>(vis) }, elem);
+    return std::visit(detail::result_{ std::forward<Visitor>(vis) }, elem);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -104,27 +103,25 @@ constexpr auto at_fus(Sequence &&seq, Idx idx, Visitor &&vis = detail::empty_vis
     namespace fus = boost::fusion;
     namespace rfus = fus::result_of;
 
-    using int_type = underlying_type_t<Idx>;
-
     static constexpr auto size = rfus::size_v<Sequence>;
-    ASSERTE_MSG_A(idx < size, "Index " << idx << " is out of bounds [0, " << size << ")");
+    if (idx >= size) throw std::domain_error{ "Index is out of bounds" };
 
-    static auto const tbl = []<int_type... Indices>
-        (Sequence && seq, std::integer_sequence<int_type, Indices...>)
+    static auto const tbl = []<std::size_t... Indices>
+        (Sequence && seq, std::index_sequence<Indices...>)
         {
             using ref_seq_type = mp_rename<mp_transform<std::add_lvalue_reference_t, Sequence>, mp_list>;
-            using elem_type = typename boost::make_variant_over<ref_seq_type>::type;
+            using elem_type = mp_apply<std::variant, ref_seq_type>;
 
             return std::array<elem_type, sizeof... (Indices)>{ fus::at_c<Indices>(seq)... };
         }
         (
             std::forward<Sequence>(seq), 
-            std::make_integer_sequence<int_type, size>()
+            std::make_index_sequence<size>()
         )
     ;
 
-    decltype(auto) elem = tbl[static_cast<int_type>(idx)];
-    return  boost::apply_visitor(detail::result_{ std::forward<Visitor>(vis) }, elem);
+    decltype(auto) elem = tbl[static_cast<std::size_t>(idx)];
+    return std::visit(detail::result_{ std::forward<Visitor>(vis) }, elem);
 }
 
 } 
