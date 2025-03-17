@@ -48,17 +48,19 @@ template
     , std::size_t N_
     , typename CharTraits = std::char_traits<Char>
 >
-struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
+class basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
 {
-    // exposition only
+public:
     using storage_type = std::array<Char, N_ + 1>;
-    storage_type m_data{};
+
+    // keep nonstatic members public to satisfy standard layout requirement
+    storage_type    m_data{};  
 
     using traits_type = CharTraits;
     using value_type = Char;
     using pointer = value_type *;
     using const_pointer = value_type const *;
-    using reference = value_type&;
+    using reference = value_type &;
     using const_reference = value_type const &;
     using iterator = typename storage_type::iterator;
     using const_iterator = typename storage_type::const_iterator;
@@ -69,8 +71,22 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     using string_view_type = std::basic_string_view<value_type, traits_type>;
 
     static constexpr auto npos = string_view_type::npos;
-    static constexpr auto nsize = N_;
+private:
 
+    constexpr auto init_from_array(value_type const (&array)[N_ + 1]) -> void
+    {
+        std::ranges::copy(array, std::ranges::begin(m_data));
+    }
+
+    template <std::size_t M_> requires (M_ <= N_)
+    constexpr auto init_from_fs(basic_fixed_string<Char, M_, CharTraits> const &other) -> void
+    {
+        std::ranges::copy_n(std::ranges::begin(other.m_data), M_, std::ranges::begin(m_data));
+        if constexpr (M_ < N_) m_data[M_] = 0;
+    }
+
+    constexpr auto sv() const -> string_view_type { return *this; }
+public:
     ///////////////////////////////////////////////////////////////////////////////
     //
     // constructors
@@ -80,7 +96,7 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     constexpr basic_fixed_string(value_type const (&array)[N_ + 1]) // NOLINT(google-explicit-constructor)
         noexcept(std::copy_constructible<value_type>)
     {
-        std::ranges::copy(array, std::ranges::begin(m_data));
+        init_from_array(array);
     }
 
     //-----------------------------------------------------------------------------
@@ -92,7 +108,7 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
         if (std::distance(first, last) > N_)
             throw std::out_of_range{ "String is too long" };
 
-        std::ranges::copy(first, last, std::ranges::begin(m_data));
+        std::copy(first, last, std::begin(m_data));
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -102,7 +118,7 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     constexpr auto operator = (value_type const (&array)[N_ + 1]) noexcept(std::copy_constructible<value_type>)
         -> basic_fixed_string &
     {
-        std::ranges::copy(array, std::ranges::begin(m_data));
+        init_from_array(array);
         return *this;
     }
 
@@ -114,8 +130,7 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     explicit constexpr basic_fixed_string(basic_fixed_string<Char, M_, CharTraits> const &other)
         noexcept(std::copy_constructible<value_type>)
     {
-        std::ranges::copy_n(std::ranges::begin(other.m_data), M_, std::ranges::begin(m_data));
-        if constexpr (M_ < N_) m_data[M_] = 0;
+        init_from_fs(other);
     }
 
     template <std::size_t M_> requires (M_ <= N_)
@@ -123,8 +138,7 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
         noexcept(std::copy_constructible<value_type>)
     {
         basic_fixed_string<Char, M_, CharTraits> res{};
-        std::ranges::copy_n(std::ranges::begin(res.m_data), M_, std::ranges::begin(m_data));
-        if constexpr (M_ < N_) m_data[M_] = 0;
+        res.init_from_fs(*this);
 
         return res;
     }
@@ -229,10 +243,10 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     [[nodiscard]] constexpr auto find(string_view_type sv, size_type pos = 0) const noexcept -> size_type
     { return sv().find(sv, pos); }
 
-    [[nodiscard]] constexpr auto find(value_type const *s, size_type pos, size_type n) const -> size_type
+    [[nodiscard]] constexpr auto find(value_type const *s, size_type pos, size_type n) const noexcept -> size_type
     { return sv().find(s, pos, n); }
 
-    [[nodiscard]] constexpr auto find(value_type const *s, size_type pos = 0) const -> size_type
+    [[nodiscard]] constexpr auto find(value_type const *s, size_type pos = 0) const noexcept -> size_type
     { return sv().find(s, pos); }
 
     [[nodiscard]] constexpr auto find(value_type c, size_type pos = 0) const noexcept -> size_type
@@ -251,10 +265,10 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     [[nodiscard]] constexpr auto rfind(string_view_type sv, size_type pos = npos) const noexcept -> size_type
     { return sv().rfind(sv, pos); }
 
-    [[nodiscard]] constexpr auto rfind(value_type const *s, size_type pos, size_type n) const -> size_type
+    [[nodiscard]] constexpr auto rfind(value_type const *s, size_type pos, size_type n) const noexcept -> size_type
     { return sv().rfind(s, pos, n); }
 
-    [[nodiscard]] constexpr auto rfind(value_type const *s, size_type pos = npos) const -> size_type
+    [[nodiscard]] constexpr auto rfind(value_type const *s, size_type pos = npos) const noexcept -> size_type
     { return sv().rfind(s, pos); }
 
     [[nodiscard]] constexpr auto rfind(value_type c, size_type pos = npos) const noexcept -> size_type
@@ -272,10 +286,10 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     [[nodiscard]] constexpr auto find_first_of(string_view_type sv, size_type pos = 0) const noexcept -> size_type
     { return sv().find_first_of(sv, pos); }
 
-    [[nodiscard]] constexpr auto find_first_of(value_type const *s, size_type pos, size_type n) const -> size_type
+    [[nodiscard]] constexpr auto find_first_of(value_type const *s, size_type pos, size_type n) const noexcept -> size_type
     { return sv().find_first_of(s, pos, n); }
 
-    [[nodiscard]] constexpr auto find_first_of(value_type const *s, size_type pos = 0) const -> size_type
+    [[nodiscard]] constexpr auto find_first_of(value_type const *s, size_type pos = 0) const noexcept -> size_type
     { return sv().find_first_of(s, pos); }
 
     [[nodiscard]] constexpr auto find_first_of(value_type c, size_type pos = 0) const noexcept -> size_type
@@ -293,10 +307,10 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     [[nodiscard]] constexpr auto find_last_of(string_view_type sv, size_type pos = npos) const noexcept -> size_type
     { return sv().find_last_of(sv, pos); }
 
-    [[nodiscard]] constexpr auto find_last_of(value_type const *s, size_type pos, size_type n) const -> size_type
+    [[nodiscard]] constexpr auto find_last_of(value_type const *s, size_type pos, size_type n) const noexcept -> size_type
     { return sv().find_last_of(s, pos, n); }
 
-    [[nodiscard]] constexpr auto find_last_of(value_type const *s, size_type pos = npos) const -> size_type
+    [[nodiscard]] constexpr auto find_last_of(value_type const *s, size_type pos = npos) const noexcept -> size_type
     { return sv().find_last_of(s, pos); }
 
     [[nodiscard]] constexpr auto find_last_of(value_type c, size_type pos = npos) const noexcept -> size_type
@@ -314,10 +328,10 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     [[nodiscard]] constexpr auto find_first_not_of(string_view_type sv, size_type pos = 0) const noexcept -> size_type
     { return sv().find_first_not_of(sv, pos); }
 
-    [[nodiscard]] constexpr auto find_first_not_of(value_type const *s, size_type pos, size_type n) const -> size_type
+    [[nodiscard]] constexpr auto find_first_not_of(value_type const *s, size_type pos, size_type n) const noexcept -> size_type
     { return sv().find_first_not_of(s, pos, n); }
 
-    [[nodiscard]] constexpr auto find_first_not_of(value_type const *s, size_type pos = 0) const -> size_type
+    [[nodiscard]] constexpr auto find_first_not_of(value_type const *s, size_type pos = 0) const noexcept -> size_type
     { return sv().find_first_not_of(s, pos); }
 
     [[nodiscard]] constexpr auto find_first_not_of(value_type c, size_type pos = 0) const noexcept -> size_type
@@ -335,10 +349,10 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     [[nodiscard]] constexpr auto find_last_not_of(string_view_type sv, size_type pos = npos) const noexcept -> size_type
     { return sv().find_last_not_of(sv, pos); }
 
-    [[nodiscard]] constexpr auto find_last_not_of(value_type const *s, size_type pos, size_type n) const -> size_type
+    [[nodiscard]] constexpr auto find_last_not_of(value_type const *s, size_type pos, size_type n) const noexcept -> size_type
     { return sv().find_last_not_of(s, pos, n); }
 
-    [[nodiscard]] constexpr auto find_last_not_of(value_type const *s, size_type pos = npos) const -> size_type
+    [[nodiscard]] constexpr auto find_last_not_of(value_type const *s, size_type pos = npos) const noexcept -> size_type
     { return sv().find_last_not_of(s, pos); }
 
     [[nodiscard]] constexpr auto find_last_not_of(value_type c, size_type pos = npos) const noexcept -> size_type
@@ -350,38 +364,68 @@ struct basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
     { return sv().compare(pos1, count1, v); }
 
     [[nodiscard]] constexpr auto compare(size_type pos1, size_type count1, string_view_type v, size_type pos2,
-                                         size_type count2) const -> int
-    {
-        return sv().compare(pos1, count1, v, pos2, count2);
-    }
-    [[nodiscard]] constexpr auto compare(value_type const *s) const -> int { return sv().compare(s); }
+                                         size_type count2) const noexcept -> int
+    { return sv().compare(pos1, count1, v, pos2, count2); }
 
-    [[nodiscard]] constexpr auto compare(size_type pos1, size_type count1, value_type const *s) const -> int
+    [[nodiscard]] constexpr auto compare(value_type const *s) const noexcept -> int { return sv().compare(s); }
+
+    [[nodiscard]] constexpr auto compare(size_type pos1, size_type count1, value_type const *s) const noexcept -> int
     { return sv().compare(pos1, count1, s); }
 
     [[nodiscard]] constexpr auto compare(size_type pos1, size_type count1, value_type const *s,
-                                         size_type count2) const -> int
+                                         size_type count2) const noexcept -> int
+    { return sv().compare(pos1, count1, s, count2); }
+
+    //-----------------------------------------------------------------------------
+    //
+    // compare, ignoring trailing zero
+    //
+    template <std::size_t M_>
+    [[nodiscard]] constexpr auto compare_as_cstr(same_with_other_size<M_> const &other) const noexcept -> int
     {
-        return sv().compare(pos1, count1, s, count2);
+        const_iterator lhs_it;
+        typename same_with_other_size<M_>::const_iterator rhs_it;
+        for (lhs_it = m_data.begin(), rhs_it = other.m_data.begin(); ; ++lhs_it, ++rhs_it)
+        {
+            auto const value = [](auto const &cont, auto it) constexpr -> int
+            {
+                return cont.end() == it? 0: *it;
+            };
+
+            auto const lhs = value(m_data, lhs_it);
+            auto const rhs = value(other.m_data, rhs_it);
+            if (lhs == 0 || rhs == 0) return lhs - rhs;
+        }
     }
 
     //-----------------------------------------------------------------------------
-    [[nodiscard]] constexpr auto starts_with(string_view_type v) const noexcept -> bool { return sv().substr(0, v.size()) == v; }
-    [[nodiscard]] constexpr auto starts_with(char c) const noexcept -> bool { return !empty() && traits_type::eq(front(), c); }
-    [[nodiscard]] constexpr auto starts_with(value_type const *s) const noexcept -> bool { return starts_with(string_view_type(s)); }
+    [[nodiscard]] constexpr auto starts_with(string_view_type v) const noexcept -> bool
+    { return sv().substr(0, v.size()) == v; }
 
-    [[nodiscard]] constexpr auto ends_with(string_view_type sv) const noexcept -> bool { return size() >= sv.size() && compare(size() - sv.size(), npos, sv) == 0; }
-    [[nodiscard]] constexpr auto ends_with(value_type c) const noexcept -> bool { return !empty() && traits_type::eq(back(), c); }
-    [[nodiscard]] constexpr auto ends_with(value_type const *s) const -> bool { return ends_with(string_view_type(s)); }
+    [[nodiscard]] constexpr auto starts_with(char c) const noexcept -> bool
+    { return !empty() && traits_type::eq(front(), c); }
 
+    [[nodiscard]] constexpr auto starts_with(value_type const *s) const noexcept -> bool
+    { return starts_with(string_view_type(s)); }
+
+    //-----------------------------------------------------------------------------
+    [[nodiscard]] constexpr auto ends_with(string_view_type sv) const noexcept -> bool
+    { return size() >= sv.size() && compare(size() - sv.size(), npos, sv) == 0; }
+
+    [[nodiscard]] constexpr auto ends_with(value_type c) const noexcept -> bool
+    { return !empty() && traits_type::eq(back(), c); }
+
+    [[nodiscard]] constexpr auto ends_with(value_type const *s) const noexcept -> bool
+    { return ends_with(string_view_type(s)); }
+
+    //-----------------------------------------------------------------------------
     [[nodiscard]] constexpr auto contains(string_view_type sv) const noexcept -> bool { return find(sv) != npos; }
     [[nodiscard]] constexpr auto contains(value_type c) const noexcept -> bool { return find(c) != npos; }
-    [[nodiscard]] constexpr auto contains(value_type const *s) const -> bool { return find(s) != npos; }
+    [[nodiscard]] constexpr auto contains(value_type const *s) const noexcept -> bool { return find(s) != npos; }
 
-    auto swap(basic_fixed_string &other) noexcept(std::is_nothrow_swappable_v<storage_type>) -> void { m_data.swap(other.m_data); }
-
-  private:
-    constexpr auto sv() const -> string_view_type { return *this; }
+    //-----------------------------------------------------------------------------
+    auto swap(basic_fixed_string &other) noexcept(std::is_nothrow_swappable_v<storage_type>) -> void
+    { m_data.swap(other.m_data); }
 };
 
 template <typename Char, typename CharTraits, std::size_t N_>

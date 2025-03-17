@@ -61,6 +61,16 @@ BOOST_AUTO_TEST_CASE(fixed_string_)
 
     BOOST_TEST("abc"_fs == "abc"_fs);
     BOOST_TEST("abc"_fs == "abc"sv);
+
+    char const abc_[] = { 'a', 'b', 'c' };
+    fixed_string abc{ abc_ };
+
+    BOOST_TEST(abc.size() == 3);
+    BOOST_TEST("abc"_fs.size() == 4);
+
+    BOOST_TEST(abc != "abc"_fs);
+
+    BOOST_TEST(abc.compare_as_cstr("abc"_fs) == 0);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // util
