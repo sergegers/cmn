@@ -12,7 +12,7 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/util/feature.h>
 
-#include "parse_arg_helper.h"
+#include <cmn/io/format/mix/parse_arg.h>
 
 namespace cmn::io
 {
@@ -57,10 +57,10 @@ template
     , typename Char
 >
     requires std::formattable<std::remove_cvref_t<T>, Char>
-struct list_formatter: parse_arg_helper<Char>
+struct list_formatter: mix::parse_arg<Char>
 {
 private:
-    using inherited = parse_arg_helper<Char>;
+    using inherited = mix::parse_arg<Char>;
 protected:
     using underlying_formatting_type = std::remove_cvref_t<T>;
     using underlying_formatter_type = std::formatter<underlying_formatting_type, Char>;
@@ -117,7 +117,7 @@ public:
                 //-----------------------------------------------------------------------------
                 // brackets only
 
-                string_view_type const open_br { inherited::parse_arg(ctx) };
+                string_view_type const open_br { inherited::parse_arg_(ctx) };
 
                 inherited::next(ctx);
                 string_view_type const close_br { inherited::parse_last_arg(ctx) };
@@ -130,10 +130,10 @@ public:
                 //-----------------------------------------------------------------------------
                 // brackets & separator
 
-                string_view_type const open_br{ inherited::parse_arg(ctx) };
+                string_view_type const open_br{ inherited::parse_arg_(ctx) };
 
                 inherited::next(ctx);
-                string_view_type const separator { inherited::parse_arg(ctx) };
+                string_view_type const separator { inherited::parse_arg_(ctx) };
 
                 inherited::next(ctx);
                 string_view_type const close_br { inherited::parse_last_arg(ctx) };

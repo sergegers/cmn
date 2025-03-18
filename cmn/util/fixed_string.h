@@ -91,7 +91,7 @@ public:
     //
     // constructors
     //
-    constexpr basic_fixed_string() noexcept = default;
+    constexpr basic_fixed_string() noexcept = default;  // data() == nullptr, size() == 0
 
     constexpr basic_fixed_string(value_type const (&array)[N_ + 1]) // NOLINT(google-explicit-constructor)
         noexcept(std::copy_constructible<value_type>)
@@ -111,6 +111,17 @@ public:
         std::copy(first, last, std::begin(m_data));
     }
 
+    //-----------------------------------------------------------------------------
+    //
+    // interoperability
+    //
+    template <std::size_t M_> requires (M_ <= N_)
+    explicit constexpr basic_fixed_string(basic_fixed_string<Char, M_, CharTraits> const &other)
+        noexcept(std::copy_constructible<value_type>)
+    {
+        init_from_fs(other);
+    }
+
     ///////////////////////////////////////////////////////////////////////////////
     //
     // assignment operators
@@ -122,17 +133,10 @@ public:
         return *this;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////
+    //-----------------------------------------------------------------------------
     //
     // interoperability
     //
-    template <std::size_t M_> requires (M_ <= N_)
-    explicit constexpr basic_fixed_string(basic_fixed_string<Char, M_, CharTraits> const &other)
-        noexcept(std::copy_constructible<value_type>)
-    {
-        init_from_fs(other);
-    }
-
     template <std::size_t M_> requires (M_ <= N_)
     [[nodiscard]] explicit constexpr operator basic_fixed_string<Char, M_, CharTraits> () const
         noexcept(std::copy_constructible<value_type>)
@@ -394,6 +398,23 @@ public:
 
             auto const lhs = value(m_data, lhs_it);
             auto const rhs = value(other.m_data, rhs_it);
+            if (lhs == 0 || rhs == 0) return lhs - rhs;
+        }
+    }
+
+    [[nodiscard]] constexpr auto compare_as_cstr(string_view_type const &other) const noexcept -> int
+    {
+        const_iterator lhs_it;
+        typename string_view_type::const_iterator rhs_it;
+        for (lhs_it = m_data.begin(), rhs_it = other.begin(); ; ++lhs_it, ++rhs_it)
+        {
+            auto const value = [](auto const &cont, auto it) constexpr -> int
+            {
+                return cont.end() == it? 0: *it;
+            };
+
+            auto const lhs = value(m_data, lhs_it);
+            auto const rhs = value(other, rhs_it);
             if (lhs == 0 || rhs == 0) return lhs - rhs;
         }
     }

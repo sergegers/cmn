@@ -81,11 +81,12 @@ add_library (
  "cmn/io/manip/slot/storage.h"
  "cmn/io/manip/slot/param.h"
 
-"cmn/io/format/util.h"
+"cmn/io/format/mix/parse_arg.h"
+"cmn/io/format/mix/mixins.h"
+"cmn/io/format/mix.h"
 "cmn/io/format/context_traits.h"
-"cmn/io/format/parse_arg_helper.h"
+"cmn/io/format/util.h"
 "cmn/io/format/list.h"
-"cmn/io/format/mixins.h"
 "cmn/io/format.h"
 
  "cmn/range/io/format.h"
@@ -155,7 +156,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
- )
+)
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -183,7 +184,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test_cmn/manip.cpp" 
   "test_cmn/range/io.cpp"
   "test_cmn/tuple/io.cpp"
- )
+  "test_cmn/io.cpp")
 
 target_include_directories(test_cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test_cmn PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

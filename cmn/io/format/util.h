@@ -6,6 +6,7 @@
 #include <boost/type_traits/promote.hpp>
 
 #include <cmn/util/symbols.h>
+
 #include <cmn/io/format/context_traits.h>
 
 namespace cmn::io

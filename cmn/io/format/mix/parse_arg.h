@@ -10,9 +10,9 @@
 
 #include <cmn/util/feature.h>
 
-#include "util.h"
+#include <cmn/io/format/util.h>
 
-namespace cmn::io
+namespace cmn::io::mix
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,7 +22,7 @@ namespace cmn::io
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <typename Char = char>
-struct parse_arg_helper
+struct parse_arg
 {
     using char_type = Char;
     using string_view_type = std::basic_string_view<Char>;
@@ -37,7 +37,7 @@ private:
         return has_feature(sr, sr_esc)? ++it: it;
     }
 public:
-    [[nodiscard]] static constexpr auto parse_arg(auto &ctx)
+    [[nodiscard]] static constexpr auto parse_arg_(auto &ctx)
     {
         auto const it = ctx.begin();
 
@@ -69,15 +69,15 @@ public:
     [[nodiscard]] static constexpr auto try_parse_arg(ParseContext &ctx) noexcept
         -> try_parser_arg_result_type<ParseContext>
     {
-        auto const it = ctx.begin();
-        auto const sep_sr = decode_state_at(ctx, it);
+        auto const begin = ctx.begin();
+        auto const sep_sr = decode_state_at(ctx, begin);
         if (!has_any_feature(sep_sr, sr_sym, sr_sep)) return std::nullopt;
 
-        auto const end_sep_it = find_symbol(ctx, it, scroll_to_sep, scroll_to_close);
-        ctx.advance_to(end_sep_it);
+        auto const end_sep_it = find_symbol(ctx, begin, scroll_to_sep, scroll_to_close);
         if (end_sep_it == ctx.end()) return std::nullopt;
 
-        return std::ranges::subrange{ get_begin_it(sep_sr, it), end_sep_it };
+        ctx.advance_to(end_sep_it);
+        return std::ranges::subrange{ get_begin_it(sep_sr, begin), end_sep_it };
         
     }
 

@@ -9,7 +9,7 @@
 
 #include <cmn/meta/concepts.h>
 
-#include "context_traits.h"
+#include <cmn/io/format/context_traits.h>
 
 namespace cmn::io::mix
 {
