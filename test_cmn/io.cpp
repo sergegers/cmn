@@ -138,10 +138,54 @@ BOOST_AUTO_TEST_CASE(parse_arg)
     BOOST_CHECK(it == ctx.end());
 }
 
+BOOST_AUTO_TEST_CASE(try_parse_arg)
+{
+    using namespace std::string_view_literals;
+
+    std::format_parse_context ctx{ "{:a:b:c}", 3 };
+    using formatter_type = std::formatter<my_int>;
+
+    auto it = ctx.begin();
+    std::advance(it, 2);
+    ctx.advance_to(it);
+
+    auto const a_opt = formatter_type::try_parse_arg(ctx);
+    BOOST_REQUIRE(a_opt);
+    std::string_view a { *a_opt };
+    BOOST_TEST(a == "a"sv);
+
+    it = ctx.begin();
+    std::advance(it, 1);
+    ctx.advance_to(it);
+
+    auto const b_opt = formatter_type::try_parse_arg(ctx);
+    BOOST_REQUIRE(b_opt);
+    std::string_view b{ *b_opt };
+    BOOST_TEST(b == "b"sv);
+
+    it = ctx.begin();
+    std::advance(it, 1);
+    ctx.advance_to(it);
+
+    auto const c_opt = formatter_type::try_parse_arg(ctx);
+    BOOST_REQUIRE(c_opt);
+    std::string_view c{ *c_opt };
+    BOOST_TEST(c == "c"sv);
+
+    it = ctx.begin();
+    std::advance(it, 1);
+    BOOST_CHECK(it == ctx.end());
+}
+
 BOOST_AUTO_TEST_CASE(parse_arg_formatter)
 {
     std::formatter<my_int> f;
     std::format_parse_context ctx{ "{:x}", 1 };
+
+    auto it = ctx.begin();
+    ++it;
+    ctx.advance_to(it);
+
     f.parse(ctx);
 
     BOOST_TEST(std::format("{:x}", my_int{ 11 }) == "0XB");
