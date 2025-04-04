@@ -80,26 +80,26 @@ BOOST_AUTO_TEST_CASE(find_symbol_)
     auto end = find_symbol(ctx, ctx.begin(), scroll_to_sep_<>);
     auto begin = ctx.begin();
 
-    std::advance(begin, 1);
+    ++begin;
     BOOST_CHECK(begin == end);
 
-    std::advance(begin, 1);
+    ++begin;
     end = find_symbol(ctx, begin, scroll_to_sep_<>);
     std::string_view a{ begin, end };
     BOOST_TEST(a == "a"sv);
 
-    std::advance(begin, 1);
+    ++begin;
     BOOST_CHECK(begin == end);
 
-    std::advance(begin, 1);
+    ++begin;
     end = find_symbol(ctx, begin, scroll_to_sep_<>);
     std::string_view b{ begin, end };
     BOOST_TEST(b == "b"sv);
 
-    std::advance(begin, 1);
+    ++begin;
     BOOST_CHECK(begin == end);
 
-    std::advance(begin, 1);
+    ++begin;
     end = find_symbol(ctx, begin, scroll_to_close_<>);
     std::string_view c{ begin, end };
     BOOST_TEST(c == "c"sv);
@@ -120,21 +120,19 @@ BOOST_AUTO_TEST_CASE(parse_arg)
     BOOST_TEST(a == "a"sv);
 
     it = ctx.begin();
-    std::advance(it, 1);
-    ctx.advance_to(it);
+    ctx.advance_to(++it);
 
     std::string_view b{ formatter_type::parse_arg_(ctx) };
     BOOST_TEST(b == "b"sv);
 
     it = ctx.begin();
-    std::advance(it, 1);
-    ctx.advance_to(it);
+    ctx.advance_to(++it);
 
     std::string_view c{ formatter_type::parse_last_arg(ctx) };
     BOOST_TEST(c == "c"sv);
 
     it = ctx.begin();
-    std::advance(it, 1);
+    ++it;
     BOOST_CHECK(it == ctx.end());
 }
 
@@ -155,8 +153,7 @@ BOOST_AUTO_TEST_CASE(try_parse_arg)
     BOOST_TEST(a == "a"sv);
 
     it = ctx.begin();
-    std::advance(it, 1);
-    ctx.advance_to(it);
+    ctx.advance_to(++it);
 
     auto const b_opt = formatter_type::try_parse_arg(ctx);
     BOOST_REQUIRE(b_opt);
@@ -164,8 +161,7 @@ BOOST_AUTO_TEST_CASE(try_parse_arg)
     BOOST_TEST(b == "b"sv);
 
     it = ctx.begin();
-    std::advance(it, 1);
-    ctx.advance_to(it);
+    ctx.advance_to(++it);
 
     auto const c_opt = formatter_type::try_parse_arg(ctx);
     BOOST_REQUIRE(c_opt);
@@ -173,8 +169,7 @@ BOOST_AUTO_TEST_CASE(try_parse_arg)
     BOOST_TEST(c == "c"sv);
 
     it = ctx.begin();
-    std::advance(it, 1);
-    BOOST_CHECK(it == ctx.end());
+    BOOST_CHECK(++it == ctx.end());
 }
 
 BOOST_AUTO_TEST_CASE(parse_arg_formatter)
@@ -183,10 +178,11 @@ BOOST_AUTO_TEST_CASE(parse_arg_formatter)
     std::format_parse_context ctx{ "{:x}", 1 };
 
     auto it = ctx.begin();
-    ++it;
+    std::advance(it, 2);
     ctx.advance_to(it);
 
-    f.parse(ctx);
+    it = f.parse(ctx);
+    BOOST_CHECK(++it == ctx.end());
 
     BOOST_TEST(std::format("{:x}", my_int{ 11 }) == "0XB");
 }
