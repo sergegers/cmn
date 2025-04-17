@@ -62,12 +62,13 @@ public:
         return std::ranges::subrange { get_begin_it(sep_sr, it), end_sep_it };
     }
 
+    //-----------------------------------------------------------------------------
     template <typename ParseContext>
-    using try_parser_arg_result_type = std::optional<std::ranges::subrange<context_iterator_t<ParseContext>>>;
+    using try_parse_arg_result_type = std::optional<std::ranges::subrange<context_iterator_t<ParseContext>>>;
 
     template <typename ParseContext>
     [[nodiscard]] static constexpr auto try_parse_arg(ParseContext &ctx) noexcept
-        -> try_parser_arg_result_type<ParseContext>
+        -> try_parse_arg_result_type<ParseContext>
     {
         auto const begin = ctx.begin();
         auto const sep_sr = decode_state_at(ctx, begin);

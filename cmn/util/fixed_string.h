@@ -38,6 +38,7 @@
 #include <type_traits>
 #include <algorithm>
 #include <stdexcept>
+#include <ranges>
 
 namespace cmn
 {
@@ -51,10 +52,10 @@ template
 class basic_fixed_string // NOLINT(cppcoreguidelines-special-member-functions)
 {
 public:
-    using storage_type = std::array<Char, N_ + 1>;
+    using storage_type = std::array<Char, N_>;
 
     // keep nonstatic members public to satisfy standard layout requirement
-    storage_type    m_data{};  
+    storage_type    m_data{};
 
     using traits_type = CharTraits;
     using value_type = Char;
@@ -62,10 +63,10 @@ public:
     using const_pointer = value_type const *;
     using reference = value_type &;
     using const_reference = value_type const &;
-    using iterator = typename storage_type::iterator;
-    using const_iterator = typename storage_type::const_iterator;
-    using reverse_iterator = typename storage_type::reverse_iterator;
-    using const_reverse_iterator = typename storage_type::const_reverse_iterator;
+    using iterator = storage_type::iterator;
+    using const_iterator = storage_type::const_iterator;
+    using reverse_iterator = storage_type::reverse_iterator;
+    using const_reverse_iterator = storage_type::const_reverse_iterator;
     using size_type = std::size_t;
     using difference_type = ptrdiff_t;
     using string_view_type = std::basic_string_view<value_type, traits_type>;
@@ -73,15 +74,23 @@ public:
     static constexpr auto npos = string_view_type::npos;
 private:
 
-    constexpr auto init_from_array(value_type const (&array)[N_ + 1]) -> void
+    template <std::random_access_iterator It, std::sentinel_for<It> Se>
+        requires std::indirectly_copyable<It, iterator>
+
+    constexpr auto init(It first, Se last) -> void
     {
-        std::ranges::copy(array, std::ranges::begin(m_data));
+        std::size_t const length = std::distance(first, last);
+        if (length > N_)
+            throw std::out_of_range{ "String is too long" };
+
+        std::copy(first, last, std::begin(m_data));
+        if (length < N_) m_data[length] = 0;
     }
 
     template <std::size_t M_> requires (M_ <= N_)
-    constexpr auto init_from_fs(basic_fixed_string<Char, M_, CharTraits> const &other) -> void
+    constexpr auto init(value_type const (&array)[M_]) -> void
     {
-        std::ranges::copy_n(std::ranges::begin(other.m_data), M_, std::ranges::begin(m_data));
+        std::ranges::copy(array, std::ranges::begin(m_data));
         if constexpr (M_ < N_) m_data[M_] = 0;
     }
 
@@ -91,12 +100,12 @@ public:
     //
     // constructors
     //
-    constexpr basic_fixed_string() noexcept = default;  // data() == nullptr, size() == 0
+    constexpr basic_fixed_string() noexcept /*requires (N_ == 0)*/ = default;  // data() == nullptr, size() == 0
 
-    constexpr basic_fixed_string(value_type const (&array)[N_ + 1]) // NOLINT(google-explicit-constructor)
-        noexcept(std::copy_constructible<value_type>)
+    constexpr basic_fixed_string(value_type const (&array)[N_]) // NOLINT(google-explicit-constructor)
+        noexcept(std::copy_constructible<value_type>) requires (N_ > 0)
     {
-        init_from_array(array);
+        init(array);
     }
 
     //-----------------------------------------------------------------------------
@@ -105,10 +114,7 @@ public:
 
     constexpr basic_fixed_string(It first, Se last)
     {
-        if (std::distance(first, last) > N_)
-            throw std::out_of_range{ "String is too long" };
-
-        std::copy(first, last, std::begin(m_data));
+        init(first, last);
     }
 
     //-----------------------------------------------------------------------------
@@ -119,17 +125,17 @@ public:
     explicit constexpr basic_fixed_string(basic_fixed_string<Char, M_, CharTraits> const &other)
         noexcept(std::copy_constructible<value_type>)
     {
-        init_from_fs(other);
+        init(other.m_data);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
     //
     // assignment operators
     //
-    constexpr auto operator = (value_type const (&array)[N_ + 1]) noexcept(std::copy_constructible<value_type>)
+    constexpr auto operator = (value_type const (&array)[N_]) noexcept(std::copy_constructible<value_type>)
         -> basic_fixed_string &
     {
-        init_from_array(array);
+        init(array);
         return *this;
     }
 
@@ -141,26 +147,19 @@ public:
     [[nodiscard]] explicit constexpr operator basic_fixed_string<Char, M_, CharTraits> () const
         noexcept(std::copy_constructible<value_type>)
     {
-        basic_fixed_string<Char, M_, CharTraits> res{};
-        res.init_from_fs(*this);
-
-        return res;
+        return substr<0, M_>();
     }
 
     ///////////////////////////////////////////////////////////////////////////////
     //
     // iterators
     //
-    [[nodiscard]] constexpr auto begin() noexcept -> iterator { return m_data.begin(); }
-    [[nodiscard]] constexpr auto begin() const noexcept -> const_iterator { return m_data.begin(); }
-    [[nodiscard]] constexpr auto end() noexcept -> iterator { return m_data.end() - 1; }
-    [[nodiscard]] constexpr auto end() const noexcept -> const_iterator { return m_data.end() - 1; }
+    [[nodiscard]] constexpr auto begin(this auto &self_) noexcept { return self_.m_data.begin(); }
+    [[nodiscard]] constexpr auto end(this auto &self_) noexcept { return self_.m_data.end() - 1; }
     [[nodiscard]] constexpr auto cbegin() const noexcept -> const_iterator { return m_data.cbegin(); }
     [[nodiscard]] constexpr auto cend() const noexcept -> const_iterator { return m_data.cend() - 1; }
-    [[nodiscard]] constexpr auto rbegin() noexcept -> reverse_iterator { return m_data.rbegin() + 1; }
-    [[nodiscard]] constexpr auto rbegin() const noexcept -> const_reverse_iterator { return m_data.rbegin() + 1; }
-    [[nodiscard]] constexpr auto rend() noexcept -> reverse_iterator { return m_data.rend(); }
-    [[nodiscard]] constexpr auto rend() const noexcept -> const_reverse_iterator { return m_data.rend(); }
+    [[nodiscard]] constexpr auto rbegin(this auto &self_) noexcept { return self_.m_data.rbegin() + 1; }
+    [[nodiscard]] constexpr auto rend(this auto &self_) noexcept -> reverse_iterator { return self_.m_data.rend(); }
     [[nodiscard]] constexpr auto crbegin() const noexcept -> const_reverse_iterator { return m_data.crbegin() + 1; }
     [[nodiscard]] constexpr auto crend() const noexcept -> const_reverse_iterator { return m_data.crend(); }
 
@@ -169,27 +168,21 @@ public:
     // capacity
     //
     [[nodiscard]] constexpr auto size() const noexcept -> size_type { return N_; }
-    [[nodiscard]] constexpr auto length() const noexcept -> size_type { return N_; }
-    [[nodiscard]] constexpr auto max_size() const noexcept -> size_type { return N_; }
+    [[nodiscard]] constexpr auto length() const noexcept -> size_type { return size(); }
+    [[nodiscard]] constexpr auto max_size() const noexcept -> size_type { return size(); }
     [[nodiscard]] constexpr auto empty() const noexcept -> bool { return N_ == 0; }
 
     ///////////////////////////////////////////////////////////////////////////////
     //
     // element access
     //
-    [[nodiscard]] constexpr auto operator[](size_type n) -> reference { return m_data[n]; }
-    [[nodiscard]] constexpr auto operator[](size_type n) const -> const_reference { return m_data[n]; }
-    [[nodiscard]] constexpr auto at(size_type n) -> reference { return m_data.at(n); }
-    [[nodiscard]] constexpr auto at(size_type n) const -> const_reference { return m_data.at(n); }
+    [[nodiscard]] constexpr auto &operator[](this auto &self_, size_type n) { return self_.m_data[n]; }
+    [[nodiscard]] constexpr auto &at(this auto &self_, size_type n) { return self_.m_data.at(n); }
 
-    [[nodiscard]] constexpr auto front() noexcept -> reference requires (!empty()) { return m_data.front(); }
-    [[nodiscard]] constexpr auto front() const noexcept -> const_reference requires (!empty()) { return m_data.front(); }
-    [[nodiscard]] constexpr auto back() noexcept -> reference  requires (!empty()) { return m_data[size() - 1]; }
-    [[nodiscard]] constexpr auto back() const noexcept -> const_reference  requires (!empty()) { return m_data[size() - 1]; }
+    [[nodiscard]] constexpr auto &front(this auto &self_) noexcept requires (!empty()) { return self_.m_data.front(); }
+    [[nodiscard]] constexpr auto &back(this auto &self_) noexcept requires (!empty()) { return m_data.back(); }
 
-    [[nodiscard]] constexpr auto data() noexcept -> pointer { return m_data.data(); }
-    [[nodiscard]] constexpr auto data() const noexcept -> const_pointer { return m_data.data(); }
-
+    [[nodiscard]] constexpr auto data(this auto &self_) noexcept { return self_.m_data.data(); }
     [[nodiscard]] constexpr auto c_str() const noexcept -> const_pointer { return data(); }
 
   private:
@@ -467,7 +460,7 @@ template <typename Char, typename CharTraits, std::size_t M1_, std::size_t M2_>
     if constexpr (M1_ != M2_)
         return false;
     using lhs_type = std::decay_t<decltype(lhs)>;
-    using sv_type = typename lhs_type::string_view_type;
+    using sv_type = lhs_type::string_view_type;
     return static_cast<sv_type>(lhs) == rhs;
 }
 
@@ -477,7 +470,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
                                         std::basic_string_view<Char, CharTraits> rhs) -> bool
 {
     using lhs_type = std::decay_t<decltype(lhs)>;
-    using sv_type = typename lhs_type::string_view_type;
+    using sv_type = lhs_type::string_view_type;
     return static_cast<sv_type>(lhs) == rhs;
 }
 
@@ -486,7 +479,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
                                         basic_fixed_string<Char, N_, CharTraits> const &rhs) -> bool
 {
     using rhs_type = std::decay_t<decltype(rhs)>;
-    using sv_type = typename rhs_type::string_view_type;
+    using sv_type = rhs_type::string_view_type;
     return lhs == static_cast<sv_type>(rhs);
 }
 
@@ -496,7 +489,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
                                         std::basic_string<Char, CharTraits> rhs) -> bool
 {
     using lhs_type = std::decay_t<decltype(lhs)>;
-    using sv_type = typename lhs_type::string_view_type;
+    using sv_type = lhs_type::string_view_type;
     return static_cast<sv_type>(lhs) == rhs;
 }
 
@@ -505,7 +498,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
                                         basic_fixed_string<Char, N_, CharTraits> const &rhs) -> bool
 {
     using rhs_type = std::decay_t<decltype(rhs)>;
-    using sv_type = typename rhs_type::string_view_type;
+    using sv_type = rhs_type::string_view_type;
     return lhs == static_cast<sv_type>(rhs);
 }
 
@@ -517,7 +510,7 @@ template <typename Char, typename CharTraits, std::size_t M1_, std::size_t M2_>
 [[nodiscard]] constexpr auto operator <=> (basic_fixed_string<Char, M1_, CharTraits> const & lhs, basic_fixed_string<Char, M2_, CharTraits> const & rhs)
 {
     using lhs_type = std::decay_t<decltype(lhs)>;
-    using sv_type = typename lhs_type::string_view_type;
+    using sv_type = lhs_type::string_view_type;
     return static_cast<sv_type>(lhs) <=> rhs;
 }
 
@@ -526,7 +519,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
 [[nodiscard]] constexpr auto operator <=> (basic_fixed_string<Char, N_, CharTraits> const & lhs, std::basic_string_view<Char, CharTraits> rhs)
 {
     using lhs_type = std::decay_t<decltype(lhs)>;
-    using sv_type = typename lhs_type::string_view_type;
+    using sv_type = lhs_type::string_view_type;
     return static_cast<sv_type>(lhs) <=> rhs;
 }
 
@@ -534,7 +527,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
 [[nodiscard]] constexpr auto operator <=> (std::basic_string_view<Char, CharTraits> lhs, basic_fixed_string<Char, N_, CharTraits> const & rhs)
 {
     using rhs_type = std::decay_t<decltype(rhs)>;
-    using sv_type = typename rhs_type::string_view_type;
+    using sv_type = rhs_type::string_view_type;
     return lhs <=> static_cast<sv_type>(rhs);
 }
 
@@ -543,7 +536,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
 [[nodiscard]] constexpr auto operator <=> (basic_fixed_string<Char, N_, CharTraits> const & lhs, std::basic_string<Char, CharTraits> rhs)
 {
     using lhs_type = std::decay_t<decltype(lhs)>;
-    using sv_type = typename lhs_type::string_view_type;
+    using sv_type = lhs_type::string_view_type;
     return static_cast<sv_type>(lhs) <=> rhs;
 }
 
@@ -551,7 +544,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
 [[nodiscard]] constexpr auto operator <=> (std::basic_string<Char, CharTraits> lhs, basic_fixed_string<Char, N_, CharTraits> const & rhs)
 {
     using rhs_type = std::decay_t<decltype(rhs)>;
-    using sv_type = typename rhs_type::string_view_type;
+    using sv_type = rhs_type::string_view_type;
     return lhs <=> static_cast<sv_type>(rhs);
 }
 
@@ -559,15 +552,7 @@ template <typename Char, typename CharTraits, std::size_t N_>
 //
 // CTAD
 //
-
-// BUG
-//template <typename Char, std::size_t N_> basic_fixed_string(Char const (&)[N_]) -> basic_fixed_string<Char, N_ - 1>;
-template <std::size_t N_> basic_fixed_string(char const (&)[N_]) -> basic_fixed_string<char, N_ - 1>;
-template <std::size_t N_> basic_fixed_string(char8_t const (&)[N_]) -> basic_fixed_string<char8_t, N_ - 1>;
-template <std::size_t N_> basic_fixed_string(char16_t const (&)[N_]) -> basic_fixed_string<char16_t, N_ - 1>;
-template <std::size_t N_> basic_fixed_string(char32_t const (&)[N_]) -> basic_fixed_string<char32_t, N_ - 1>;
-template <std::size_t N_> basic_fixed_string(wchar_t const (&)[N_]) -> basic_fixed_string<wchar_t, N_ - 1>;
-template <std::size_t N_> basic_fixed_string(unsigned char const (&)[N_]) -> basic_fixed_string<unsigned char, N_ - 1>;
+template <typename Char, std::size_t N_> basic_fixed_string(Char const (&)[N_]) -> basic_fixed_string<Char, N_>;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <std::size_t N_> using fixed_string = basic_fixed_string<char, N_>;
@@ -653,8 +638,17 @@ auto operator << (std::basic_ostream<Char, CharTraits> &out, basic_fixed_string<
 inline namespace literals
 {
 
-template <fixed_string Fs_> constexpr auto operator""_fs() { return Fs_; }
-template <fixed_wstring Fs_> constexpr auto operator""_wfs() { return Fs_; }
+template <fixed_string Fs_> constexpr auto operator""_fs()
+{
+    // drop null for consistent behaviour with string_view
+    return Fs_.template substr<0, (Fs_.size() > 0? Fs_.size() - 1: 0)>();
+}
+
+template <fixed_wstring Fs_> constexpr auto operator""_wfs()
+{
+    // drop null for consistent behaviour with string_view
+    return Fs_.template substr<0, (Fs_.size() > 0? Fs_.size() - 1: 0)>();
+}
 
 }
 
@@ -668,7 +662,7 @@ struct std::hash<cmn::basic_fixed_string<Char, N_, CharTraits>>  // NOLINT(cert-
 
     constexpr auto operator ()(argument_type const &str) const -> size_t
     {
-        using sv_type = typename argument_type::string_view_type;
+        using sv_type = argument_type::string_view_type;
         return hash<sv_type>()(static_cast<sv_type>(str));
     }
 };

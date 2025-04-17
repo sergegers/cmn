@@ -13,6 +13,15 @@ constexpr auto to_char(basic_fixed_string<Char, 1, CharTraits> const &str) -> Ch
     return str[0];
 }
 
+template <typename Char, typename CharTraits>
+constexpr auto to_char(basic_fixed_string<Char, 2, CharTraits> const &str) -> Char
+{
+    if (str[1] != 0) throw std::logic_error{ "Not null terminated string" };
+
+    return str[0];
+}
+
+//-----------------------------------------------------------------------------
 template <typename Char, std::size_t N_, typename CharTraits>
 constexpr auto to_string(basic_fixed_string<Char, N_, CharTraits> const &str) -> std::basic_string<Char, CharTraits>
 {

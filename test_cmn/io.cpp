@@ -8,6 +8,7 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/strong_typedef/strong_typedef.h>
 #include <cmn/util/symbols.h>
+#include <cmn/util/feature.h>
 
 #include <cmn/io/format/mix/parse_arg.h>
 #include <cmn/io/format/mix/mixins.h>
@@ -18,11 +19,18 @@ namespace cmn::io
 
 using my_int = strong_typedef<int, struct my_int_>;
 
+enum format_options_t
+{
+    fo_empty,
+    fo_hex,
+    fo_uppercase
+};
+
 }
 
 namespace std
 {
-    
+
 template <typename Char>
 struct formatter<cmn::io::my_int, Char>:
     cmn::io::mix::parse_arg<Char>,
@@ -31,14 +39,21 @@ struct formatter<cmn::io::my_int, Char>:
     using parse_arg_type = cmn::io::mix::parse_arg<Char>;
     using ostream_type = std::basic_ostream<Char>;
 
-    bool m_hex = false;
+    cmn::io::format_options_t m_fo = cmn::io::fo_empty;
 
     constexpr auto prepare_stream(this auto const &self_, ostream_type &ostr) -> ostream_type &
     {
-        if (self_.m_hex)
-            ostr << std::hex << std::showbase << std::uppercase;
+        using namespace cmn::io;
+
+        if (self_.m_fo == fo_empty)
+        {
+            ostr << std::dec << std::noshowbase << std::nouppercase;
+        }
         else
-            ostr << std::dec << std::noshowbase;
+        {
+            if (cmn::has_feature(self_.m_fo, fo_hex)) ostr << std::hex << std::showbase << std::hex;
+            if (cmn::has_feature(self_.m_fo, fo_uppercase)) ostr << std::uppercase;
+        }
 
         return ostr;
     }
@@ -52,14 +67,40 @@ struct formatter<cmn::io::my_int, Char>:
             range_ != std::nullopt; 
             range_ = parse_arg_type::try_parse_arg(ctx))
         {
+            using namespace cmn::io;
             using string_view_type = std::basic_string_view<Char>;
-            using symbols_type = cmn::symbols<Char>;
 
             string_view_type const chunk { *range_ };
-            if (0 == symbols_type::x.compare_as_cstr(chunk))         // x
-                self_.m_hex = true;
-            else
-                throw std::format_error(std::format("Unknown format specifier {}", chunk));
+            for (auto const sym: chunk)
+            {
+                using symbols_type = cmn::symbols<Char>;
+                static constexpr auto x = cmn::to_char(symbols_type::x);
+                static constexpr auto u = cmn::to_char(symbols_type::u);
+
+                switch (sym)
+                {
+                case x:
+                {
+                    if (cmn::has_feature(self_.m_fo, fo_hex))
+                        throw std::format_error(std::format("Redundant feature {} in format string {}", x, chunk));
+
+                    self_.m_fo = cmn::set_feature(self_.m_fo, fo_hex);
+                }
+                break;
+
+                case u:
+                {
+                    if (cmn::has_feature(self_.m_fo, fo_uppercase))
+                        throw std::format_error(std::format("Redundant feature {} in format string {}", u, chunk));
+
+                    self_.m_fo = cmn::set_feature(self_.m_fo, fo_uppercase);
+                }
+                break;
+
+                default:
+                    throw std::format_error(std::format("Unknown format specifier {}", chunk));
+                }
+            }
         }
 
         return ctx.begin();

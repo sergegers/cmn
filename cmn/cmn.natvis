@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
+    <Type Name="cmn::basic_fixed_string&lt;*,*,*&gt;">
+        <DisplayString>{{ {m_data} }}</DisplayString>
+        <Expand>
+            <Item Name="[data]">m_data._Elems,na</Item>            
+            <Item Name="[size]">m_data</Item>            
+        </Expand>
+    </Type>
+    
     <Type Name="cmn::enum_::basic_qualified_name&lt;*,*&gt;">
         <DisplayString>{{ {m_name,na} }}</DisplayString>
         <Expand>

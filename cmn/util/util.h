@@ -117,7 +117,7 @@ consteval auto digit_to_char(int_<Idx_>) -> Char
 }
 
 template <std::unsigned_integral auto N_, typename Char, typename CharTraits, std::size_t... Idss_>
-constexpr auto itoa_digits(std::index_sequence<Idss_...>) -> basic_fixed_string<Char, log10(N_), CharTraits>
+constexpr auto itoa_digits(std::index_sequence<Idss_...>) -> basic_fixed_string<Char, log10(N_) + 1, CharTraits>
 {
     auto const count = log10(N_);
     Char const s_literal[count + 1]
@@ -129,7 +129,7 @@ constexpr auto itoa_digits(std::index_sequence<Idss_...>) -> basic_fixed_string<
 }
 
 template <std::unsigned_integral auto N_, typename Char, typename CharTraits, std::size_t... Idss_>
-constexpr auto neg_itoa_digits(std::index_sequence<Idss_...>) -> basic_fixed_string<Char, log10(N_) + 1, CharTraits>
+constexpr auto neg_itoa_digits(std::index_sequence<Idss_...>) -> basic_fixed_string<Char, log10(N_) + 1 + 1, CharTraits>
 {
     using symbols_type = symbols<Char, CharTraits>;
     auto const count = log10(N_);
