@@ -225,7 +225,8 @@ BOOST_AUTO_TEST_CASE(parse_arg_formatter)
     it = f.parse(ctx);
     BOOST_CHECK(++it == ctx.end());
 
-    BOOST_TEST(std::format("{:x}", my_int{ 11 }) == "0XB");
+    BOOST_TEST(std::format("{:x}", my_int{ 11 }) == "0xb");
+    BOOST_TEST(std::format("{:ux}", my_int{ 11 }) == "0XB");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io
