@@ -562,6 +562,13 @@ template <std::size_t N_> using fixed_u32string = basic_fixed_string<char32_t, N
 template <std::size_t N_> using fixed_wstring = basic_fixed_string<wchar_t, N_>;
 template <std::size_t N_> using fixed_ustring = basic_fixed_string<unsigned char, N_>;
 
+using empty_fixed_string = fixed_string<0>;
+using empty_fixed_u8string = fixed_u8string<0>;
+using empty_fixed_u16string = fixed_u16string<0>;
+using empty_fixed_u32string = fixed_u32string<0>;
+using empty_fixed_wstring = fixed_wstring<0>;
+using empty_fixed_ustring = fixed_ustring<0>;
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 // concatenation

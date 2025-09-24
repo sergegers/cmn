@@ -16,7 +16,7 @@ template <typename T, typename Char>
 struct strong_typedef_formatter: mix::out_to_stream<T, Char>
 {
     using out_to_stream_mix_type = mix::out_to_stream<T, Char>;
-    using ostream_type = typename out_to_stream_mix_type::ostream_type;
+    using ostream_type = out_to_stream_mix_type::ostream_type;
 
     int_fmt_t m_fmt_options = int_fmt_t::default_;
 
@@ -26,7 +26,7 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
     }
 
     template<typename ParseContext>
-    constexpr auto parse(ParseContext &ctx) -> typename ParseContext::iterator
+    constexpr auto parse(ParseContext &ctx) -> ParseContext::iterator
     {
         using namespace cmn::io;
         using enum int_fmt_t;

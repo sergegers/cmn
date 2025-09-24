@@ -2,10 +2,10 @@
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
     <Type Name="cmn::basic_fixed_string&lt;*,*,*&gt;">
-        <DisplayString>{{ {m_data} }}</DisplayString>
+        <DisplayString>{{ {m_data._Elems,na} }}</DisplayString>
         <Expand>
             <Item Name="[data]">m_data._Elems,na</Item>            
-            <Item Name="[size]">m_data</Item>            
+            <Item Name="[size]">$T2</Item>            
         </Expand>
     </Type>
     
@@ -14,7 +14,7 @@
         <Expand>
             <Item Name="[name]">m_name,na</Item>
             <Item Name="[namespace]">m_ns,na</Item>
-            <Item Name="[enum_name]">m_enum_name,na</Item>
+            <Item Name="[enum name]">m_enum_name,na</Item>
         </Expand>    
     </Type>
     
@@ -23,8 +23,8 @@
         <Expand>
             <Item Name="[name]">m_name,na</Item>
             <Item Name="[namespace]">m_ns,na</Item>
-            <Item Name="[enum_name]">m_enum_name,na</Item>
-            <Item Name="[enum_member_name]">m_enum_member_name,na</Item>
+            <Item Name="[enum name]">m_enum_name,na</Item>
+            <Item Name="[enum member name]">m_enum_member_name,na</Item>
         </Expand>
     </Type>
     
@@ -36,5 +36,11 @@
             <Item Name="[wide_name]">m_wname</Item>
         </Expand>
     </Type> -->
+    
+    <Type Name="cmn::io::strong_typedef_formatter&lt;*,*&gt;">
+        <Expand>
+            <Item Name="[format options]">m_fmt_options,b</Item>
+        </Expand>
+    </Type>
     
 </AutoVisualizer>
