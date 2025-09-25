@@ -210,26 +210,25 @@ template <c::enumerable T>
 static constexpr auto no_mask = std::numeric_limits<mask_type_t<T>>::max();
 
 //-----------------------------------------------------------------------------
-template <c::enumerable E>
-constexpr auto to_mask(E en) -> mask_type_t<E>
+template <c::enumerable E> constexpr auto mask_cast(E en) -> mask_type_t<E>
 {
     return static_cast<mask_type_t<E>>(en);
 }
+
 //-----------------------------------------------------------------------------
-template <c::enumerable T>
-constexpr auto to_interop(T t) -> interop_type_t<T>
+template <c::enumerable T> constexpr auto interop_cast(T t) -> interop_type_t<T>
 {
     return static_cast<interop_type_t<T>>(t);
 }
 
 //-----------------------------------------------------------------------------
-constexpr auto lazy_to_interop(c::adapted_enum auto t) { return to_interop(t); }
-// suppress double conversion
+constexpr auto lazy_to_interop(c::adapted_enum auto t) { return interop_cast(t); }
+// do not promote twice
 constexpr auto lazy_to_interop(c::enumerable auto t) { return t; }
 
 //-----------------------------------------------------------------------------
 template <c::enumerable T>
-constexpr auto to_underlying(T t) { return static_cast<underlying_type_t<T>>(t); }
+constexpr auto underlying_cast(T t) { return static_cast<underlying_type_t<T>>(t); }
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -272,7 +271,7 @@ using make_enumerable_sequence = typename detail::add_and_convert
     , std::make_integer_sequence
       <
             detail::underlying_t<B_>
-          , to_underlying(E_) - to_underlying(B_) /* half opened range */
+          , underlying_cast(E_) - underlying_cast(B_) /* half opened range */
       >
 >::type;
 

@@ -4,6 +4,7 @@
 #include <concepts>
 
 #include <cmn/io/format.h>
+#include <cmn/util/feature.h>
 
 #include <cmn/strong_typedef/strong_typedef.h>
 

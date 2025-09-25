@@ -244,7 +244,7 @@ template <typename T> requires c::interop_unit<T>
 struct interop_type<T> : std::type_identity<typename T::difference_type> {};
 
 // always integer
-template <c::enumerable T> using interop_type_t = typename interop_type<T>::type;
+template <c::enumerable T> using interop_type_t = interop_type<T>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace c

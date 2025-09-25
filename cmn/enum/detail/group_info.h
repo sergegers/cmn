@@ -145,7 +145,7 @@ constexpr auto exec
         std::move(records),
         [&en, mval, &op](record_type const &rec) constexpr -> bool
         {
-            bool const found = (rec.as_mask() == to_mask(mval));
+            bool const found = (rec.as_mask() == mask_cast(mval));
             if (found)
             {
                 op(rec);

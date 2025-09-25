@@ -118,7 +118,7 @@ constexpr auto out_enum(E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs
     auto const remain = group_::exec(group.m_records, en, out_group_op{ fmt_specs, ostr, first }, 
         static_cast<mask_type>(fmt_specs.mask));
 
-    out_tail(fmt_specs, ostr, first, to_interop(remain));
+    out_tail(fmt_specs, ostr, first, interop_cast(remain));
 
     return ostr << fmt_specs.close;
 }
@@ -143,7 +143,7 @@ constexpr auto out_bitfield(E en, basic_fmt_specs<Char, CharTraits> const &fmt_s
     auto const remain = exec(groups, masks, en, out_group_op{ fmt_specs, ostr, first }, 
         static_cast<mask_type>(fmt_specs.mask));
 
-    out_tail(fmt_specs, ostr, first, to_interop(remain));
+    out_tail(fmt_specs, ostr, first, interop_cast(remain));
 
     return ostr << fmt_specs.close;
 }

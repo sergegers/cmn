@@ -34,7 +34,7 @@ auto get_mask(int_fmt_t en) -> mask_type_t<int_fmt_t>
         if (has_value(en, mask))
             return mask;
 
-    return to_mask(int_fmt_t::empty);
+    return mask_cast(int_fmt_t::empty);
 }
 
 // remain not affected options unchanged
