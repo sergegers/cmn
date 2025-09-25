@@ -37,9 +37,20 @@
         </Expand>
     </Type> -->
     
-    <Type Name="cmn::io::strong_typedef_formatter&lt;*,*&gt;">
+    <Type Name="cmn::io::strong_typedef_formatter&lt;*,*&gt;">     
+        <Intrinsic Name="radix" Expression="(cmn::io::radix_fmt_t)(m_fmt_options &amp; cmn::io::radix_fmt_t::mask)"/>
+        <Intrinsic Name="base" Expression="(cmn::io::base_fmt_t)(m_fmt_options &amp; cmn::io::base_fmt_t::mask)"/>
+        <Intrinsic Name="lang" Expression="(cmn::io::lang_fmt_t)(m_fmt_options &amp; cmn::io::lang_fmt_t::mask)"/>
+        <Intrinsic Name="width" Expression="(cmn::io::width_fmt_t)(m_fmt_options &amp; cmn::io::width_fmt_t::mask)"/>
+        <Intrinsic Name="case_" Expression="(cmn::io::case_fmt_t)(m_fmt_options &amp; cmn::io::case_fmt_t::mask)"/>
+        <Intrinsic Name="sign" Expression="(cmn::io::case_fmt_t)(m_fmt_options &amp; cmn::io::sign_fmt_t::mask)"/>
         <Expand>
             <Item Name="[format options]">m_fmt_options,b</Item>
+            <Item Name="[radix]">radix()</Item>
+            <Item Name="[base]">base()</Item>
+            <Item Name="[language]">lang()</Item>
+            <Item Name="[width]">width()</Item>
+            <Item Name="[sign]">sign()</Item>
         </Expand>
     </Type>
     
