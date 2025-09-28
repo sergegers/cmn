@@ -30,7 +30,7 @@ template <c::bitfield Policy>
 }
 
 template <c::bitfield Policy>
-[[nodiscard]] constexpr auto set_feature_(Policy pol, Policy feat, auto mask) noexcept -> interop_type_t<Policy>
+[[nodiscard]] constexpr auto set_feature_(auto pol, Policy feat, auto mask) noexcept -> interop_type_t<Policy>
 {
     return get_feature_(pol, ~mask) | get_feature_(feat, mask);
 }
@@ -38,12 +38,6 @@ template <c::bitfield Policy>
 }
 
 //-----------------------------------------------------------------------------
-template <c::bitfield Policy>
-[[nodiscard]] constexpr auto feature(Policy pol, interop_type_t<Policy> mask = no_mask<Policy>) noexcept -> Policy
-{
-    return static_cast<Policy>(detail::get_feature_(pol, mask));
-}
-
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto feature(interop_type_t<Policy> pol, Policy mask) noexcept -> Policy
 {
@@ -55,6 +49,7 @@ template <c::strong_bitfield Policy>
 {
     return static_cast<Policy>(detail::get_feature_(pol, mask));
 }
+
 //-----------------------------------------------------------------------------
 template <c::enumerable To, c::bitfield Policy>
 [[nodiscard]] constexpr auto feature_to(Policy pol, interop_type_t<Policy> mask = no_mask<Policy>) noexcept -> To
@@ -84,8 +79,7 @@ template <c::bitfield Policy>
 }
 
 template <c::strong_bitfield Policy>
-[[nodiscard]] constexpr auto has_feature(Policy pol, Policy feat, Policy mask) noexcept
-    -> bool
+[[nodiscard]] constexpr auto has_feature(Policy pol, Policy feat, Policy mask) noexcept -> bool
 {
     return detail::has_feature_(pol, feat, mask);
 }
@@ -134,7 +128,7 @@ template <c::bitfield Policy>
 
 //-----------------------------------------------------------------------------
 template <c::bitfield Policy>
-[[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
+[[nodiscard]] constexpr auto set_feature(interop_type_t<Policy> pol, Policy feat, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
     -> Policy
 {
     return static_cast<Policy>(detail::set_feature_(pol, feat, mask));
@@ -153,7 +147,6 @@ template <c::bitfield Policy>
 {
     return static_cast<Policy>(detail::get_feature_(pol, mask) & ~interop_cast(feat));
 }
-
 
 //-----------------------------------------------------------------------------
 template <c::bitfield PolicyMask, c::bitfield... Features>

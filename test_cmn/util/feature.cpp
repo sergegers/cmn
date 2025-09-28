@@ -45,5 +45,24 @@ static_assert(set_feature(sbf_pol, f8, mB) == (f1 | f8));
 
 //-----------------------------------------------------------------------------
 
+enum feature_t
+{
+    f_1 = 0x1,
+    f_2  = 0x2,
+    f_4  = 0x4,
+    f_8  = 0x8,
+    f_m3  = f_1 | f_2,
+    f_mB  = f_4 | f_8
+};
+
+auto const bf_pol = f_1 | f_4;
+
+static_assert(feature(bf_pol, f_m3) == f_1);
+static_assert(feature(bf_pol, f_mB) == f_4);
+
+static_assert(set_feature(bf_pol, f_2, f_m3) == (f_2 | f_4));
+static_assert(set_feature(bf_pol, f_8, f_mB) == (f_1 | f_8));
+//-----------------------------------------------------------------------------
+
 BOOST_AUTO_TEST_SUITE_END() // util
 BOOST_AUTO_TEST_SUITE_END() // cmn
