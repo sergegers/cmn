@@ -57,7 +57,7 @@ template <typename ParseContext>
 //
 [[nodiscard]] constexpr auto naked(boost::promote_t<scroll_result_t> sr) -> scroll_result_t
 {
-    return feature(sr, sr_naked);
+    return get_feature(sr, sr_naked);
 }
 
 //-----------------------------------------------------------------------------
@@ -128,7 +128,7 @@ template <typename ParseContext>
     }
 
     // verify target
-    auto const real_sr = feature(decode_state_at(ctx, res_it), sr_naked);
+    auto const real_sr = get_feature(decode_state_at(ctx, res_it), sr_naked);
     return (real_sr == sr)? res_it: ctx.end();
 }
 

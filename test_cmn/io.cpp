@@ -21,9 +21,9 @@ using my_int = strong_typedef<int, struct my_int_>;
 
 enum format_options_t
 {
-    fo_empty,
-    fo_hex,
-    fo_uppercase
+    fo_empty        = 0x0,
+    fo_hex          = 0x1,
+    fo_uppercase    = 0x2
 };
 
 }
@@ -39,7 +39,7 @@ struct formatter<cmn::io::my_int, Char>:
     using parse_arg_type = cmn::io::mix::parse_arg<Char>;
     using ostream_type = std::basic_ostream<Char>;
 
-    cmn::io::format_options_t m_fo = cmn::io::fo_empty;
+    cmn::interop_type_t<cmn::io::format_options_t> m_fo = cmn::io::fo_empty;
 
     constexpr auto prepare_stream(this auto const &self_, ostream_type &ostr) -> ostream_type &
     {

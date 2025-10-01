@@ -37,8 +37,8 @@ using enum strong_feature_t;
 
 auto const sbf_pol = f1 | f4;
 
-static_assert(feature(sbf_pol, m3) == f1);
-static_assert(feature(sbf_pol, mB) == f4);
+static_assert(get_feature(sbf_pol, m3) == f1);
+static_assert(get_feature(sbf_pol, mB) == f4);
 
 static_assert(set_feature(sbf_pol, f2, m3) == (f2 | f4));
 static_assert(set_feature(sbf_pol, f8, mB) == (f1 | f8));
@@ -57,8 +57,8 @@ enum feature_t
 
 auto const bf_pol = f_1 | f_4;
 
-static_assert(feature(bf_pol, f_m3) == f_1);
-static_assert(feature(bf_pol, f_mB) == f_4);
+static_assert(get_feature(bf_pol, f_m3) == f_1);
+static_assert(get_feature(bf_pol, f_mB) == f_4);
 
 static_assert(set_feature(bf_pol, f_2, f_m3) == (f_2 | f_4));
 static_assert(set_feature(bf_pol, f_8, f_mB) == (f_1 | f_8));
