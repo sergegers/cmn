@@ -144,19 +144,19 @@ struct default_read_char final
 ///////////////////////////////////////////////////////////////////////////////
 struct write_base final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, write_base const &bs)
     {
         using enum int_fmt_t;
-        if (has_feature(bs.m_fmt, showbase))
+        if (has_feature(bs.m_fmt_opt, showbase))
         {
-            if (has_any_feature(bs.m_fmt, c, asm_))
+            if (has_any_feature(bs.m_fmt_opt, c, asm_))
                 ostr << std::noshowbase;
             else
                 ostr << std::showbase;
         }
-        else if (has_feature(bs.m_fmt, hidebase))
+        else if (has_feature(bs.m_fmt_opt, hidebase))
             ostr << std::noshowbase;
         return ostr;
     }
@@ -166,19 +166,19 @@ struct write_base final
 
 struct read_base final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, read_base bs)
     {
         using enum int_fmt_t;
-        if (has_feature(bs.m_fmt, showbase))
+        if (has_feature(bs.m_fmt_opt, showbase))
         {
-            if (has_any_feature(bs.m_fmt, c, asm_))
+            if (has_any_feature(bs.m_fmt_opt, c, asm_))
                 istr >> std::noshowbase;
             else
                 istr >> std::showbase;                
         }
-        else if (has_feature(bs.m_fmt, hidebase))
+        else if (has_feature(bs.m_fmt_opt, hidebase))
             istr >> std::noshowbase;
 
         return istr;
@@ -190,11 +190,11 @@ template <std::integral Unit>
 struct write_sign final
 {
     Unit                &m_unit;
-    int_fmt_t const     m_fmt;
+    int_fmt_t const     m_fmt_opt;
 
     write_sign(Unit &unit, int_fmt_t fmt)
         : m_unit { unit },
-          m_fmt { fmt } {}
+          m_fmt_opt { fmt } {}
 
     template
     <
@@ -212,7 +212,7 @@ struct write_sign final
         static constexpr auto plus = to_char(symbols_type::plus);
         static constexpr auto endl = to_char(symbols_type::endl);
 
-        if (has_feature(pfx.m_fmt, sign))
+        if (has_feature(pfx.m_fmt_opt, sign))
         {
             switch (auto const sgn = cmn::sgn(boost::implicit_cast<signed_type>(pfx.m_unit)))
             {
@@ -224,7 +224,7 @@ struct write_sign final
                 BOOST_THROW_EXCEPTION(cmn::unexpected{});
             }
         }
-        else if (has_feature(pfx.m_fmt, forcesign))
+        else if (has_feature(pfx.m_fmt_opt, forcesign))
         {
             switch (auto const sgn = cmn::sgn(boost::implicit_cast<signed_type>(pfx.m_unit)))
             {
@@ -246,11 +246,11 @@ template <std::integral Unit>
 struct read_sign final
 {
     Unit                &m_unit;
-    int_fmt_t const     m_fmt;
+    int_fmt_t const     m_fmt_opt;
 
     read_sign(Unit &unit, int_fmt_t fmt)
         : m_unit { unit },
-          m_fmt { fmt } {}
+          m_fmt_opt { fmt } {}
 
     template
     <
@@ -268,7 +268,7 @@ struct read_sign final
         static constexpr auto plus = to_char(symbols_type::plus);
         static constexpr auto endl = to_char(symbols_type::endl);
 
-        if (has_feature(pfx.m_fmt, sign))
+        if (has_feature(pfx.m_fmt_opt, sign))
         {
             Char sgn;
             do istr >> sgn; while (sgn == endl);
@@ -283,7 +283,7 @@ struct read_sign final
                 BOOST_THROW_EXCEPTION(cmn::unexpected{});
             }
         }
-        else if (has_feature(pfx.m_fmt, forcesign))
+        else if (has_feature(pfx.m_fmt_opt, forcesign))
         {
             Char sgn;
             do istr >> sgn; while (sgn == endl);
@@ -304,7 +304,7 @@ struct read_sign final
 ///////////////////////////////////////////////////////////////////////////////
 struct write_c_prefix final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     template
     <
@@ -316,7 +316,7 @@ struct write_c_prefix final
         using symbols_type = symbols<Char, CharTraits>;
         using enum int_fmt_t;
 
-        if (has_all_features(pfx.m_fmt, c, hex, showbase))
+        if (has_all_features(pfx.m_fmt_opt, c, hex, showbase))
         {
             ostr << symbols_type::hex_prefix;
         }
@@ -327,7 +327,7 @@ struct write_c_prefix final
 //-----------------------------------------------------------------------------
 struct read_c_prefix final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     template
     <
@@ -342,7 +342,7 @@ struct read_c_prefix final
         static constexpr auto endl = to_char(symbols_type::endl);
         static constexpr auto &hex_pfx = symbols_type::hex_prefix;
 
-        if (has_all_features(pfx.m_fmt, c, hex, showbase))
+        if (has_all_features(pfx.m_fmt_opt, c, hex, showbase))
         for (;;)
         {
             Char buf[hex_pfx.size() + 1];
@@ -368,7 +368,7 @@ struct read_c_prefix final
 ///////////////////////////////////////////////////////////////////////////////
 struct write_asm_postfix final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     template
     <
@@ -380,7 +380,7 @@ struct write_asm_postfix final
         using symbols_type = symbols<Char, CharTraits>;
         using enum int_fmt_t;
 
-        if (has_all_features(pfx.m_fmt, asm_, hex, showbase))
+        if (has_all_features(pfx.m_fmt_opt, asm_, hex, showbase))
             ostr << symbols_type::hex_postfix;
         return ostr;
     }
@@ -389,7 +389,7 @@ struct write_asm_postfix final
 //-----------------------------------------------------------------------------
 struct read_asm_postfix final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     template
     <
@@ -401,7 +401,7 @@ struct read_asm_postfix final
         using symbols_type = symbols<Char, CharTraits>;
         using enum int_fmt_t;
 
-        if (has_all_features(pfx.m_fmt, asm_, hex, showbase))
+        if (has_all_features(pfx.m_fmt_opt, asm_, hex, showbase))
         {
             Char h;
             istr >> h;
@@ -415,14 +415,14 @@ struct read_asm_postfix final
 ///////////////////////////////////////////////////////////////////////////////
 struct write_radix final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, write_radix const &rdx)
     {
         using enum int_fmt_t;
-        if (has_feature(rdx.m_fmt, hex))
+        if (has_feature(rdx.m_fmt_opt, hex))
             ostr << std::hex;
-        else if (has_feature(rdx.m_fmt, dec))
+        else if (has_feature(rdx.m_fmt_opt, dec))
             ostr << std::dec;
 
         return ostr;
@@ -432,14 +432,14 @@ struct write_radix final
 //-----------------------------------------------------------------------------
 struct read_radix final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, read_radix rdx)
     {
         using enum int_fmt_t;
-        if (has_feature(rdx.m_fmt, hex))
+        if (has_feature(rdx.m_fmt_opt, hex))
             istr >> std::hex;
-        else if (has_feature(rdx.m_fmt, dec))
+        else if (has_feature(rdx.m_fmt_opt, dec))
             istr >> std::dec;
 
         return istr;
@@ -450,9 +450,9 @@ struct read_radix final
 template <std::integral Unit>
 struct write_width final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
-    write_width(Unit, int_fmt_t fmt): m_fmt { fmt } {}
+    write_width(Unit, int_fmt_t fmt): m_fmt_opt { fmt } {}
 
     template
     <
@@ -468,14 +468,14 @@ struct write_width final
         static constexpr auto hex_digits = std::numeric_limits<std::make_unsigned_t<Unit>>::digits / 4;
         static constexpr auto dec_digits = std::numeric_limits<Unit>::digits10;
 
-        if (has_feature(w.m_fmt, long_))
+        if (has_feature(w.m_fmt_opt, long_))
         {
-            if (has_feature(w.m_fmt, dec))
+            if (has_feature(w.m_fmt_opt, dec))
                 ostr << std::internal << std::setw(dec_digits) << std::setfill(zero);
-            else if (has_feature(w.m_fmt, hex))
+            else if (has_feature(w.m_fmt_opt, hex))
                 ostr << std::internal << std::setw(hex_digits) << std::setfill(zero);
         }
-        else if (has_feature(w.m_fmt, short_))
+        else if (has_feature(w.m_fmt_opt, short_))
         {
             ostr.unsetf(std::ios_base::internal);
         }
@@ -488,9 +488,9 @@ struct write_width final
 template <std::integral Unit>
 struct read_width final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
-    read_width(Unit, int_fmt_t fmt): m_fmt { fmt } {}
+    read_width(Unit, int_fmt_t fmt): m_fmt_opt { fmt } {}
 
     friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, read_width w)
     {
@@ -499,14 +499,14 @@ struct read_width final
         static constexpr auto hex_digits = std::numeric_limits<std::make_unsigned_t<Unit>>::digits / 4;
         static constexpr auto dec_digits = std::numeric_limits<Unit>::digits10;
 
-        if (has_feature(w.m_fmt, long_))
+        if (has_feature(w.m_fmt_opt, long_))
         {
-            if (has_feature(w.m_fmt, dec))
+            if (has_feature(w.m_fmt_opt, dec))
                 istr >> std::internal >> std::setw(dec_digits);
-            else if (has_feature(w.m_fmt, hex))
+            else if (has_feature(w.m_fmt_opt, hex))
                 istr >> std::internal >> std::setw(hex_digits);
         }
-        else if (has_feature(w.m_fmt, short_))
+        else if (has_feature(w.m_fmt_opt, short_))
         {
             istr.unsetf(std::ios_base::internal);
         }
@@ -518,14 +518,14 @@ struct read_width final
 ///////////////////////////////////////////////////////////////////////////////
 struct write_case final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, write_case const &cs)
     {
         using enum int_fmt_t;
-        if (has_feature(cs.m_fmt, uppercase))
+        if (has_feature(cs.m_fmt_opt, uppercase))
             ostr << std::uppercase;
-        else if (has_feature(cs.m_fmt, lowercase))
+        else if (has_feature(cs.m_fmt_opt, lowercase))
             ostr << std::nouppercase;
 
         return ostr;
@@ -535,14 +535,14 @@ struct write_case final
 //-----------------------------------------------------------------------------
 struct read_case final
 {
-    int_fmt_t const   m_fmt;
+    int_fmt_t const   m_fmt_opt;
 
     friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, read_case cs)
     {
         using enum int_fmt_t;
-        if (has_feature(cs.m_fmt, uppercase))
+        if (has_feature(cs.m_fmt_opt, uppercase))
             istr >> std::uppercase;
-        else if (has_feature(cs.m_fmt, lowercase))
+        else if (has_feature(cs.m_fmt_opt, lowercase))
             istr >> std::nouppercase;
 
         return istr;

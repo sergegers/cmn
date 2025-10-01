@@ -129,6 +129,8 @@ consteval auto adapt_enum_info(int_fmt_t en)
 
 CMN_ENUM_INJECT_OPS()
 
+static_assert(c::strong_bitfield<int_fmt_t>);
+
 namespace manip
 {
 

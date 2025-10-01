@@ -6,8 +6,7 @@
 #include <ranges>
 #include <optional>
 
-#include <boost/type_traits/promote.hpp>
-
+#include <cmn/meta/type_traits.h>
 #include <cmn/util/feature.h>
 
 #include <cmn/io/format/util.h>
@@ -32,7 +31,7 @@ private:
 
     // set iterator to the beginning of escaped symbol sequence
     template <typename Iterator>
-    [[nodiscard]] static constexpr auto get_begin_it(boost::promote_t<scroll_result_t> sr,  Iterator it) -> Iterator
+    [[nodiscard]] static constexpr auto get_begin_it(interop_type_t<scroll_result_t> sr,  Iterator it) -> Iterator
     {
         return has_feature(sr, sr_esc)? ++it: it;
     }

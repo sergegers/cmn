@@ -43,6 +43,10 @@ static_assert(get_feature(sbf_pol, mB) == f4);
 static_assert(set_feature(sbf_pol, f2, m3) == (f2 | f4));
 static_assert(set_feature(sbf_pol, f8, mB) == (f1 | f8));
 
+static_assert(has_feature(sbf_pol, f1));
+static_assert(has_feature(sbf_pol, f4));
+static_assert(has_all_features(sbf_pol, f1, f4));
+
 //-----------------------------------------------------------------------------
 
 enum feature_t
@@ -62,7 +66,12 @@ static_assert(get_feature(bf_pol, f_mB) == f_4);
 
 static_assert(set_feature(bf_pol, f_2, f_m3) == (f_2 | f_4));
 static_assert(set_feature(bf_pol, f_8, f_mB) == (f_1 | f_8));
+
+static_assert(has_feature(bf_pol, f_1));
+static_assert(has_feature(bf_pol, f_4));
+
 //-----------------------------------------------------------------------------
+
 
 BOOST_AUTO_TEST_SUITE_END() // util
 BOOST_AUTO_TEST_SUITE_END() // cmn

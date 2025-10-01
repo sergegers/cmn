@@ -19,11 +19,11 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
     using out_to_stream_mix_type = mix::out_to_stream<T, Char>;
     using ostream_type = out_to_stream_mix_type::ostream_type;
 
-    int_fmt_t m_fmt_options = int_fmt_t::default_;
+    int_fmt_t m_fmt_opt = int_fmt_t::default_;
 
     /* CRTP override */ constexpr auto prepare_stream(ostream_type &ostr) const -> ostream_type &
     {
-        return ostr << int_fmt(m_fmt_options);
+        return ostr << int_fmt(m_fmt_opt);
     }
 
     template<typename ParseContext>
@@ -39,9 +39,9 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
         constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
         auto it = ctx.begin();
-        m_fmt_options = empty;
+        m_fmt_opt = empty;
 
-        switch (check_state_at(ctx, it,  sr_sym | sr_sep | sr_close))  // NOLINT(clang-diagnostic-switch-enum)
+        switch (check_state_at(ctx, it, sr_sym | sr_sep | sr_close))
         {
         case sr_sep: ++it; break;
         case sr_close: return it;
@@ -55,11 +55,11 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
         {
             switch (*it++)
             {
-            case to_char(symbols_type::octothorpe): m_fmt_options |= showbase | lowercase; break;
-            case to_char(symbols_type::x): m_fmt_options |= hex | c | nosign; break;
-            case to_char(symbols_type::a): m_fmt_options |= long_asm_up_hex; break;
-            case to_char(symbols_type::s): m_fmt_options |= short_; break;
-            case to_char(symbols_type::u): m_fmt_options |= uppercase; break;
+            case to_char(symbols_type::octothorpe): m_fmt_opt |= showbase | lowercase; break;
+            case to_char(symbols_type::x): m_fmt_opt |= hex | c | nosign; break;
+            case to_char(symbols_type::a): m_fmt_opt |= long_asm_up_hex; break;
+            case to_char(symbols_type::s): m_fmt_opt |= short_; break;
+            case to_char(symbols_type::u): m_fmt_opt |= uppercase; break;
 
             default:
                     throw std::format_error{ "Unexpected "};
