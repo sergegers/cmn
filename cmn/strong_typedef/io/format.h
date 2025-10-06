@@ -39,7 +39,6 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
         constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
 
         auto it = ctx.begin();
-        m_fmt_opt = empty;
 
         switch (check_state_at(ctx, it, sr_sym | sr_sep | sr_close))
         {

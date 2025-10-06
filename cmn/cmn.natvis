@@ -37,30 +37,6 @@
         </Expand>
     </Type> -->
 
-	<Intrinsic Name="radix" Expression="(cmn::io::radix_fmt_t)(fmt_opt &amp; cmn::io::radix_fmt_t::mask)">
-		<Parameter Name="fmt_opt" Type="cmn::io::int_fmt_t"/>
-	</Intrinsic>
-
-	<Intrinsic Name="base" Expression="(cmn::io::base_fmt_t)(fmt_opt &amp; cmn::io::base_fmt_t::mask)">
-		<Parameter Name="fmt_opt" Type="cmn::io::int_fmt_t"/>
-	</Intrinsic>
-
-	<Intrinsic Name="lang" Expression="(cmn::io::lang_fmt_t)(fmt_opt &amp; cmn::io::lang_fmt_t::mask)">
-		<Parameter Name="fmt_opt" Type="cmn::io::int_fmt_t"/>
-	</Intrinsic>
-
-	<Intrinsic Name="width" Expression="(cmn::io::width_fmt_t)(fmt_opt &amp; cmn::io::width_fmt_t::mask)">
-		<Parameter Name="fmt_opt" Type="cmn::io::int_fmt_t"/>
-	</Intrinsic>
-
-	<Intrinsic Name="case_" Expression="(cmn::io::case_fmt_t)(fmt_opt &amp; cmn::io::case_fmt_t::mask)">
-		<Parameter Name="fmt_opt" Type="cmn::io::int_fmt_t"/>
-	</Intrinsic>
-
-	<Intrinsic Name="sign" Expression="(cmn::io::sign_fmt_t)(fmt_opt &amp; cmn::io::sign_fmt_t::mask)">
-		<Parameter Name="fmt_opt" Type="cmn::io::int_fmt_t"/>
-	</Intrinsic>
-
 	<Type Name="cmn::io::strong_typedef_formatter&lt;*,*&gt;">
 		<AlternativeType Name="cmn::io::detail::write_base"/>
 		<AlternativeType Name="cmn::io::detail::read_base"/>
@@ -76,13 +52,25 @@
 		<AlternativeType Name="cmn::io::detail::read_width"/>
 		<AlternativeType Name="cmn::io::detail::write_case"/>
 		<AlternativeType Name="cmn::io::detail::read_case"/>
+		<AlternativeType Name="cmn::io::int_fmt_wrapper_t"/>
+
+		<Intrinsic Name="radix" Expression="(cmn::io::radix_fmt_t)(m_fmt_opt &amp; cmn::io::radix_fmt_t::mask)" />
+		<Intrinsic Name="base" Expression="(cmn::io::base_fmt_t)(m_fmt_opt &amp; cmn::io::base_fmt_t::mask)" />
+		<Intrinsic Name="lang" Expression="(cmn::io::lang_fmt_t)(m_fmt_opt &amp; cmn::io::lang_fmt_t::mask)" />
+		<Intrinsic Name="width" Expression="(cmn::io::width_fmt_t)(m_fmt_opt &amp; cmn::io::width_fmt_t::mask)" />
+		<Intrinsic Name="case_" Expression="(cmn::io::case_fmt_t)(m_fmt_opt &amp; cmn::io::case_fmt_t::mask)" />
+		<Intrinsic Name="sign" Expression="(cmn::io::sign_fmt_t)(m_fmt_opt &amp; cmn::io::sign_fmt_t::mask)" />
+        <Intrinsic Name="reminder" Expression="m_fmt_opt &amp; ~radix() &amp; ~base() &amp; ~lang() &amp; ~width()
+			&amp; ~case_() &amp; ~sign()" />
+
 		<Expand>
             <Item Name="[format options]">m_fmt_opt,b</Item>
-            <Item Name="[radix]">radix(m_fmt_opt)</Item>
-            <Item Name="[base]">base(m_fmt_opt)</Item>
-            <Item Name="[language]">lang(m_fmt_opt)</Item>
-            <Item Name="[width]">width(m_fmt_opt)</Item>
-            <Item Name="[sign]">sign(m_fmt_opt)</Item>
+            <Item Name="[radix]">radix()</Item>
+            <Item Name="[base]">base()</Item>
+            <Item Name="[language]">lang()</Item>
+            <Item Name="[width]">width()</Item>
+            <Item Name="[sign]">sign()</Item>
+			<Item Name="[reminder]">reminder()</Item>
         </Expand>
     </Type>
 	

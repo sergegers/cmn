@@ -35,6 +35,12 @@ template <c::bitfield Policy>
     return get_feature_(pol, ~mask) | get_feature_(feat, mask);
 }
 
+template <c::bitfield Policy>
+constexpr auto inplace_set_feature_(auto &pol, Policy feat) noexcept -> Policy &
+{
+    return pol = static_cast<Policy>(set_feature_(pol, feat, feat));
+}
+
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -145,6 +151,16 @@ template <c::strong_bitfield Policy>
 {
     return static_cast<Policy>(detail::set_feature_(pol, feat, mask));
 }
+
+///////////////////////////////////////////////////////////////////////////////
+template <c::strong_bitfield Policy, c::strong_bitfield... Features>
+    requires (... && std::same_as<Policy, Features>)
+[[nodiscard]] constexpr auto set_features(Policy pol, Policy feat, Features... feats) noexcept -> Policy
+{
+    using detail::inplace_set_feature_;
+    return (inplace_set_feature_(pol, feat), ..., inplace_set_feature_(pol, feats));
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::bitfield Policy>

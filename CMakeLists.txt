@@ -135,6 +135,7 @@ add_library (
  "cmn/strong_typedef/strong_typedef.h" 
  "cmn/strong_typedef/io/io.h" 
  "cmn/strong_typedef/io/io.cpp" 
+ "cmn/strong_typedef/io/int_fmt.h"
  "cmn/strong_typedef/io/format.h"
  "cmn/strong_typedef/io.h" 
 
