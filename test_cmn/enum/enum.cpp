@@ -93,6 +93,15 @@ static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_ns == "cmn::enu
 static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_name == "cl_cmb_t");
 static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_member_name == "green");
 
+// mask_by_enum
+//static_assert(mask_by_enum(cl_cmb_t::zero) == cl_cmb_t::digit_mask);
+static_assert(mask_by_enum(cl_cmb_t::one) == cl_cmb_t::digit_mask);
+static_assert(mask_by_enum(cl_cmb_t::two) == cl_cmb_t::digit_mask);
+static_assert(mask_by_enum(cl_cmb_t::three) == cl_cmb_t::digit_mask);
+//static_assert(mask_by_enum(cl_cmb_t::red) == cl_cmb_t::color_mask);
+static_assert(mask_by_enum(cl_cmb_t::green) == cl_cmb_t::color_mask);
+static_assert(mask_by_enum(cl_cmb_t::blue) == cl_cmb_t::color_mask);
+
 BOOST_AUTO_TEST_CASE(masks)
 {
     using enum cl_cmb_t;

@@ -23,8 +23,8 @@ struct group_info
 {
     using enum_type = E;
     using record_type = record_info<E>;
-    using mask_type = typename record_type::mask_type;
-    using interop_type = typename record_type::interop_type;
+    using mask_type = record_type::mask_type;
+    using interop_type = record_type::interop_type;
     using records_type = std::array<record_type, Sz_>;
 
     static constexpr std::size_t size = Sz_;
@@ -107,10 +107,10 @@ consteval group_info(Record &&, Records &&...) ->
 namespace group_
 {
 
-template <typename T> using enum_type_t = typename T::enum_type;
-template <typename T> using mask_type_t = typename T::mask_type;
-template <typename T> using interop_type_t = typename T::interop_type;
-template <typename T> using record_type_t = typename T::record_type;
+template <typename T> using enum_type_t = T::enum_type;
+template <typename T> using mask_type_t = T::mask_type;
+template <typename T> using interop_type_t = T::interop_type;
+template <typename T> using record_type_t = T::record_type;
 
 template <typename T> constexpr std::size_t size_v = T::size;
 

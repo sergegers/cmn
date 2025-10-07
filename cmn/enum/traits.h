@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <utility>
 #include <array>
+#include <ranges>
 
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
@@ -12,7 +13,6 @@
 #include <cmn/enum/detail/enum_info.h>
 #include <cmn/enum/detail/group_info.h>
 #include <cmn/enum/detail/record_info.h>
-#include <cmn/enum/detail/enum_info.h>
 
 namespace cmn::enum_
 {
@@ -91,7 +91,7 @@ struct group_by_mask_
         if constexpr (lazy_to_interop(masks_v<enum_type>[Idx_]) == lazy_to_interop(Mask_))
             return std::get<Idx_>(groups_v<enum_type>);
         else
-            return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
+            return group_by_mask_{}.operator()<Idx_ + 1>();
     }
 
     template <std::size_t Idx_>
@@ -101,7 +101,7 @@ struct group_by_mask_
         if constexpr (lazy_to_interop(masks_v<enum_type>[Idx_]) == lazy_to_interop(Mask_))
             return std::get<Idx_>(groups_v<enum_type>);
         else
-            return group_by_mask_<Mask_>{}.template operator()<Idx_ + 1>();
+            return group_by_mask_{}.operator()<Idx_ + 1>();
     }
 };
 
@@ -191,6 +191,18 @@ static constexpr auto mask_overlap(std::array<Mask, Size_> const &masks)
 
 // check enum constants consistency
 template <c::adapted_enum E> constexpr bool is_masks_overlapped_v = 0 != mask_overlap(masks_v<E>);
+
+///////////////////////////////////////////////////////////////////////////////
+template <c::adapted_enum E>
+[[nodiscard]] constexpr auto mask_by_enum(E en) -> mask_type_t<E>
+{
+    auto const &masks = masks_v<E>;
+    auto const it = std::ranges::find_if
+    (
+        masks, [en](mask_type_t<E> mask) { return !empty(mask_cast(en) & mask); }
+    );
+    return std::ranges::end(masks) == it? 0: *it;
+}
 
 }
 

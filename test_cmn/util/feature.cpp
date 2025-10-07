@@ -8,8 +8,6 @@
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/io.h>
 
-#include <cmn/strong_typedef/io/int_fmt.h>
-
 BOOST_AUTO_TEST_SUITE(cmn)
 BOOST_AUTO_TEST_SUITE(util)
 
@@ -79,22 +77,6 @@ BOOST_AUTO_TEST_CASE(feature)
 
 	BOOST_TEST(has_feature(bf_pol, f_1));
     BOOST_TEST(has_feature(bf_pol, f_4));
-}
-
-BOOST_AUTO_TEST_CASE(int_fmt)
-{
-    using enum io::int_fmt_t;
-
-    auto const fmt_opt = hex | showbase | c | short_ | lowercase | nosign;
-  //  BOOST_TEST(has_all_features(fmt_opt, hex, showbase, c, short_, lowercase, nosign));
-
-    io::int_fmt_wrapper_t x{ set_features(fmt_opt, dec, asm_, short_, forcesign) };
-    BOOST_TEST
-	(
-		set_features(fmt_opt, dec, asm_, short_, forcesign) ==
-        (dec | showbase | asm_ | short_ | lowercase | forcesign)
-    );
-
 }
 
 BOOST_AUTO_TEST_SUITE_END() // util

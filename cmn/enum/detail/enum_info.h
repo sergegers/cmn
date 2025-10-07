@@ -40,9 +40,9 @@ struct enum_info
     using record_type = record_info<E>;
     using op_type = interop_type_t<op_t>;
     using groups_type = std::tuple<group_info<E, Szs_>...>;
-    using mask_type = typename record_type::mask_type;
+    using mask_type = record_type::mask_type;
     using masks_type = std::array<mask_type, sizeof... (Szs_)>;
-    using interop_type = typename record_type::interop_type;
+    using interop_type = record_type::interop_type;
 
     template <typename... Groups>
     consteval enum_info(op_type ops, Groups &&... groups):

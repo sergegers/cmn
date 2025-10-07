@@ -10,13 +10,6 @@
 namespace cmn
 {
 
-template <c::bitfield Policy>
-[[nodiscard]] constexpr auto empty(Policy pol) noexcept -> bool { return static_cast<interop_type_t<Policy>>(pol) == 0; }
-
-///////////////////////////////////////////////////////////////////////////////
-namespace detail
-{
-
 template <c::enumerable Policy>
 [[nodiscard]] constexpr auto get_feature_(Policy pol, auto mask) noexcept -> interop_type_t<Policy>
 {
@@ -36,58 +29,53 @@ template <c::bitfield Policy>
 }
 
 template <c::bitfield Policy>
-constexpr auto inplace_set_feature_(auto &pol, Policy feat) noexcept -> Policy &
-{
-    return pol = static_cast<Policy>(set_feature_(pol, feat, feat));
-}
-
-}
+[[nodiscard]] constexpr auto empty(Policy pol) noexcept -> bool { return static_cast<interop_type_t<Policy>>(pol) == 0; }
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto get_feature(interop_type_t<Policy> pol, Policy mask) noexcept -> Policy
 {
-    return static_cast<Policy>(detail::get_feature_(pol, mask));
+    return static_cast<Policy>(get_feature_(pol, mask));
 }
 
 template <c::strong_bitfield Policy>
 [[nodiscard]] constexpr auto get_feature(Policy pol, Policy mask) noexcept -> Policy
 {
-    return static_cast<Policy>(detail::get_feature_(pol, mask));
+    return static_cast<Policy>(get_feature_(pol, mask));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enumerable To, c::bitfield Policy>
 [[nodiscard]] constexpr auto feature_to(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept -> To
 {
-    return static_cast<To>(detail::get_feature_(pol, mask));
+    return static_cast<To>(get_feature_(pol, mask));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto has_feature(interop_type_t<Policy> pol, Policy feat) noexcept -> bool
 {
-    return detail::has_feature_(pol, feat, feat);
+    return has_feature_(pol, feat, feat);
 }
 
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto has_feature(interop_type_t<Policy> pol, Policy feat, mask_type_t<Policy> mask) noexcept -> bool
 {
-    return detail::has_feature_(pol, feat, mask);
+    return has_feature_(pol, feat, mask);
 }
 
 //-----------------------------------------------------------------------------
 template <c::strong_bitfield Policy>
 [[nodiscard]] constexpr auto has_feature(Policy pol, Policy feat, Policy mask) noexcept -> bool
 {
-    return detail::has_feature_(pol, feat, mask);
+    return has_feature_(pol, feat, mask);
 }
 
 
 template <c::strong_bitfield Policy>
 [[nodiscard]] constexpr auto has_feature(Policy pol, Policy feat) noexcept -> bool
 {
-    return detail::has_feature_(pol, feat, feat);
+    return has_feature_(pol, feat, feat);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -136,38 +124,34 @@ template <c::bitfield Policy>
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto set_feature(interop_type_t<Policy> pol, Policy feat) noexcept -> Policy
 {
-    return static_cast<Policy>(detail::set_feature_(pol, feat, mask_cast(feat)));
+    return static_cast<Policy>(set_feature_(pol, feat, mask_cast(feat)));
 }
 
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto set_feature(interop_type_t<Policy> pol, Policy feat, mask_type_t<Policy> mask) noexcept -> Policy
 {
-    return static_cast<Policy>(detail::set_feature_(pol, feat, mask));
+    return static_cast<Policy>(set_feature_(pol, feat, mask));
 }
 
 //-----------------------------------------------------------------------------
 template <c::strong_bitfield Policy>
-[[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat, Policy mask = feat) noexcept -> Policy
+[[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat) noexcept -> Policy
 {
-    return static_cast<Policy>(detail::set_feature_(pol, feat, mask));
+    return static_cast<Policy>(set_feature_(pol, feat, feat));
 }
 
-///////////////////////////////////////////////////////////////////////////////
-template <c::strong_bitfield Policy, c::strong_bitfield... Features>
-    requires (... && std::same_as<Policy, Features>)
-[[nodiscard]] constexpr auto set_features(Policy pol, Policy feat, Features... feats) noexcept -> Policy
+template <c::strong_bitfield Policy>
+[[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat, Policy mask) noexcept -> Policy
 {
-    using detail::inplace_set_feature_;
-    return (inplace_set_feature_(pol, feat), ..., inplace_set_feature_(pol, feats));
+    return static_cast<Policy>(set_feature_(pol, feat, mask));
 }
-
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::bitfield Policy>
 [[nodiscard]] constexpr auto reset_feature(Policy pol, Policy feat, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
     -> Policy
 {
-    return static_cast<Policy>(detail::get_feature_(pol, mask) & ~interop_cast(feat));
+    return static_cast<Policy>(get_feature_(pol, mask) & ~interop_cast(feat));
 }
 
 //-----------------------------------------------------------------------------
@@ -198,20 +182,20 @@ template <c::bitfield Policy>
 template <c::enumerable Policy>
 [[nodiscard]] constexpr auto value(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept -> Policy
 {
-    return static_cast<Policy>(detail::get_feature_(pol, mask));
+    return static_cast<Policy>(get_feature_(pol, mask));
 }
 
 template <c::enumerable Policy>
 [[nodiscard]] constexpr auto set_value(Policy pol, Policy val, mask_type_t<Policy> mask = no_mask<Policy>) noexcept
     -> Policy
 {
-    return static_cast<Policy>(detail::get_feature_(pol, ~mask) | detail::get_feature_(val, mask));
+    return static_cast<Policy>(get_feature_(pol, ~mask) | get_feature_(val, mask));
 }
 
 template <c::enumerable Policy>
 [[nodiscard]] constexpr auto has_value(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept -> bool
 {
-    return 0 != detail::get_feature_(pol, mask);
+    return 0 != get_feature_(pol, mask);
 }
 
 template <c::enumerable Policy>

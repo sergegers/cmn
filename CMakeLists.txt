@@ -157,7 +157,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
- )
+  "cmn/enum/feature.h")
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -188,7 +188,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test_cmn/util/util.cpp" 
   "test_cmn/util/fixed_string.cpp" 
   "test_cmn/util/feature.cpp"
- )
+  "test_cmn/enum/feature.cpp")
 
 target_include_directories(test_cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test_cmn PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})

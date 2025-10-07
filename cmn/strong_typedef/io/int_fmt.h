@@ -10,8 +10,8 @@ namespace cmn::io
 //
 enum class radix_fmt_t
 {
-	dec = 0b0000'0000'0000'0001,    // default
-	hex = 0b0000'0000'0000'0010,    // x
+	dec = 0b0000'0000'0000'0001,		// default
+	hex = 0b0000'0000'0000'0010,		// x
 	mask = dec | hex
 };
 
@@ -24,15 +24,15 @@ enum class base_fmt_t
 
 enum class lang_fmt_t
 {
-	asm_ = 0b0000'0000'0001'0000,    // a
-	c = 0b0000'0000'0010'0000,    // default
+	asm_ = 0b0000'0000'0001'0000,		// a
+	c = 0b0000'0000'0010'0000,			// default
 	mask = asm_ | c
 };
 
 enum class width_fmt_t
 {
-	short_ = 0b0000'0000'0100'0000,    // s, default
-	long_ = 0b0000'0000'1000'0000,    // l
+	short_ = 0b0000'0000'0100'0000,		// s, default
+	long_ = 0b0000'0000'1000'0000,		// l
 	mask = short_ | long_
 };
 
@@ -45,9 +45,9 @@ enum class case_fmt_t
 
 enum class sign_fmt_t
 {
-	sign = 0b0000'0100'0000'0000,    // ( ) space for zero
-	nosign = 0b0000'1000'0000'0000,    // default
-	forcesign = 0b0001'0000'0000'0000,    // (+) + for zero
+	sign = 0b0000'0100'0000'0000,		// ( ) space for zero
+	nosign = 0b0000'1000'0000'0000,		// default
+	forcesign = 0b0001'0000'0000'0000,  // (+) + for zero
 	mask = sign | nosign | forcesign
 };
 
@@ -57,24 +57,24 @@ enum class sign_fmt_t
 //
 enum class int_fmt_t : short
 {
-	dec = radix_fmt_t::dec,         // default
-	hex = radix_fmt_t::hex,         // x
+	dec = radix_fmt_t::dec,					// default
+	hex = radix_fmt_t::hex,					// x
 
-	showbase = base_fmt_t::showbase,     // #
-	hidebase = base_fmt_t::hidebase,     // default
+	showbase = base_fmt_t::showbase,		// #
+	hidebase = base_fmt_t::hidebase,		// default
 
-	asm_ = lang_fmt_t::asm_,         // a
-	c = lang_fmt_t::c,            // default
+	asm_ = lang_fmt_t::asm_,				// a
+	c = lang_fmt_t::c,						// default
 
-	short_ = width_fmt_t::short_,       // s, default
-	long_ = width_fmt_t::long_,        // l
+	short_ = width_fmt_t::short_,			// s, default
+	long_ = width_fmt_t::long_,				// l
 
-	uppercase = case_fmt_t::uppercase,    // u
-	lowercase = case_fmt_t::lowercase,    // default
+	uppercase = case_fmt_t::uppercase,		// u
+	lowercase = case_fmt_t::lowercase,		// default
 
-	sign = sign_fmt_t::sign,         // ( ) space for zero
-	nosign = sign_fmt_t::nosign,       // default
-	forcesign = sign_fmt_t::forcesign,    // (+) + for zero
+	sign = sign_fmt_t::sign,				// ( ) space for zero
+	nosign = sign_fmt_t::nosign,			// default
+	forcesign = sign_fmt_t::forcesign,		// (+) + for zero
 
 	empty = 0b0000'0000'0000'0000,
 	default_ = dec | hidebase | c | short_ | lowercase | nosign,      // must be synced with
@@ -88,8 +88,8 @@ enum class int_fmt_t : short
 	case_mask = case_fmt_t::mask,
 	sign_mask = sign_fmt_t::mask,
 	// predefined formats
-	sshort_asm_up_hex = hex | showbase | asm_ | short_ | uppercase | sign,        // +1Bh
-	long_asm_up_hex = hex | showbase | asm_ | long_ | uppercase | nosign,       // 0000001Bh
+	sshort_asm_up_hex = hex | showbase | asm_ | short_ | uppercase | sign,    // +1Bh
+	long_asm_up_hex = hex | showbase | asm_ | long_ | uppercase | nosign,     // 0000001Bh
 	long_c_up_hex = hex | showbase | c | long_ | uppercase | forcesign        // +0x0000001B
 };
 
