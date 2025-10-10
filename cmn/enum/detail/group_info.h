@@ -158,6 +158,37 @@ constexpr auto exec
     return en;
 }
 
+template <c::adapted_enum E>
+constexpr auto exec2
+(
+    std::ranges::input_range auto records
+    , E en
+    , std::invocable<record_info<E> const&, cmn::mask_type_t<E>> auto const &op
+    , cmn::mask_type_t<E> group_mask
+) -> E
+{
+    using record_type = record_info<E>;
+
+    auto const mval = value(en, group_mask);
+
+    std::ignore = std::ranges::find_if
+    (
+        std::move(records),
+        [&en, mval, &op, group_mask](record_type const& rec) constexpr -> bool
+        {
+            bool const found = (rec.as_mask() == mask_cast(mval));
+            if (found)
+            {
+                op(rec, group_mask);
+                en = reset_value(en, mval);
+            }
+            return found;
+        }
+    );
+
+    return en;
+}
+
 }
 
 }

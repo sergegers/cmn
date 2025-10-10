@@ -8,7 +8,9 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/strong_typedef/strong_typedef.h>
 #include <cmn/util/symbols.h>
-#include <cmn/util/feature.h>
+
+#include <cmn/enum/bitfield.h>
+#include <cmn/enum/feature.h>
 
 #include <cmn/io/format/mix/parse_arg.h>
 #include <cmn/io/format/mix/mixins.h>
@@ -25,6 +27,13 @@ enum format_options_t
     fo_hex          = 0x1,
     fo_uppercase    = 0x2
 };
+
+consteval auto adapt_enum_info(format_options_t fo)
+{
+    return enum_::adapt_bitfield_info_helper<fo_empty, fo_hex, fo_uppercase>();
+}
+
+CMN_ENUM_INJECT_OPS()
 
 }
 

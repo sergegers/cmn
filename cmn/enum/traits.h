@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <utility>
 #include <array>
-#include <ranges>
 
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
@@ -194,14 +193,33 @@ template <c::adapted_enum E> constexpr bool is_masks_overlapped_v = 0 != mask_ov
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::adapted_enum E>
-[[nodiscard]] constexpr auto mask_by_enum(E en) -> mask_type_t<E>
+[[nodiscard]] constexpr auto mask_by_enum(E en) noexcept -> mask_type_t<E>
 {
+    auto const& groups = groups_v<E>;
     auto const &masks = masks_v<E>;
-    auto const it = std::ranges::find_if
+
+    mask_type_t<E> res = no_mask<E>;
+    std::ignore = exec2
     (
-        masks, [en](mask_type_t<E> mask) { return !empty(mask_cast(en) & mask); }
+        groups,
+        masks,
+        en,
+        [en, &res](record_info<E> const& rec, mask_type_t<E> mask) constexpr
+        {
+            if (rec.m_value == en)
+            {
+                res = mask;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
     );
-    return std::ranges::end(masks) == it? 0: *it;
+
+
+    return res;
 }
 
 }

@@ -174,4 +174,42 @@ constexpr auto exec
     );
 }
 
+template
+<
+    boost::c::fus_sequence Groups
+    , c::adapted_enum E
+>
+constexpr auto exec2
+(
+    Groups const& groups
+    , std::array<mask_type_t<E>, boost::fusion::result_of::size_v<Groups>> const& masks
+    , E en
+    , std::invocable<record_info<E> const&, mask_type_t<E>> auto const &op
+    , mask_type_t<E> addditional_mask = no_mask<E>
+) noexcept
+-> E // return remainder
+{
+    namespace fus = boost::fusion;
+    namespace rfus = fus::result_of;
+
+    using masks_type = std::array<mask_type_t<E>, rfus::size_v<Groups>>;
+    using sequences_type = fus::vector<Groups const&, masks_type const &>;
+
+    return fus::fold
+    (
+        fus::zip_view<sequences_type>{ sequences_type{ groups, masks } },
+        value(en, addditional_mask),
+        [&op, addditional_mask](E remainder, auto const& group_mask_pair) constexpr
+        {
+            auto const& current_group = fus::at_c<0>(group_mask_pair);
+            auto const& current_mask = fus::at_c<1>(group_mask_pair);
+
+            if (!empty(current_mask & addditional_mask))
+                return group_::exec2(current_group.m_records, remainder, op, current_mask);
+            else
+                return remainder;
+        }
+    );
+}
+
 }

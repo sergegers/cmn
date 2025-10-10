@@ -81,9 +81,9 @@ struct record_info
 namespace record_
 {
 
-template <typename T> using enum_type_t = typename T::enum_type;
-template <typename T> using mask_type_t = typename T::mask_type;
-template <typename T> using interop_type_t = typename T::interop_type;
+template <typename T> using enum_type_t = T::enum_type;
+template <typename T> using mask_type_t = T::mask_type;
+template <typename T> using interop_type_t = T::interop_type;
 
 template <c::enum_ auto E_> consteval auto make() -> record_info<decltype(E_)> { return { int_<E_>{} }; }
 

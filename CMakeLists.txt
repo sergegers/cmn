@@ -1,7 +1,7 @@
 ﻿# CMakeList.txt : CMake project for cmn, include source and define
 # project specific logic here.
 #
-cmake_minimum_required (VERSION 3.8)
+cmake_minimum_required (VERSION 3.10)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
     set(CMAKE_CXX_STANDARD 23)
@@ -30,13 +30,13 @@ add_compile_definitions("$<$<CONFIG:Debug>:CMN_STATIC_TEST>")
 
 project ("cmn")
 
-#set(Boost_DEBUG ON)
+set(Boost_DEBUG ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
 
 find_package(Boost REQUIRED COMPONENTS 
-    system
+   # system
     exception
     serialization
     unit_test_framework 

@@ -122,22 +122,9 @@ template <c::bitfield Policy>
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::bitfield Policy>
-[[nodiscard]] constexpr auto set_feature(interop_type_t<Policy> pol, Policy feat) noexcept -> Policy
-{
-    return static_cast<Policy>(set_feature_(pol, feat, mask_cast(feat)));
-}
-
-template <c::bitfield Policy>
 [[nodiscard]] constexpr auto set_feature(interop_type_t<Policy> pol, Policy feat, mask_type_t<Policy> mask) noexcept -> Policy
 {
     return static_cast<Policy>(set_feature_(pol, feat, mask));
-}
-
-//-----------------------------------------------------------------------------
-template <c::strong_bitfield Policy>
-[[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat) noexcept -> Policy
-{
-    return static_cast<Policy>(set_feature_(pol, feat, feat));
 }
 
 template <c::strong_bitfield Policy>
