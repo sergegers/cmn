@@ -195,11 +195,11 @@ template <c::adapted_enum E> constexpr bool is_masks_overlapped_v = 0 != mask_ov
 template <c::adapted_enum E>
 [[nodiscard]] constexpr auto mask_by_enum(E en) noexcept -> mask_type_t<E>
 {
-    auto const& groups = groups_v<E>;
+    auto const &groups = groups_v<E>;
     auto const &masks = masks_v<E>;
 
     mask_type_t<E> res = no_mask<E>;
-    std::ignore = exec2
+    std::ignore = exec
     (
         groups,
         masks,

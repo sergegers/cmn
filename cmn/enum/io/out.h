@@ -69,7 +69,7 @@ struct out_group_op
     bool                                    &m_first;
 
     template <c::adapted_enum E>
-    constexpr auto operator ()(record_info<E> const &rec) const
+    constexpr auto operator ()(record_info<E> const &rec, mask_type_t<E>) const
     {
         if (!m_first) m_ostr << m_fmt_specs.separator; else m_first = false;
         m_ostr << rec;

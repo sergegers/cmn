@@ -27,23 +27,13 @@ namespace cmn::io
 namespace manip
 {
 
-auto get_mask(int_fmt_t en) -> mask_type_t<int_fmt_t>
-{
-    // NOTE: zero value isn't used, so we can get mask from value
-    for (auto const mask: enum_::masks_v<int_fmt_t>)
-        if (has_value(en, mask))
-            return mask;
-
-    return mask_cast(int_fmt_t::empty);
-}
-
 // remain not affected options unchanged
 auto override_value(int_fmt_t old, int_fmt_t new_) -> int_fmt_t
 {
     int_fmt_t res = old;
     for (auto const mask: enum_::masks_v<int_fmt_t>)
-        if (auto const masked_new = value(new_,  mask); has_value(masked_new))
-            res = set_value(res, masked_new, mask);
+        if (auto const masked_new = get_mask(new_,  mask); has_mask(masked_new))
+            res = set_mask(res, masked_new, mask);
 
     return res;
 }

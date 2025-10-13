@@ -30,7 +30,7 @@ add_compile_definitions("$<$<CONFIG:Debug>:CMN_STATIC_TEST>")
 
 project ("cmn")
 
-set(Boost_DEBUG ON)
+#set(Boost_DEBUG ON)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
