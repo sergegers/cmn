@@ -204,7 +204,7 @@ template <c::adapted_enum E>
         groups,
         masks,
         en,
-        [en, &res](record_info<E> const& rec, mask_type_t<E> mask) constexpr
+        [en, &res](record_info<E> const &rec, mask_type_t<E> mask) constexpr
         {
             if (rec.m_value == en)
             {

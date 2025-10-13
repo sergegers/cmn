@@ -13,18 +13,29 @@ namespace enum_
 namespace detail
 {
 
-template <c::strong_bitfield Policy>
-constexpr bool bitfield_or_combo_ = in(cmn::enum_::kind_v<Policy>, kind_t::bitfield, kind_t::combo);
-
-template <typename Policy, c::bitfield Feature> requires bitfield_or_combo_<Feature>
-constexpr auto inplace_set_feature_(Policy& pol, Feature feat) noexcept -> Policy &
+template <typename Policy, c::bitfield Feature> requires c::adapted_enum<Feature>
+[[nodiscard]] constexpr auto set_feature_adapted(Policy pol, Feature feat) noexcept -> Policy
 {
-    auto old_pol = pol;
-    auto const mask = mask_by_enum(feat);
-    pol = static_cast<Policy>(set_feature_(pol, feat, mask));
-    std::cout << "policy:" << old_pol << "->" << pol << " feature:" << feat << " mask:" << mask << "\n";
+    std::ignore = exec
+    (
+          groups_v<Feature>
+        , masks_v<Feature>
+        , feat
+        , [&pol](record_info<Feature> const& rec, mask_type_t<Feature> mask)
+        {
+            pol = static_cast<Policy>(set_feature_(pol, rec.m_value, mask));
+            return false;
+        }
+    );
 
     return pol;
+}
+
+template <typename Policy, c::bitfield Feature> requires c::adapted_enum<Feature>
+constexpr auto inplace_set_feature_adapted(Policy &pol, Feature feat) noexcept -> Policy &
+{
+    auto const mask = mask_by_enum(feat);
+    return pol = static_cast<Policy>(set_feature_(pol, feat, mask));
 }
 
 }
@@ -34,24 +45,26 @@ constexpr auto inplace_set_feature_(Policy& pol, Feature feat) noexcept -> Polic
 template <c::bitfield Policy> requires c::adapted_enum<Policy>
 [[nodiscard]] constexpr auto set_feature(interop_type_t<Policy> pol, Policy feat) noexcept -> Policy
 {
-    auto const mask = mask_by_enum(feat);
-    return static_cast<Policy>(set_feature_(pol, feat, feat));
+    //auto const mask = mask_by_enum(feat);
+    //return static_cast<Policy>(set_feature_(pol, feat, feat));
+    return static_cast<Policy>(detail::set_feature_adapted(pol, feat));
 }
 
-template <c::strong_bitfield Policy> requires detail::bitfield_or_combo_<Policy>
+template <c::strong_bitfield Policy> requires c::adapted_enum<Policy>
 [[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat) noexcept -> Policy
 {
-    auto const mask = mask_by_enum(feat);
-    return static_cast<Policy>(set_feature_(pol, feat, mask));
+    //auto const mask = mask_by_enum(feat);
+    //return static_cast<Policy>(set_feature_(pol, feat, mask));
+    return static_cast<Policy>(detail::set_feature_adapted(pol, feat));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::strong_bitfield Policy, c::bitfield... Features>
-    requires (... && std::same_as<Policy, Features>) && detail::bitfield_or_combo_<Policy>
+    requires (... && std::same_as<Policy, Features>) && c::adapted_enum<Policy>
 [[nodiscard]] constexpr auto set_features(Policy pol, Policy feat, Features... feats) noexcept -> Policy
 {
-    using detail::inplace_set_feature_;
-    return (inplace_set_feature_(pol, feat), ..., inplace_set_feature_(pol, feats));
+    using detail::inplace_set_feature_adapted;
+    return (inplace_set_feature_adapted(pol, feat), ..., inplace_set_feature_adapted(pol, feats));
 }
 
 }

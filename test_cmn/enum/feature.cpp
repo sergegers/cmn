@@ -8,7 +8,7 @@
 BOOST_AUTO_TEST_SUITE(cmn)
 BOOST_AUTO_TEST_SUITE(enum_)
 
-BOOST_AUTO_TEST_CASE(int_fmt)
+BOOST_AUTO_TEST_CASE(set_feature_)
 {
     using enum cmn::io::int_fmt_t;
 
@@ -17,7 +17,23 @@ BOOST_AUTO_TEST_CASE(int_fmt)
     BOOST_TEST(set_feature(fmt_opt, dec) == (dec | showbase | c | short_ | lowercase | nosign));
     BOOST_TEST(has_all_features(fmt_opt, hex, showbase, c, short_, lowercase, nosign));
 
-    auto const new_fmt_opt = set_features(fmt_opt,dec, asm_, short_, forcesign);
+    auto const new_fmt_opt = set_feature(fmt_opt, dec | asm_ | short_ | forcesign);
+
+    cmn::io::int_fmt_wrapper_t x{ new_fmt_opt };
+    BOOST_TEST
+    (
+        new_fmt_opt ==
+        (dec | showbase | asm_ | short_ | lowercase | forcesign)
+    );
+
+}
+
+BOOST_AUTO_TEST_CASE(set_features_)
+{
+    using enum cmn::io::int_fmt_t;
+
+    auto const fmt_opt = hex | showbase | c | short_ | lowercase | nosign;
+    auto const new_fmt_opt = set_features(fmt_opt, dec, asm_, short_, forcesign);
 
     cmn::io::int_fmt_wrapper_t x{ new_fmt_opt };
     BOOST_TEST

@@ -49,6 +49,9 @@ BOOST_AUTO_TEST_CASE(strong_feature)
     BOOST_TEST(has_feature(sbf_pol, f4));
     BOOST_TEST(has_all_features(sbf_pol, f1, f4));
 
+    BOOST_TEST(reset_feature(sbf_pol, f1) == f4);
+    BOOST_TEST(reset_feature(sbf_pol, f4) == f1);
+
 }
 
 //-----------------------------------------------------------------------------
@@ -63,7 +66,7 @@ enum feature_t
     f_mB  = f_4 | f_8
 };
 
-static_assert(cmn::c::bitfield<strong_feature_t>);
+static_assert(cmn::c::bitfield<feature_t>);
 
 BOOST_AUTO_TEST_CASE(feature)
 {
@@ -77,6 +80,9 @@ BOOST_AUTO_TEST_CASE(feature)
 
 	BOOST_TEST(has_feature(bf_pol, f_1));
     BOOST_TEST(has_feature(bf_pol, f_4));
+
+    BOOST_TEST(reset_feature(bf_pol, f_1) == f_4);
+    BOOST_TEST(reset_feature(bf_pol, f_4) == f_1);
 }
 
 BOOST_AUTO_TEST_SUITE_END() // util
