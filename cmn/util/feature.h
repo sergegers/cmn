@@ -19,7 +19,7 @@ template <c::enumerable Policy>
 template <c::enumerable Policy>
 [[nodiscard]] constexpr auto set_feature_(auto pol, Policy feat, auto mask) noexcept -> interop_type_t<Policy>
 {
-    return get_feature_(pol, ~mask) | get_feature_(feat, mask);
+    return interop_cast(pol) & ~lazy_to_interop(mask) | get_feature_(feat, mask);
 }
 
 template <c::enumerable Policy>

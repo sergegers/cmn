@@ -35,9 +35,9 @@ static_assert(std::same_as<interop_type_t<ce>, short>);
 static_assert(std::same_as<mask_type_t<ce>, unsigned short>);
 static_assert(no_mask<ce> == 0xFFFF);
 
-static_assert(next_on_mask(0b0111) == 0b1000);
-static_assert(next_on_mask(0b0111) != 0b1001);
-static_assert(next_on_mask(0b0100000100) == 0b1000000000);
+static_assert(next_step(0b0111) == 0b1000);
+static_assert(next_step(0b0111) != 0b1001);
+static_assert(next_step(0b0100000100) == 0b1000000000);
 
 //-----------------------------------------------------------------------------
 using boost::test_tools::output_test_stream;

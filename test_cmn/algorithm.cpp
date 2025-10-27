@@ -178,12 +178,12 @@ BOOST_AUTO_TEST_CASE(bfind_fus_vis_args)
 
     {
         auto const res = binary_find_fus(test_vector, mp_int < 3 > {}, vis, 2, 3);
-        BOOST_TEST(res == (std::pair{ std::tuple{ 3, 2, 3 }, 1_z }));
+        BOOST_TEST(res == (std::pair{ std::tuple{ 3, 2, 3 }, 1z }));
     }
 
     {
         auto const res = binary_find_fus(test_vector, mp_int < 5 > {}, vis, 2, 3);
-        BOOST_TEST(res == (std::pair{ std::tuple{ 0, 0, 0 }, -1_z }));
+        BOOST_TEST(res == (std::pair{ std::tuple{ 0, 0, 0 }, -1z }));
     }
 }
 

@@ -8,6 +8,8 @@
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
 
+#include <cmn/enum/feature.h>
+
 #include <cmn/io/manip/slot/fwd.h>
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
@@ -23,8 +25,6 @@ namespace io
 
 namespace manip
 {
-
-auto override_value(int_fmt_t old, int_fmt_t new_) -> int_fmt_t;
 
 // set one group at once
 struct int_fmt_storage_t
@@ -51,6 +51,7 @@ using int_fmt_forwarder = slot_manip_forwarder<int_fmt_slot_manip>;
 inline constexpr int_fmt_forwarder int_fmt{};
 
 constexpr auto udec = int_fmt(int_fmt_t::dec);
+constexpr auto uoct = int_fmt(int_fmt_t::oct);
 constexpr auto uhex = int_fmt(int_fmt_t::hex);
 constexpr auto ushowbase = int_fmt(int_fmt_t::showbase);
 constexpr auto uhidebase = int_fmt(int_fmt_t::hidebase);
@@ -79,7 +80,7 @@ auto get_value(std::basic_ios<Char, CharTraits> &ios, Unit const &/*unit*/) -> i
 {
     auto const unit_default = default_v<Unit>;  // get default type formatting options from traits
     auto const manip_value = manip::int_fmt_slot_manip::value(ios);
-    return manip::override_value(unit_default, manip_value); // override default values by the stream ones
+    return set_feature(unit_default, manip_value); // override default values by the stream ones
 }
 
 ///////////////////////////////////////////////////////////////////////////////

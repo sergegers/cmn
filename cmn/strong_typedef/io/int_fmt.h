@@ -1,6 +1,7 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/enum/combo.h>
+#include <cmn/enum/traits.h>
 
 namespace cmn::io
 {
@@ -10,44 +11,45 @@ namespace cmn::io
 //
 enum class radix_fmt_t
 {
-	dec = 0b0000'0000'0000'0001,		// default
-	hex = 0b0000'0000'0000'0010,		// x
-	mask = dec | hex
+	dec,									// default
+	oct,									// o
+	hex,									// x
+	mask = dec | oct | hex
 };
 
 enum class base_fmt_t
 {
-	showbase = 0b0000'0000'0000'0100,    // #
-	hidebase = 0b0000'0000'0000'1000,    // default
+	showbase = enum_::next_step(radix_fmt_t::mask),				// #
+	hidebase = showbase + enum_::next_step(radix_fmt_t::mask),	// default
 	mask = showbase | hidebase
 };
 
 enum class lang_fmt_t
 {
-	asm_ = 0b0000'0000'0001'0000,		// a
-	c = 0b0000'0000'0010'0000,			// default
+	asm_ = enum_::next_step(base_fmt_t::mask),					// a
+	c	 = asm_ + enum_::next_step(base_fmt_t::mask),			// default
 	mask = asm_ | c
 };
 
 enum class width_fmt_t
 {
-	short_ = 0b0000'0000'0100'0000,		// s, default
-	long_ = 0b0000'0000'1000'0000,		// l
+	short_ = enum_::next_step(lang_fmt_t::mask),				// s, default
+	long_ = short_ + enum_::next_step(lang_fmt_t::mask),		// l
 	mask = short_ | long_
 };
 
 enum class case_fmt_t
 {
-	uppercase = 0b0000'0001'0000'0000,    // u
-	lowercase = 0b0000'0010'0000'0000,    // default
+	uppercase = enum_::next_step(width_fmt_t::mask),			// u
+	lowercase = uppercase + enum_::next_step(width_fmt_t::mask),// default
 	mask = uppercase | lowercase
 };
 
 enum class sign_fmt_t
 {
-	sign = 0b0000'0100'0000'0000,		// ( ) space for zero
-	nosign = 0b0000'1000'0000'0000,		// default
-	forcesign = 0b0001'0000'0000'0000,  // (+) + for zero
+	sign = enum_::next_step(case_fmt_t::mask),					// ( ) space for zero
+	nosign = sign + enum_::next_step(case_fmt_t::mask),			// default
+	forcesign = nosign + enum_::next_step(case_fmt_t::mask),	// (+) + for zero
 	mask = sign | nosign | forcesign
 };
 
@@ -58,6 +60,7 @@ enum class sign_fmt_t
 enum class int_fmt_t : short
 {
 	dec = radix_fmt_t::dec,					// default
+	oct = radix_fmt_t::oct,					// o
 	hex = radix_fmt_t::hex,					// x
 
 	showbase = base_fmt_t::showbase,		// #
@@ -101,7 +104,7 @@ consteval auto adapt_enum_info(int_fmt_t en)
 	return enum_info
 	(
 		default_ops(en, kind_t::combo) | op_interoperable
-		, group_::make<dec, hex>()
+		, group_::make<dec, oct, hex>()
 		, group_::make<showbase, hidebase>()
 		, group_::make<asm_, c>()
 		, group_::make<short_, long_>()

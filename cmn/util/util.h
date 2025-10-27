@@ -16,15 +16,6 @@
 namespace cmn
 {
 
-inline namespace literals
-{
-
-// TODO: replace with C++ 23 literals
-constexpr auto operator ""_uz (unsigned long long n) -> std::size_t { return n; }
-constexpr auto operator ""_z (unsigned long long n) -> std::ptrdiff_t { return n; }
-
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //
 // https://www.bfilipek.com/2019/02/2lines3featuresoverload.html?m=1
@@ -83,7 +74,7 @@ constexpr auto sgn(Int val) -> std::make_signed_t<Int>
 template <std::unsigned_integral T> constexpr auto log10(T param) -> std::size_t
 {
     using namespace literals;
-    std::size_t result{ 1_uz };
+    std::size_t result{ 1uz };
 
      while(T{} != (param /= T{ 10 })) ++result;
      return result;
@@ -92,9 +83,9 @@ template <std::unsigned_integral T> constexpr auto log10(T param) -> std::size_t
 template <std::unsigned_integral T> constexpr auto pow10(T param) -> std::size_t
 {
     using namespace literals;
-    std::size_t result{ 1_uz };
+    std::size_t result{ 1uz };
 
-    while (T{} != param--) result *= 10_uz;
+    while (T{} != param--) result *= 10uz;
     return result;
 }
 

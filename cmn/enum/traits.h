@@ -119,13 +119,13 @@ constexpr auto const &group_by_mask()
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// first enum constant value in next group based on previous mask
+// get first left empty bit
 //
-template <c::enumerable E> 
-constexpr auto next_on_mask(E prev_mask) -> E
+template <c::enumerable E>
+constexpr auto next_step(E prev_mask)
 {
-    using mask_type = std::make_unsigned_t<underlying_type_t<E>>;
-    return E{ 1 } << (bsr(static_cast<mask_type>(prev_mask)) + 1);
+    using mask_type = mask_type_t<E>;
+    return 1 << (bsr(static_cast<mask_type>(prev_mask)) + 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

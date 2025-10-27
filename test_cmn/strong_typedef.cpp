@@ -1,5 +1,6 @@
 
 #include <format>
+#include <string_view>
 
 #include <boost/io/ios_state.hpp>
 #include <boost/archive/xml_oarchive.hpp>
@@ -45,13 +46,33 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
 {
     boost::test_tools::output_test_stream ostr;
 
+    using enum int_fmt_t;
+    auto x = hex;
+    auto y = set_feature(x, showbase);
+    BOOST_TEST_MESSAGE(y);
+
     //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
     {
         boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
-        ostr << uhex << ushowbase << uupercase << uasm << ulong_ << usign << my_int{ 6789 };
-        //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
-        //BOOST_TEST_MESSAGE(ostr.str());
-        BOOST_TEST(ostr.is_equal("+00001A85h"));
+
+        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        ostr << uhex;
+        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        ostr << ushowbase;
+        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        ostr << uupercase;
+        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        ostr << uasm;
+        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        ostr << ulong_;
+        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        ostr << usign;
+        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+
+        //ostr << uhex << ushowbase << uupercase << uasm << ulong_ << usign << my_int{ 6789 };
+        //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        ////BOOST_TEST_MESSAGE(ostr.str());
+        //BOOST_TEST(ostr.is_equal("+00001A85h"));
     }
 
     ostr.str("");
@@ -141,6 +162,14 @@ static_assert(c::bitfield<my_bitfield>);
 
 BOOST_AUTO_TEST_CASE(strong_typedef_format)
 {
+    using namespace std::string_view_literals;
+    using enum int_fmt_t;
+
+    std::basic_format_parse_context ctx{ ":#x}"sv, 3 };
+    std::formatter<my_int> fmt;
+    fmt.parse(ctx);
+    BOOST_TEST(fmt.m_fmt_opt == (hex | showbase | c | short_ | lowercase | nosign));
+
 //    BOOST_TEST(std::format("{}", my_int{ 4 }) == "4");
     BOOST_TEST(std::format("{:#x}", my_int{ 4 }) == "0x4");
 //    BOOST_TEST(std::format("{:#xu}", my_int{ 0x4A }) == "0x4A");

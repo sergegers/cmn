@@ -68,7 +68,6 @@ struct symbols<char>
     static constexpr auto empty                     = "empty"_fs;
     static constexpr auto nullptr_                  = "nullptr"_fs;
     static constexpr auto hex_prefix                = "0x"_fs;
-    static constexpr auto hex_postfix               = "h"_fs;
     static constexpr auto scope_resolution          = "::"_fs;
     static constexpr auto left_arrow                = "<-"_fs;
     static constexpr auto right_arrow               = "->"_fs;
@@ -121,7 +120,6 @@ struct symbols<wchar_t>
     static constexpr auto empty                     = L"empty"_wfs;
     static constexpr auto nullptr_                  = L"nullptr"_wfs;
     static constexpr auto hex_prefix                = L"0x"_wfs;
-    static constexpr auto hex_postfix               = L"h"_wfs;
     static constexpr auto scope_resolution          = L"::"_wfs;
     static constexpr auto left_arrow                = L"<-"_wfs;
     static constexpr auto right_arrow               = L"->"_wfs;
