@@ -51,7 +51,7 @@ struct find_if_fus_impl
     Iterator                m_it;
     EndIter                 m_end;
 
-    find_if_fus_impl
+    constexpr find_if_fus_impl
     (
         std::ptrdiff_t const index, 
         BeginIter begin,
@@ -70,7 +70,7 @@ struct find_if_fus_impl
     auto operator =(itself &&) -> itself&      = delete;
 
     template <typename Pred, typename Visitor>
-    auto operator ()(Pred &&pred, Visitor &&visitor) const
+    constexpr auto operator ()(Pred &&pred, Visitor &&visitor) const
     {
         auto &&cur = *m_it;
         if (pred(cur))
@@ -119,12 +119,12 @@ struct find_if_fus_impl<BeginIter, Iterator, EndIter>
     auto operator = (itself &&) -> itself&      = delete;
 
     template <typename Pred, typename Visitor>
-    auto operator ()(Pred &&, Visitor &&visitor) const noexcept
+    constexpr auto operator ()(Pred &&, Visitor &&visitor) const noexcept
     {
         // use first sequence element to compute a visitor
         // result type or use a part of the result_of protocol
         // if the sequence is empty
-        using any_type = typename mpl::eval_if_c
+        using any_type = mpl::eval_if_c
         <
             std::is_same_v<BeginIter, EndIter>,
             vis_result<std::decay_t<Visitor>>,
@@ -162,7 +162,7 @@ struct iter_find_if_fus_impl
     Iterator                m_it;
     EndIter                 m_end;
     
-    iter_find_if_fus_impl
+    constexpr iter_find_if_fus_impl
     (
         std::ptrdiff_t const index,
         BeginIter begin,
@@ -181,7 +181,7 @@ struct iter_find_if_fus_impl
     auto operator =(itself &&) -> itself&      = delete;
     
     template <typename Pred, typename Visitor>
-    auto operator ()(Pred &&pred, Visitor &&visitor) const
+    constexpr auto operator ()(Pred &&pred, Visitor &&visitor) const
     {
         if (pred(m_it))
         {
@@ -201,7 +201,7 @@ struct iter_find_if_fus_impl
     }
 
     template <typename PredVisitor>
-    auto operator ()(PredVisitor &&pred_vis) const
+    constexpr auto operator ()(PredVisitor &&pred_vis) const
     {
         if (pred_vis(m_it))
         {
@@ -235,7 +235,7 @@ struct iter_find_if_fus_impl<BeginIter, Iterator, EndIter>
     
     EndIter                 m_end;
     
-    iter_find_if_fus_impl
+    constexpr iter_find_if_fus_impl
     (
         std::ptrdiff_t const /*index*/,
         BeginIter /*begin*/,
@@ -251,7 +251,7 @@ struct iter_find_if_fus_impl<BeginIter, Iterator, EndIter>
     auto operator = (itself &&) -> itself &      = delete;
     
     template <typename Pred, typename Visitor>
-    auto operator ()(Pred &&, Visitor &&visitor) const
+    constexpr auto operator ()(Pred &&, Visitor &&visitor) const
     {
         return result_{ std::forward<Visitor>(visitor) }
                 .with_args(m_end)
@@ -261,7 +261,7 @@ struct iter_find_if_fus_impl<BeginIter, Iterator, EndIter>
     }
     
     template <typename PredVisitor>
-    auto operator ()(PredVisitor &&pred_vis) const
+    constexpr auto operator ()(PredVisitor &&pred_vis) const
     {
         return result_{ std::forward<PredVisitor>(pred_vis) }
                 .with_args(algo::visit, m_end)
@@ -277,10 +277,10 @@ struct find_pred
     T m_t;
 
     template <typename Arg>
-    find_pred(Arg &&t) : m_t { std::forward<Arg>(t) } {}
+    constexpr find_pred(Arg &&t) : m_t { std::forward<Arg>(t) } {}
 
     template <typename Current>
-    auto operator ()(Current const &current) const -> bool
+    constexpr auto operator ()(Current const &current) const -> bool
     {
         return m_t == current;
     }
@@ -298,7 +298,7 @@ struct find_if_mp11_impl final
 
     std::ptrdiff_t const		m_index;
 
-    explicit find_if_mp11_impl(std::ptrdiff_t index) : m_index { index } {}
+    constexpr explicit find_if_mp11_impl(std::ptrdiff_t index) : m_index { index } {}
     find_if_mp11_impl(itself const &) = delete;
     find_if_mp11_impl(itself &&)      = delete;
 
@@ -306,7 +306,7 @@ struct find_if_mp11_impl final
     auto operator =(itself &&) -> itself &      = delete;
 
     template <boost::c::mp11_list Rest, typename Pred, typename Visitor>
-    auto operator ()(std::type_identity<Rest>, Pred &&pred, Visitor &&visitor) const
+    constexpr auto operator ()(std::type_identity<Rest>, Pred &&pred, Visitor &&visitor) const
     {
         using namespace boost::mp11;
 
@@ -332,7 +332,7 @@ struct find_if_mp11_impl final
     template <boost::c::mp11_list Rest, typename Pred, typename Visitor>
         requires mp_empty_v<Rest>
 
-    auto operator ()(std::type_identity<Rest>, Pred &&/*pred*/, Visitor &&visitor) const
+    constexpr auto operator ()(std::type_identity<Rest>, Pred &&/*pred*/, Visitor &&visitor) const
     {
         using namespace boost::mp11;
 
@@ -371,7 +371,7 @@ struct find_if_noctor_mp11_impl final
 
     std::ptrdiff_t const		m_index;
 
-    find_if_noctor_mp11_impl(std::ptrdiff_t const index) noexcept : m_index { index } {}
+    constexpr find_if_noctor_mp11_impl(std::ptrdiff_t const index) noexcept : m_index { index } {}
     find_if_noctor_mp11_impl(itself const &) = delete;
     find_if_noctor_mp11_impl(itself &&)      = delete;
 
@@ -379,7 +379,7 @@ struct find_if_noctor_mp11_impl final
     auto operator = (itself &&) -> itself&       = delete;
 
     template <boost::c::mp11_list Rest, typename Pred, typename Visitor>
-    auto operator ()(std::type_identity<Rest>, Pred &&pred, Visitor &&visitor) const
+    constexpr auto operator ()(std::type_identity<Rest>, Pred &&pred, Visitor &&visitor) const
     {
         using namespace boost::mp11;
 
@@ -403,7 +403,7 @@ struct find_if_noctor_mp11_impl final
 
     template <boost::c::mp11_list Rest, typename Pred, typename Visitor>
         requires mp_empty_v<Rest>
-    auto operator ()(std::type_identity<Rest>, Pred &&/*pred*/, Visitor &&visitor) const
+    constexpr auto operator ()(std::type_identity<Rest>, Pred &&/*pred*/, Visitor &&visitor) const
     {
         using namespace boost::mp11;
 
@@ -443,14 +443,14 @@ struct find_if_noctor_mp11_impl final
 // 
 // Stops the search if pred(at_c<Pos>(seq)) == true.
 // 
-// Returns: std::pair<decltype(visitor(elem)), int> where int is poisition or
+// Returns: std::pair<decltype(visitor(elem)), int> where int is position or
 // int position if the decltype(visitor(elem)) == void
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Sequence, typename Pred, typename Visitor = detail::empty_visitor>
     requires boost::c::fus_sequence<std::remove_reference_t<Sequence>>
 
-auto find_if_fus(Sequence &&seq, Pred &&pred, Visitor &&visitor = detail::empty_visitor {})
+constexpr auto find_if_fus(Sequence &&seq, Pred &&pred, Visitor &&visitor = detail::empty_visitor {})
 {
     namespace fus = boost::fusion;
 
@@ -473,14 +473,14 @@ auto find_if_fus(Sequence &&seq, Pred &&pred, Visitor &&visitor = detail::empty_
 // 
 // Stops the search if at_c<Pos>(seq) == t.
 //
-// Returns: std::pair<decltype(visitor(elem)), int> where int is poisition or
+// Returns: std::pair<decltype(visitor(elem)), int> where int is position or
 // int position if the decltype(visitor(elem)) == void
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Sequence, typename T, typename Visitor = detail::empty_visitor>
     requires boost::c::fus_sequence<std::remove_reference_t<Sequence>>
 
-auto find_fus(Sequence &&seq, T &&t, Visitor &&visitor = detail::empty_visitor {})
+constexpr auto find_fus(Sequence &&seq, T &&t, Visitor &&visitor = detail::empty_visitor {})
 {
     return find_if_fus
     (
@@ -501,14 +501,14 @@ auto find_fus(Sequence &&seq, T &&t, Visitor &&visitor = detail::empty_visitor {
 // 
 // Stops the search if pred(at_c<Pos>(seq)) == true.
 // 
-// Returns: std::pair<decltype(visitor(iter)), int> where int is poisition or
+// Returns: std::pair<decltype(visitor(iter)), int> where int is position or
 // int position if the decltype(visitor(iter)) == void
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Sequence, typename Pred, typename Visitor = detail::empty_visitor>
     requires boost::c::fus_sequence<std::remove_reference_t<Sequence>>
 
-auto iter_find_if_fus(Sequence &&seq, Pred &&pred, Visitor &&visitor = detail::empty_visitor {})
+constexpr auto iter_find_if_fus(Sequence &&seq, Pred &&pred, Visitor &&visitor = detail::empty_visitor {})
 {
     namespace fus = boost::fusion;
 
@@ -531,7 +531,7 @@ auto iter_find_if_fus(Sequence &&seq, Pred &&pred, Visitor &&visitor = detail::e
 template <typename Sequence, typename Pred>
     requires boost::c::fus_sequence<std::remove_reference_t<Sequence>>
 
-auto iter_find_if_fus(Sequence &&seq, Pred &&pred, algo::visit_tag)
+constexpr auto iter_find_if_fus(Sequence &&seq, Pred &&pred, algo::visit_tag)
 {
     namespace fus = boost::fusion;
 
@@ -565,7 +565,7 @@ template
     , typename Pred
     , typename Visitor = detail::empty_visitor
 >
-auto find_if_mp11(Pred &&pred, Visitor &&visitor = detail::empty_visitor {})
+constexpr auto find_if_mp11(Pred &&pred, Visitor &&visitor = detail::empty_visitor {})
 {
     detail::find_if_mp11_impl<L> fi{ 0 };
     using list_id = std::type_identity<L>;
@@ -596,7 +596,7 @@ template
     , typename Pred
     , typename Visitor = detail::empty_type_visitor
 >
-auto find_if_noctor_mp11(Pred &&pred, Visitor &&visitor = detail::empty_type_visitor {})
+constexpr auto find_if_noctor_mp11(Pred &&pred, Visitor &&visitor = detail::empty_type_visitor {})
 {
     detail::find_if_noctor_mp11_impl<L> const fi { 0 };
     using list_id = std::type_identity<L>;

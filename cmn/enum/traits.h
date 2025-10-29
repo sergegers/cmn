@@ -7,6 +7,8 @@
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
 
+#include <cmn/algorithm/find.h>
+
 #include <cmn/enum/detail/qualified_name.h>
 #include <cmn/enum/detail/name_info.h>
 #include <cmn/enum/detail/enum_info.h>
@@ -40,7 +42,7 @@ namespace group_
 {
 
 using detail::group_::make;
-using detail::group_::exec;
+using detail::group_::find;
 using detail::group_::size_v;
 
 }
@@ -52,7 +54,7 @@ using detail::record_::make;
 
 }
 
-using detail::exec;
+using detail::fold;
 
 //-----------------------------------------------------------------------------
 template <c::enum_ E, typename Char, typename CharTraits>
@@ -199,7 +201,7 @@ template <c::adapted_enum E>
     auto const &masks = masks_v<E>;
 
     mask_type_t<E> res = no_mask<E>;
-    std::ignore = exec
+    std::ignore = fold
     (
         groups,
         masks,
@@ -221,6 +223,22 @@ template <c::adapted_enum E>
 
     return res;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+template <c::adapted_enum E>
+[[nodiscard]] constexpr bool contains_zero_v = [] constexpr -> bool
+    {
+        return find_if_fus
+        (
+            groups_v<E>,
+            [](auto const& group) -> bool
+            {
+                return std::ranges::binary_search(group.m_records, 0, {}, &record_info<E>::as_interop);
+            }
+        )
+            != -1;
+    }
+();
 
 }
 

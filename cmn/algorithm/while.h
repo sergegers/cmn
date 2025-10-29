@@ -29,7 +29,7 @@ template <boost::c::mp11_list L>
 struct while_mp11_impl
 {
     template <boost::c::mp11_list Rest, typename Pred>
-    auto operator ()(std::type_identity<Rest>, Pred &&pred) const -> void
+    constexpr auto operator ()(std::type_identity<Rest>, Pred &&pred) const -> void
     {
         if constexpr (!mp_empty_v<Rest>)
         {
@@ -53,7 +53,7 @@ struct while_mp11_impl
 
 // TODO: + visitor
 template <boost::c::mp11_list L, typename Pred>
-auto while_mp11(Pred &&pred) -> void
+constexpr auto while_mp11(Pred &&pred) -> void
 {
     detail::while_mp11_impl<L> {} (std::type_identity<L>{}, std::forward<Pred>(pred));
 }

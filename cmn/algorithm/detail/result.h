@@ -84,7 +84,7 @@ struct result_base_
 
     //-----------------------------------------------------------------------------
     template <typename Self, c::enumerable Index = std::ptrdiff_t>
-    constexpr auto with_index(this Self &&self_, Index index = -1) requires callable_<Self>
+    [[nodiscard]] constexpr auto with_index(this Self &&self_, Index index = -1) requires callable_<Self>
     {
         return self_.make_result
         (
@@ -93,7 +93,7 @@ struct result_base_
     }
 
     template <typename Self, c::enumerable Index = std::ptrdiff_t>
-    constexpr auto with_index(this Self &&self_, Index index = -1) requires procedure_<Self>
+    [[nodiscard]] constexpr auto with_index(this Self &&self_, Index index = -1) requires procedure_<Self>
     {
         return self_.make_result
         (
@@ -107,13 +107,13 @@ struct result_base_
 
     //-----------------------------------------------------------------------------
     template <typename Self>
-    auto vis_result_not_found(this Self &&self_)
+    constexpr [[nodiscard]] auto vis_result_not_found(this Self &&self_)
     {
         return self_.make_result([]() -> vis_result_t<Visitor> { return {}; });
     }
 
     template <typename Self>
-    auto vis_result_not_found(this Self &&self_) requires std::is_void_v<vis_result_t<Visitor>>
+    constexpr [[nodiscard]] auto vis_result_not_found(this Self &&self_) requires std::is_void_v<vis_result_t<Visitor>>
     {
         return self_.make_result([]{});
     }
@@ -128,13 +128,13 @@ private:
     friend inherited;
 
     template <typename NewVisitor>
-    static constexpr auto make_result(NewVisitor &&vis) -> result_<NewVisitor>
+    [[nodiscard]] static constexpr auto make_result(NewVisitor &&vis) -> result_<NewVisitor>
     {
         return { std::forward<NewVisitor>(vis) };
     }
 public:
     template <typename VisArg>
-    result_(VisArg &&visitor):
+    constexpr result_(VisArg &&visitor):
         inherited{ std::forward<VisArg>(visitor) }
     {}
 
@@ -144,7 +144,7 @@ public:
     // NOTE: (for debugging purposes) set breakpoint here
     //
     template <typename Self, typename... Args>
-    constexpr auto operator ()(this Self &&self_, Args &&... args) ->
+    [[nodiscard]] constexpr auto operator ()(this Self &&self_, Args &&... args) ->
         decltype(std::forward<Self>(self_).m_visitor(std::forward<Args>(args)...))
     {
         return std::forward<Self>(self_).m_visitor(std::forward<Args>(args)...);
@@ -152,7 +152,7 @@ public:
 
     //-----------------------------------------------------------------------------
     template <typename Self, typename... Args>
-    constexpr auto with_args(this Self &&self_, Args &&... args) requires callable_<Self, Args...>
+    [[nodiscard]] constexpr auto with_args(this Self &&self_, Args &&... args) requires callable_<Self, Args...>
     {
         return make_result
         (
@@ -163,7 +163,7 @@ public:
 
     //-----------------------------------------------------------------------------
     template <typename... Args, typename Self>
-    constexpr auto with_type_args(this Self &&self_) requires type_callable_<Self, Args...>
+    [[nodiscard]] constexpr auto with_type_args(this Self &&self_) requires type_callable_<Self, Args...>
     {
         return make_result
         (
@@ -174,7 +174,7 @@ public:
 
     //-----------------------------------------------------------------------------
     template <typename Self, typename... Args>
-    auto args_not_found(this Self &&self_, Args &&... args) requires callable_<Self, Args...>
+    [[nodiscard]] constexpr auto args_not_found(this Self &&self_, Args &&... args) requires callable_<Self, Args...>
     {
         using visitor_result_type = decltype(std::forward<Self>(self_).m_visitor(std::forward<Args>(args)...));
         return make_result
@@ -185,14 +185,14 @@ public:
 
     // void result
     template <typename Self, typename... Args>
-    auto args_not_found(this Self &&self_, Args &&... args) requires procedure_<Self, Args...>
+    [[nodiscard]] constexpr auto args_not_found(this Self &&self_, Args &&... args) requires procedure_<Self, Args...>
     {
         return make_result([]{});
     }
 
     //-----------------------------------------------------------------------------
     template <typename... Args, typename Self>
-    auto type_args_not_found(this Self &&self_) requires callable_<Self, Args...>
+    [[nodiscard]] constexpr auto type_args_not_found(this Self &&self_) requires callable_<Self, Args...>
     {
         using visitor_result_type = decltype(std::forward<Self>(self_).m_visitor(std::declval<Args>()...));
         return make_result
@@ -202,7 +202,7 @@ public:
     }
 
     template <typename... Args, typename Self>
-    auto type_args_not_found(this Self &&self_) requires procedure_<Self, Args...>
+    [[nodiscard]] constexpr auto type_args_not_found(this Self &&self_) requires procedure_<Self, Args...>
     {
         return make_result([]{});
     }
@@ -219,13 +219,13 @@ private:
     friend inherited;
 
     template <typename NewVisitor>
-    static constexpr auto make_result(NewVisitor &&vis) -> result_<NewVisitor>
+    [[nodiscard]] static constexpr auto make_result(NewVisitor &&vis) -> result_<NewVisitor>
     {
         return { std::forward<NewVisitor>(vis) };
     }
 public:
     template <typename VisArg>
-    type_result_(VisArg &&visitor):
+    constexpr type_result_(VisArg &&visitor):
         inherited{ std::forward<VisArg>(visitor) }
     {}
 
@@ -235,7 +235,7 @@ public:
     // NOTE: (for debugging purposes) set breakpoint here
     //
     template <typename... Args, typename Self>
-    constexpr auto operator ()(this Self &&self_) ->
+    [[nodiscard]] constexpr auto operator ()(this Self &&self_) ->
         decltype(std::forward<Self>(self_).m_visitor.template operator ()<Args...>())
     {
         return std::forward<Self>(self_).m_visitor.template operator ()<Args...>();
@@ -243,7 +243,7 @@ public:
 
     //-----------------------------------------------------------------------------
     template <typename... Args, typename Self>
-    constexpr auto with_args(this Self &&self_) requires type_callable_<Self, Args...>
+    [[nodiscard]] constexpr auto with_args(this Self &&self_) requires type_callable_<Self, Args...>
     {
         return make_result
         (
@@ -254,7 +254,7 @@ public:
 
     //-----------------------------------------------------------------------------
     template <typename... Args, typename Self>
-    auto args_not_found(this Self &&self_) requires type_callable_<Self, Args...>
+    [[nodiscard]] constexpr auto args_not_found(this Self &&self_) requires type_callable_<Self, Args...>
     {
         using visitor_result_type = decltype(std::forward<Self>(self_).m_visitor.template operator ()<Args...>());
         return make_result
@@ -264,14 +264,14 @@ public:
     }
 
     template <typename... Args, typename Self>
-    auto args_not_found(this Self &&self_) requires type_procedure_<Self, Args...>
+    [[nodiscard]] constexpr auto args_not_found(this Self &&self_) requires type_procedure_<Self, Args...>
     {
         return make_result([]{});
     }
 
     //-----------------------------------------------------------------------------
     template <boost::c::mp11_list L, typename Self, std::size_t Idx_>
-    auto with_index_arg(this Self &&self_, std::integral_constant<std::size_t, Idx_>)
+    [[nodiscard]] constexpr auto with_index_arg(this Self &&self_, std::integral_constant<std::size_t, Idx_>)
         requires type_callable_<Self, mp_at_c<L, Idx_>>
     {
         return make_result

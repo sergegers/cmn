@@ -16,7 +16,7 @@ namespace detail
 template <typename Policy, c::bitfield Feature> requires c::adapted_enum<Feature>
 [[nodiscard]] constexpr auto set_feature_adapted(Policy pol, Feature feat) noexcept -> Policy
 {
-    std::ignore = exec
+    std::ignore = fold
     (
           groups_v<Feature>
         , masks_v<Feature>

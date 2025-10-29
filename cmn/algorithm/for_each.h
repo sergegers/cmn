@@ -11,7 +11,7 @@ namespace cmn
 
 ///////////////////////////////////////////////////////////////////////////////
 template <boost::c::mp11_list L, typename Func>
-auto for_each_noctor_mp11(Func &&func) -> decltype(std::forward<Func>(func))
+constexpr auto for_each_noctor_mp11(Func &&func) -> decltype(std::forward<Func>(func))
 {
     return []<std::size_t... Idss_>(Func &&func, std::index_sequence<Idss_...>) -> decltype(auto)
     {

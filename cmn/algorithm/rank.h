@@ -43,6 +43,6 @@ template
     template <typename...> typename Pred = boost::mp11::mp_less,
     typename... Items
 > 
-using rank_t = typename rank<Pred, Items...>::type;
+using rank_t = rank<Pred, Items...>::type;
 
 } 

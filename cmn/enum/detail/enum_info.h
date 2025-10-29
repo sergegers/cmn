@@ -139,7 +139,7 @@ template
     boost::c::fus_sequence Groups
     , c::adapted_enum E
 >
-constexpr auto exec
+constexpr auto fold
 (
       Groups const &groups
     , std::array<mask_type_t<E>, boost::fusion::result_of::size_v<Groups>> const &masks
@@ -166,7 +166,7 @@ constexpr auto exec
             auto const& mask = masks[idx];
 
             if (!empty(mask & addditional_mask))
-                return group_::exec(group.m_records, remainder, op, mask);
+                return group_::find(group.m_records, remainder, op, mask);
             else
                 return remainder;
         }

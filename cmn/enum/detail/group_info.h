@@ -17,7 +17,6 @@
 namespace cmn::enum_::detail
 {
 
-// sorted by value record infos
 template <c::enum_ E, std::size_t Sz_>
 struct group_info
 {
@@ -29,6 +28,7 @@ struct group_info
 
     static constexpr std::size_t size = Sz_;
 
+    // sorted by value record infos
     records_type    m_records;
 
     template <c::enum_ auto... Ens_>
@@ -115,8 +115,8 @@ template <typename T> using record_type_t = T::record_type;
 template <typename T> constexpr std::size_t size_v = T::size;
 
 
-template <c::enum_ auto En_, decltype(En_) ... Ens_> consteval auto make()
-    -> group_info<decltype(En_), (sizeof...(Ens_) + 1)>
+template <c::enum_ auto En_, decltype(En_) ... Ens_>
+[[nodiscard]] consteval auto make() -> group_info<decltype(En_), (sizeof...(Ens_) + 1)>
 {
     return { int_<En_>{}, int_<Ens_>{}... };
 }
@@ -128,7 +128,7 @@ template <c::enum_ auto En_, decltype(En_) ... Ens_> consteval auto make()
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <c::adapted_enum E>
-constexpr auto exec
+constexpr auto find
 (
     std::ranges::input_range auto records
     , E en
