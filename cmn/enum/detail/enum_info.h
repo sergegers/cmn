@@ -157,7 +157,7 @@ constexpr auto fold
     return fus::iter_fold
     (
         groups,
-        get_mask(en, addditional_mask),
+        get_feature(en, addditional_mask),
         [&op, addditional_mask, &masks, begin = fus::begin(groups)]
         (E remainder, auto const &it) constexpr
         {

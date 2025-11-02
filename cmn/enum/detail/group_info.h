@@ -138,7 +138,7 @@ constexpr auto find
 {
     using record_type = record_info<E>;
 
-    auto const mval = get_mask(en, group_mask);
+    auto const mval = get_feature(en, group_mask);
 
     std::ignore = std::ranges::find_if
     (
@@ -149,7 +149,7 @@ constexpr auto find
             if (found)
             {
                 op(rec, group_mask);
-                en = reset_mask(en, mval);
+                en = reset_feature(en, mval);
             }
             return found;
         }
