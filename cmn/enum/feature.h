@@ -2,7 +2,7 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/util/feature.h>
-#include <cmn/enum/traits.h>
+#include <cmn/enum/util.h>
 
 namespace cmn
 {

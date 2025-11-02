@@ -2,7 +2,7 @@
 
 #include <cmn/enum/detail/macro.h>
 
-#include <cmn/enum/traits.h>
+#include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
 

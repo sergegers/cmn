@@ -221,16 +221,4 @@ template <c::bitfield I>
     return static_cast<I>(++masked | other);
 }
 
-//-----------------------------------------------------------------------------
-template 
-<
-      c::enumerable Enum
-    , c::enumerable... Enums
->
-    requires (std::same_as<Enum, Enums> && ...)
-constexpr auto in(Enum en, Enums ...ens) -> bool
-{
-    return ((en == ens) || ...);
-}
-
 }

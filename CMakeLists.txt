@@ -157,7 +157,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  "cmn/enum/feature.h")
+  "cmn/enum/feature.h" "cmn/enum/util.h")
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

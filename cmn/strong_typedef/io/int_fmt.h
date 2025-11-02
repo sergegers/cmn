@@ -1,7 +1,8 @@
+#pragma once
 
 #include <cmn/meta/concepts.h>
 #include <cmn/enum/combo.h>
-#include <cmn/enum/traits.h>
+#include <cmn/enum/util.h>
 
 namespace cmn::io
 {
