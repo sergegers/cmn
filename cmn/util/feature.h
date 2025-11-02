@@ -206,19 +206,4 @@ template <c::bitfield Policy>
     return (feat ^ pol) & feat | pol & ~feat;
 }
 
-///////////////////////////////////////////////////////////////////////////////
-template <c::enumerable I>
-[[nodiscard]] constexpr auto next(I i) noexcept { return static_cast<I>(underlying_cast(i) + 1); }
-
-// useful for combo
-template <c::bitfield I>
-[[nodiscard]] constexpr auto next_with_mask(I i, I mask) noexcept
-{
-    auto const value = underlying_cast(i);
-    auto const mask_value = underlying_cast(mask);
-    auto masked = value & mask_value;
-    auto const other =  value & ~mask_value;
-    return static_cast<I>(++masked | other);
-}
-
 }
