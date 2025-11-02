@@ -65,7 +65,14 @@ constexpr auto name(E, std::basic_ios<Char, CharTraits> const &) noexcept
 // enum_info shortcuts
 //
 ///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E> constexpr c::enum_info auto enum_info_v = adapt_enum_info(E{});
+template <c::adapted_enum E> constexpr c::enum_info auto enum_info_v = []
+    {
+        // initialize through lambda to avoid linking errors during
+        // if constructor throw exception
+        return adapt_enum_info(E{});
+    }
+();
+
 template <c::adapted_enum E> constexpr kind_t kind_v = enum_info_v<E>.kind();
 template <c::adapted_enum E> constexpr interop_type_t<op_t> ops_v = enum_info_v<E>.m_ops;
 template <c::adapted_enum E> constexpr E begin_v = enum_info_v<E>.min_value();

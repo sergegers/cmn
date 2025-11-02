@@ -4,7 +4,7 @@
 #include <type_traits>
 #include <cstddef>
 #include <array>
-#include <ranges>
+#include <algorithm>
 #include <utility>
 #include <compare>
 
@@ -31,11 +31,23 @@ struct group_info
     // sorted by value record infos
     records_type    m_records;
 
+private:
+    constexpr auto check_constraints() const noexcept(false) -> void
+    {
+        // MSVC bug
+        constexpr auto check_limit = 340;
+
+        if (Sz_ < check_limit && std::ranges::adjacent_find(m_records, {}, &record_type::as_interop) != std::ranges::end(m_records))
+            throw std::logic_error{ "There are duplicate values in group" };
+    }
+public:
+
     template <c::enum_ auto... Ens_>
-    consteval group_info(int_<Ens_>... ens):
+    consteval group_info(int_<Ens_>... ens) noexcept(false):
         m_records{ record_type{ ens }... }
     {
         std::ranges::sort(m_records, {}, &record_type::as_interop);
+        check_constraints();
     }
 
     template <typename... Records>
@@ -45,6 +57,7 @@ struct group_info
         m_records{ std::forward<Records>(records)... }
     {
         std::ranges::sort(m_records, {}, &record_type::as_interop);
+        check_constraints();
     }
 
     constexpr auto operator <=> (group_info const &other) const noexcept -> std::strong_ordering
@@ -92,6 +105,16 @@ struct group_info
             (std::make_index_sequence<Sz_>{})
         ;
     }
+
+    [[nodiscard]] constexpr auto contains(enum_type en) const -> bool
+    {
+        return std::ranges::binary_search(m_records, en, {}, &record_info<E>::m_value);
+    }
+
+    [[nodiscard]] constexpr auto contains(interop_type en) const -> bool
+    {
+        return contains(enum_type{ en });
+    }
 };
 
 //-----------------------------------------------------------------------------
@@ -127,10 +150,10 @@ template <c::enum_ auto En_, decltype(En_) ... Ens_>
 // enum value remainder
 //
 ///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E>
+template <c::adapted_enum E, std::size_t Sz_>
 constexpr auto find
 (
-    std::ranges::input_range auto records
+      group_info<E, Sz_> const &group
     , E en
     , std::invocable<record_info<E> const &, cmn::mask_type_t<E>> auto const &op
     , cmn::mask_type_t<E> group_mask
@@ -138,12 +161,13 @@ constexpr auto find
 {
     using record_type = record_info<E>;
 
+    // extract enum part belongs to the current group
     auto const mval = get_feature(en, group_mask);
 
     std::ignore = std::ranges::find_if
     (
-        std::move(records),
-        [&en, mval, &op, group_mask](record_type const& rec) constexpr -> bool
+        group.m_records,
+        [&en, mval, &op, group_mask](record_type const &rec) constexpr -> bool
         {
             bool const found = (rec.as_mask() == mask_cast(mval));
             if (found)

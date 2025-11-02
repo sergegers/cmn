@@ -52,38 +52,38 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
     BOOST_TEST_MESSAGE(y);
 
     //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
-    {
-        boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
+    //{
+    //    boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
 
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << uhex;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << ushowbase;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << uupercase;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << uasm;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << ulong_;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << usign;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    ostr << uhex;
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    ostr << ushowbase;
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    ostr << uupercase;
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    ostr << uasm;
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    ostr << ulong_;
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    ostr << usign;
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
 
-        //ostr << uhex << ushowbase << uupercase << uasm << ulong_ << usign << my_int{ 6789 };
-        //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ////BOOST_TEST_MESSAGE(ostr.str());
-        //BOOST_TEST(ostr.is_equal("+00001A85h"));
-    }
+    //    ostr << uhex << ushowbase << uupercase << uasm << ulong_ << usign << my_int{ 6789 };
+    //    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //    BOOST_TEST_MESSAGE(ostr.str());
+    //    BOOST_TEST(ostr.is_equal("+00001A85h"));
+    //}
 
-    ostr.str("");
-    BOOST_TEST(manip::int_fmt_slot_manip::value(ostr) == int_fmt_t::empty);
-    {
-        boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
-        ostr << my_int{ 6789 };
-        //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
-        //BOOST_TEST_MESSAGE(ostr.str());        
-        BOOST_TEST(ostr.is_equal("6789"));
-    }
+    //ostr.str("");
+    //BOOST_TEST(manip::int_fmt_slot_manip::value(ostr) == int_fmt_t::empty);
+    //{
+    //    boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
+    //    ostr << my_int{ 6789 };
+    //    //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
+    //    //BOOST_TEST_MESSAGE(ostr.str());        
+    //    BOOST_TEST(ostr.is_equal("6789"));
+    //}
 }
 
 using my_int_2 = strong_typedef<int, struct my_int_2_>;

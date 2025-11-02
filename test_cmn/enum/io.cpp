@@ -1,6 +1,7 @@
 
 #include <array>
 #include <format>
+#include <algorithm>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/io/ios_state.hpp>

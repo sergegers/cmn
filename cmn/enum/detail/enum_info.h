@@ -43,13 +43,6 @@ struct enum_info
     using masks_type = std::array<mask_type, sizeof... (Szs_)>;
     using interop_type = record_type::interop_type;
 
-    template <typename... Groups>
-    consteval enum_info(op_type ops, Groups &&... groups):
-        m_ops { ops },
-        m_groups{ std::forward<Groups>(groups)... },
-        m_masks{ calc_masks() }
-    {}
-
     //-----------------------------------------------------------------------------
     //
     // enum_info concept
@@ -76,6 +69,14 @@ struct enum_info
 
     //
     //-----------------------------------------------------------------------------
+
+    template <typename... Groups>
+    consteval enum_info(op_type ops, Groups &&... groups) noexcept(false):
+        m_ops{ ops },
+        m_groups{ std::forward<Groups>(groups)... },
+        m_masks{ calc_masks() }
+    {
+    }
 private:
     ///////////////////////////////////////////////////////////////////////////////
     //
@@ -136,7 +137,7 @@ consteval enum_info(interop_type_t<op_t> ops, Group &&, Groups &&... groups) ->
 ///////////////////////////////////////////////////////////////////////////////
 template
 <
-    boost::c::fus_sequence Groups
+      boost::c::fus_sequence Groups
     , c::adapted_enum E
 >
 constexpr auto fold
@@ -152,7 +153,6 @@ constexpr auto fold
     // Can't use fus::zip_view() here due to fusion bugs
 
     namespace fus = boost::fusion;
-    namespace rfus = fus::result_of;
 
     return fus::iter_fold
     (
@@ -163,10 +163,10 @@ constexpr auto fold
         {
             auto const idx = fus::distance(begin, it);
             auto const &group = fus::deref(it);
-            auto const& mask = masks[idx];
+            auto const &mask = masks[idx];
 
             if (!empty(mask & addditional_mask))
-                return group_::find(group.m_records, remainder, op, mask);
+                return group_::find(group, remainder, op, mask);
             else
                 return remainder;
         }

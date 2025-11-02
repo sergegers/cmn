@@ -150,9 +150,9 @@ template <c::adapted_enum E>
         return find_if_fus
         (
             groups_v<E>,
-            [](auto const& group) -> bool
+            [](auto const &group) noexcept -> bool
             {
-                return std::ranges::binary_search(group.m_records, 0, {}, &record_info<E>::as_interop);
+                return group.contains(0);
             }
         )
             != -1;
@@ -166,7 +166,7 @@ template
     , c::enumerable... Enums
 >
     requires (std::same_as<Enum, Enums> && ...)
-constexpr auto in(Enum en, Enums ...ens) -> bool
+constexpr auto contains(Enum en, Enums ...ens) noexcept -> bool
 {
     return ((en == ens) || ...);
 }
@@ -185,7 +185,7 @@ consteval auto default_ops(E, kind_t kind) -> interop_type_t<kind_t>
         ;
     else
         // by default use builtin operators for C enums
-        return in(kind, enum_, bitfield, combo) ? op_io : op_empty;
+        return contains(kind, enum_, bitfield, combo) ? op_io : op_empty;
 }
 
 }

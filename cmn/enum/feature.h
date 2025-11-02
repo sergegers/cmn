@@ -45,16 +45,12 @@ constexpr auto inplace_set_feature_adapted(Policy &pol, Feature feat) noexcept -
 template <c::bitfield Policy> requires c::adapted_enum<Policy>
 [[nodiscard]] constexpr auto set_feature(interop_type_t<Policy> pol, Policy feat) noexcept -> Policy
 {
-    //auto const mask = mask_by_enum(feat);
-    //return static_cast<Policy>(set_feature_(pol, feat, feat));
     return static_cast<Policy>(detail::set_feature_adapted(pol, feat));
 }
 
 template <c::strong_bitfield Policy> requires c::adapted_enum<Policy>
 [[nodiscard]] constexpr auto set_feature(Policy pol, Policy feat) noexcept -> Policy
 {
-    //auto const mask = mask_by_enum(feat);
-    //return static_cast<Policy>(set_feature_(pol, feat, mask));
     return static_cast<Policy>(detail::set_feature_adapted(pol, feat));
 }
 

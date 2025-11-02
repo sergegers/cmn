@@ -115,7 +115,7 @@ constexpr auto out_enum(E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs
     ostr << fmt_specs.open;
 
     bool first = true;
-    auto const remain = group_::find(group.m_records, en, out_group_op{ fmt_specs, ostr, first }, 
+    auto const remain = group_::find(group, en, out_group_op{ fmt_specs, ostr, first }, 
         static_cast<mask_type>(fmt_specs.mask));
 
     out_tail(fmt_specs, ostr, first, interop_cast(remain));

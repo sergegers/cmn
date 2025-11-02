@@ -1,8 +1,14 @@
 #pragma once
 
+#include <cstddef>
+#include <utility>
 #include <initializer_list>
 
-#include <boost/mp11/concepts.hpp>   // for mpl, mp11 & fusion concepts
+#if __has_include(<boost/mp11/concepts.hpp>)
+#   include <boost/mp11/concepts.hpp>   // for mp11 concepts
+#else
+#   include <cmn/meta/boost/mp11/concepts.hpp>
+#endif
 
 #include <cmn/algorithm/detail/result.h>
 
