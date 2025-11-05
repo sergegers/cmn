@@ -5,9 +5,7 @@
 #include <type_traits>
 #include <algorithm>
 
-#include <boost/fusion/algorithm/iteration/iter_fold.hpp>
-#include <boost/fusion/iterator/deref.hpp>
-#include <boost/fusion/sequence/intrinsic/begin.hpp>
+#include <boost/fusion/algorithm/iteration/fold.hpp>
 // ReSharper disable CppUnusedIncludeDirective
 #include <boost/fusion/adapted/std_tuple.hpp>
 #include <boost/fusion/adapted/std_array.hpp>
@@ -78,10 +76,17 @@ struct enum_info
     {
     }
 private:
-    ///////////////////////////////////////////////////////////////////////////////
-    //
-    // get smallest enum value
-    //
+    template <std::size_t... Idss_>
+    consteval auto calc_masks_impl(std::index_sequence<Idss_...>) const -> masks_type
+    {
+        return { std::get<Idss_>(m_groups).m_mask... };
+    }
+
+    consteval auto calc_masks() const -> masks_type
+    {
+        return calc_masks_impl(std::make_index_sequence<sizeof... (Szs_)>{});
+    }
+    //-----------------------------------------------------------------------------
 
     template <std::size_t... Idss_>
     consteval auto min_enum_value_impl(std::index_sequence<Idss_...>) const -> enum_type
@@ -89,39 +94,20 @@ private:
         return static_cast<enum_type>(std::min({ static_cast<mask_type>(std::get<Idss_>(m_groups).min_value())... }));
     }
 
-public:
-    consteval auto min_value() const -> enum_type
-    {
-        return this->min_enum_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
-    }
-    ///////////////////////////////////////////////////////////////////////////////
-    //
-    // get largest enum value
-    //
-private:
     template <std::size_t... Idss_>
     consteval auto max_value_impl(std::index_sequence<Idss_...>) const -> enum_type
     {
         return static_cast<enum_type>(std::max({ static_cast<mask_type>(std::get<Idss_>(m_groups).max_value())... }));
     }
 public:
+    consteval auto min_value() const -> enum_type
+    {
+        return this->min_enum_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
+    }
+
     consteval auto max_value() const -> enum_type
     {
         return this->max_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
-    }
-
-    //
-    //-----------------------------------------------------------------------------
-private:
-    template <std::size_t... Idss_>
-    consteval auto calc_masks_impl(std::index_sequence<Idss_...>) const -> masks_type
-    {
-        return { std::get<Idss_>(m_groups).calc_mask()... };
-    }
-
-    consteval auto calc_masks() const -> masks_type
-    {
-        return calc_masks_impl(std::make_index_sequence<sizeof... (Szs_)>{});
     }
 };
 
@@ -150,25 +136,17 @@ constexpr auto fold
 ) noexcept
 -> E // return remainder
 {
-    // Can't use fus::zip_view() here due to fusion bugs
-
-    namespace fus = boost::fusion;
-
-    return fus::iter_fold
+    return boost::fusion::fold
     (
         groups,
         get_feature(en, addditional_mask),
-        [&op, addditional_mask, &masks, begin = fus::begin(groups)]
-        (E remainder, auto const &it) constexpr
+        [&op, addditional_mask]
+        (E remainder, auto const &group) constexpr
         {
-            auto const idx = fus::distance(begin, it);
-            auto const &group = fus::deref(it);
-            auto const &mask = masks[idx];
+            // check it in group_::find()
+            //if (!empty(group.m_mask & addditional_mask))
 
-            if (!empty(mask & addditional_mask))
-                return group_::find(group, remainder, op, mask);
-            else
-                return remainder;
+            return group_::find(group, remainder, op, addditional_mask);
         }
     );
 }

@@ -30,44 +30,16 @@ struct group_info
 
     // sorted by value record infos
     records_type    m_records;
+    mask_type       m_mask;
 
 private:
-    constexpr auto check_constraints() const noexcept(false) -> void
+    consteval auto check_constraints() const noexcept(false) -> void
     {
         // MSVC bug
         constexpr auto check_limit = 340;
 
         if (Sz_ < check_limit && std::ranges::adjacent_find(m_records, {}, &record_type::as_interop) != std::ranges::end(m_records))
             throw std::logic_error{ "There are duplicate values in group" };
-    }
-public:
-
-    template <c::enum_ auto... Ens_>
-    consteval group_info(int_<Ens_>... ens) noexcept(false):
-        m_records{ record_type{ ens }... }
-    {
-        std::ranges::sort(m_records, {}, &record_type::as_interop);
-        check_constraints();
-    }
-
-    template <typename... Records>
-    consteval group_info(Records &&... records)
-        requires (std::same_as<Records, record_type> && ...)
-    :
-        m_records{ std::forward<Records>(records)... }
-    {
-        std::ranges::sort(m_records, {}, &record_type::as_interop);
-        check_constraints();
-    }
-
-    constexpr auto operator <=> (group_info const &other) const noexcept -> std::strong_ordering
-    {
-        return m_records <=> other.m_records;
-    }
-
-    constexpr auto operator == (group_info const &other) const noexcept -> bool
-    {
-        return (*this <=> other) == std::strong_ordering::equal;
     }
 
     consteval auto calc_mask() const -> mask_type
@@ -82,6 +54,38 @@ public:
                 { return mask | rec.as_interop(); }
             )
         );
+    }
+
+public:
+
+    template <c::enum_ auto... Ens_>
+    consteval group_info(int_<Ens_>... ens) noexcept(false):
+        m_records{ record_type{ ens }... },
+        m_mask{ calc_mask() }
+    {
+        std::ranges::sort(m_records, {}, &record_type::as_interop);
+        check_constraints();
+    }
+
+    template <typename... Records>
+    consteval group_info(Records &&... records)
+        requires (std::same_as<Records, record_type> && ...)
+    :
+        m_records{ std::forward<Records>(records)... },
+        m_mask{ calc_mask() }
+    {
+        std::ranges::sort(m_records, {}, &record_type::as_interop);
+        check_constraints();
+    }
+
+    constexpr auto operator <=> (group_info const &other) const noexcept -> std::strong_ordering
+    {
+        return m_records <=> other.m_records;
+    }
+
+    constexpr auto operator == (group_info const &other) const noexcept -> bool
+    {
+        return (*this <=> other) == std::strong_ordering::equal;
     }
 
     consteval auto min_value() const -> enum_type
@@ -156,23 +160,26 @@ constexpr auto find
       group_info<E, Sz_> const &group
     , E en
     , std::invocable<record_info<E> const &, cmn::mask_type_t<E>> auto const &op
-    , cmn::mask_type_t<E> group_mask
+    , cmn::mask_type_t<E> additional_mask = no_mask<E>
 ) -> E
 {
     using record_type = record_info<E>;
 
+    auto const mask = group.m_mask & additional_mask;
+    if (empty(mask)) return en;
+        
     // extract enum part belongs to the current group
-    auto const mval = get_feature(en, group_mask);
+    auto const mval = get_feature(en, mask);
 
     std::ignore = std::ranges::find_if
     (
         group.m_records,
-        [&en, mval, &op, group_mask](record_type const &rec) constexpr -> bool
+        [&en, mval, &op, mask](record_type const &rec) constexpr -> bool
         {
             bool const found = (rec.as_mask() == mask_cast(mval));
             if (found)
             {
-                op(rec, group_mask);
+                op(rec, mask);
                 en = reset_feature(en, mval);
             }
             return found;
