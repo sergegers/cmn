@@ -93,7 +93,7 @@ struct formatter<cmn::io::my_int, Char>:
                     if (cmn::has_feature(self_.m_fo, fo_hex))
                         throw std::format_error(std::format("Redundant feature {} in format string {}", x, chunk));
 
-                    self_.m_fo = cmn::set_feature(self_.m_fo, fo_hex);
+                    self_.m_fo = cmn::set_features(self_.m_fo, fo_hex);
                 }
                 break;
 
@@ -102,7 +102,7 @@ struct formatter<cmn::io::my_int, Char>:
                     if (cmn::has_feature(self_.m_fo, fo_uppercase))
                         throw std::format_error(std::format("Redundant feature {} in format string {}", u, chunk));
 
-                    self_.m_fo = cmn::set_feature(self_.m_fo, fo_uppercase);
+                    self_.m_fo = cmn::set_features(self_.m_fo, fo_uppercase);
                 }
                 break;
 

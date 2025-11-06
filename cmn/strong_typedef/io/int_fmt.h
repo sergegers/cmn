@@ -2,6 +2,7 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/enum/combo.h>
+#include <cmn/enum/traits.h>
 #include <cmn/enum/util.h>
 
 namespace cmn::io
@@ -12,9 +13,9 @@ namespace cmn::io
 //
 enum class radix_fmt_t
 {
-	dec,									// default
-	oct,									// o
-	hex,									// x
+	dec = 1,													// default
+	oct,														// o
+	hex,														// x
 	mask = dec | oct | hex
 };
 
@@ -117,7 +118,7 @@ consteval auto adapt_enum_info(int_fmt_t en)
 CMN_ENUM_INJECT_OPS()
 
 static_assert(c::strong_bitfield<int_fmt_t>);
-static_assert(enum_::contains_zero_v<int_fmt_t>);
+static_assert(!enum_::nullable_v<int_fmt_t>);
 
 // for debugging purposes
 struct int_fmt_wrapper_t { int_fmt_t m_fmt_opt; };

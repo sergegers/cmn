@@ -14,8 +14,6 @@
 #   include <cmn/meta/boost/fusion/type_traits.hpp>
 #endif
 
-#include <cmn/meta/concepts.h>
-
 #include <cmn/algorithm/detail/visitor.h>
 #include <cmn/algorithm/detail/result.h>
 
@@ -104,7 +102,7 @@ struct find_if_fus_impl<BeginIter, Iterator, EndIter>
 {
     using itself = find_if_fus_impl;
 
-    find_if_fus_impl
+    constexpr find_if_fus_impl
     (
         std::ptrdiff_t /*index*/,
         BeginIter /*begin*/,

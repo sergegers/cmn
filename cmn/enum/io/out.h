@@ -22,7 +22,7 @@
 #include <cmn/util/feature.h>
 #include <cmn/util/util.h>
 
-#include <cmn/enum/traits.h>
+#include <cmn/enum/util.h>
 #include <cmn/enum/detail/record_info.h>
 
 #include "fmt_specs.h"

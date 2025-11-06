@@ -4,14 +4,103 @@
 #include <tuple>
 #include <utility>
 
+#include <boost/fusion/algorithm/iteration/fold.hpp>
+// ReSharper disable CppUnusedIncludeDirective
+#include <boost/fusion/adapted/std_tuple.hpp>
+// ReSharper restore CppUnusedIncludeDirective
+
+#if __has_include(<boost/fusion/concepts.hpp>)
+#   include <boost/fusion/concepts.hpp>
+#else
+#   include <cmn/meta/boost/fusion/concepts.hpp>
+#endif
+
 #include <cmn/meta/concepts.h>
 #include <cmn/util/util.h>
-#include <cmn/algorithm/find.h>
+#include <cmn/util/feature.h>
 
 #include "traits.h"
 
 namespace cmn::enum_
 {
+
+namespace group_
+{
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// execute operation Op if enum value chunk belongs to group and return unprocessed
+// enum value remainder
+//
+///////////////////////////////////////////////////////////////////////////////
+template <c::adapted_enum E, std::size_t Sz_> //requires (!nullable_v<E>)
+constexpr auto find
+(
+      group_info<E, Sz_> const &group
+    , E en
+    , std::invocable<record_info<E> const &, mask_type_t<E>> auto const &op
+    , mask_type_t<E> additional_mask = no_mask<E>
+) -> E
+{
+    using record_type = record_info<E>;
+
+    auto const mask = group.m_mask & additional_mask;
+    if (empty(mask)) return en;
+        
+    // extract enum part belongs to the current group
+    auto const mval = get_feature(en, mask);
+
+    std::ignore = std::ranges::find_if
+    (
+        group.m_records,
+        [&en, mval, &op, mask](record_type const &rec) constexpr -> bool
+        {
+            bool const found = (rec.m_value == mval);
+            if (found)
+            {
+                op(rec, mask);
+                en = reset_feature(en, mval);
+            }
+            return found;
+        }
+    );
+
+    return en;
+}
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+template
+<
+      boost::c::fus_sequence Groups
+    , c::adapted_enum E
+>
+    //requires (!nullable_v<E>)
+constexpr auto fold
+(
+      Groups const &groups
+    , std::array<mask_type_t<E>, boost::fusion::result_of::size_v<Groups>> const &masks
+    , E en
+    , std::invocable<record_info<E> const&, mask_type_t<E>> auto const &op
+    , mask_type_t<E> addditional_mask = no_mask<E>
+) noexcept
+-> E // return remainder
+{
+    return boost::fusion::fold
+    (
+        groups,
+        get_feature(en, addditional_mask),
+        [&op, addditional_mask]
+        (E remainder, auto const &group) constexpr
+        {
+            // check it in group_::find()
+            //if (!empty(group.m_mask & addditional_mask))
+
+            return group_::find(group, remainder, op, addditional_mask);
+        }
+    );
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 namespace detail
@@ -142,22 +231,6 @@ template <c::adapted_enum E>
 
     return res;
 }
-
-///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E>
-[[nodiscard]] constexpr bool contains_zero_v = [] constexpr -> bool
-    {
-        return find_if_fus
-        (
-            groups_v<E>,
-            [](auto const &group) noexcept -> bool
-            {
-                return group.contains(0);
-            }
-        )
-            != -1;
-    }
-();
 
 ///////////////////////////////////////////////////////////////////////////////
 template

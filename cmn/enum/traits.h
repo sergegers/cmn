@@ -8,9 +8,9 @@
 
 #include <cmn/enum/detail/qualified_name.h>
 #include <cmn/enum/detail/name_info.h>
-#include <cmn/enum/detail/enum_info.h>
-#include <cmn/enum/detail/group_info.h>
 #include <cmn/enum/detail/record_info.h>
+#include <cmn/enum/detail/group_info.h>
+#include <cmn/enum/detail/enum_info.h>
 
 namespace cmn::enum_
 {
@@ -39,7 +39,6 @@ namespace group_
 {
 
 using detail::group_::make;
-using detail::group_::find;
 using detail::group_::size_v;
 
 }
@@ -50,8 +49,6 @@ namespace record_
 using detail::record_::make;
 
 }
-
-using detail::fold;
 
 //-----------------------------------------------------------------------------
 template <c::enum_ E, typename Char, typename CharTraits>
@@ -68,7 +65,7 @@ constexpr auto name(E, std::basic_ios<Char, CharTraits> const &) noexcept
 template <c::adapted_enum E> constexpr c::enum_info auto enum_info_v = []
     {
         // initialize through lambda to avoid linking errors during
-        // if constructor throw exception
+        // constructor execution if the constructor throws exception
         return adapt_enum_info(E{});
     }
 ();
@@ -81,6 +78,7 @@ template <c::adapted_enum E> constexpr E end_v = static_cast<E>(interop_cast(las
 template <c::adapted_enum E> constexpr auto groups_v = enum_info_v<E>.m_groups;
 template <c::adapted_enum E, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<E>);
 template <c::adapted_enum E> constexpr auto masks_v = enum_info_v<E>.m_masks;
+template <c::adapted_enum E> constexpr bool nullable_v = enum_info_v<E>.nullable();
 
 }
 

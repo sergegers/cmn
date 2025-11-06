@@ -110,14 +110,14 @@ public:
         ;
     }
 
-    [[nodiscard]] constexpr auto contains(enum_type en) const -> bool
-    {
-        return std::ranges::binary_search(m_records, en, {}, &record_info<E>::m_value);
-    }
-
     [[nodiscard]] constexpr auto contains(interop_type en) const -> bool
     {
-        return contains(enum_type{ en });
+        return std::ranges::binary_search(m_records, en, {}, &record_info<E>::as_interop);
+    }
+
+    [[nodiscard]] constexpr auto contains(enum_type en) const -> bool
+    {
+        return this->contains(interop_cast(en));
     }
 };
 
@@ -146,47 +146,6 @@ template <c::enum_ auto En_, decltype(En_) ... Ens_>
 [[nodiscard]] consteval auto make() -> group_info<decltype(En_), (sizeof...(Ens_) + 1)>
 {
     return { int_<En_>{}, int_<Ens_>{}... };
-}
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// execute operation Op if enum value chunk belongs to group and return unprocessed
-// enum value remainder
-//
-///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E, std::size_t Sz_>
-constexpr auto find
-(
-      group_info<E, Sz_> const &group
-    , E en
-    , std::invocable<record_info<E> const &, cmn::mask_type_t<E>> auto const &op
-    , cmn::mask_type_t<E> additional_mask = no_mask<E>
-) -> E
-{
-    using record_type = record_info<E>;
-
-    auto const mask = group.m_mask & additional_mask;
-    if (empty(mask)) return en;
-        
-    // extract enum part belongs to the current group
-    auto const mval = get_feature(en, mask);
-
-    std::ignore = std::ranges::find_if
-    (
-        group.m_records,
-        [&en, mval, &op, mask](record_type const &rec) constexpr -> bool
-        {
-            bool const found = (rec.as_mask() == mask_cast(mval));
-            if (found)
-            {
-                op(rec, mask);
-                en = reset_feature(en, mval);
-            }
-            return found;
-        }
-    );
-
-    return en;
 }
 
 }

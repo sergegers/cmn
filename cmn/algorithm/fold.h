@@ -12,10 +12,10 @@
 #   include <cmn/meta/boost/mp11/type_traits.hpp>
 #endif
 
-#if __has_include(<boost/fusion/concepts.hpp>)
+#if __has_include(<boost/fusion/type_traits.hpp>)
 #   include <boost/fusion/type_traits.hpp>
 #else
-#   include <cmn/meta/boost/fusion/concepts.hpp>
+#   include <cmn/meta/boost/fusion/type_traits.hpp>
 #endif
 
 #include <cmn/util/util.h>         // make_index_sequence_reverse
@@ -32,12 +32,12 @@ using namespace boost::mp11;
 template <boost::c::mp11_list L, typename Fn, std::size_t Idx_>
 struct mp11_fold_caller
 {
-    using itself = mp11_fold_caller<L, Fn, Idx_>;
+    using itself = mp11_fold_caller;
 
     Fn &m_func;
 
     template <typename S>
-    constexpr friend auto operator >> (itself const &self, S &&s) -> decltype(auto)
+    constexpr friend decltype(auto) operator >> (itself const &self, S &&s)
     {
         return self.m_func.template operator ()<mp_at_c<L, Idx_>>(std::forward<S>(s));
     }
@@ -46,7 +46,7 @@ struct mp11_fold_caller
 }	
 
 template <boost::c::mp11_list L, typename State, typename Func>
-constexpr auto fold_noctor_mp11(State &&state, Func &&func) -> decltype(auto)
+constexpr decltype(auto) fold_noctor_mp11(State &&state, Func &&func)
 {
     using namespace boost::mp11;
 
@@ -74,13 +74,13 @@ namespace fus = boost::fusion;
 template <boost::c::fus_sequence Sequence, typename Func, std::size_t Idx_>
 struct fus_fold_caller
 {
-    using itself = fus_fold_caller<Sequence, Func, Idx_>;
+    using itself = fus_fold_caller;
 
     Sequence    &m_seq;
     Func        &m_func;
 
     template <typename State>
-    constexpr friend auto operator >>(itself const &self, State &&state) -> decltype(auto)
+    constexpr friend decltype(auto) operator >> (itself const &self, State &&state)
     {
         return self.m_func(std::forward<State>(state), fus::at_c<Idx_>(self.m_seq));
     }
@@ -89,11 +89,13 @@ struct fus_fold_caller
 }   
 
 ////////////////////////////////////////////////////////////////////////////////
+//
 // decltype(auto) fold(Sequence &&seq, State &&state, Func &&func)
 // perfect forwarding fold() version
+//
 ////////////////////////////////////////////////////////////////////////////////
 template <boost::c::fus_sequence Sequence, typename State, typename Func>
-constexpr auto fold_fus(Sequence &seq, State &&state, Func &&func) -> decltype(auto)
+constexpr decltype(auto) fold_fus(Sequence &seq, State &&state, Func &&func)
 {
     using namespace boost::mp11;
     namespace fus = boost::fusion;

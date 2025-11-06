@@ -73,7 +73,6 @@ template <c::enumerable Policy>
     return static_cast<Policy>(set_feature_(pol, val, mask));
 }
 
-
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enumerable To, c::bitfield Policy>
 [[nodiscard]] constexpr auto feature_to(Policy pol, mask_type_t<Policy> mask = no_mask<Policy>) noexcept -> To

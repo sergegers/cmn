@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <concepts>
 #include <type_traits>
 #include <string>
@@ -7,8 +8,8 @@
 #include <exception>
 #include <utility>
 #include <ios>
-#include <cstdint>
 #include <format>
+#include <utility>
 
 #include <boost/mp11.hpp>
 #include <boost/mpl/pair.hpp>
@@ -531,18 +532,43 @@ concept error_info_list =
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T>
-concept enum_info =
-    enum_<typename T::enum_type>
- && requires(T const &einfo, interop_type_t<enum_::op_t> &ops)
+concept enum_info_types_ =
+    requires
     {
         typename T::enum_type;
+        typename T::record_type;
+        typename T::op_type;
+        typename T::groups_type;
+        typename T::mask_type;
+        typename T::masks_type;
+        typename T::interop_type;
+        typename T::elements_type;
+    }
+;
 
-        { einfo.kind() } -> std::same_as<enum_::kind_t>;
+template <typename T>
+concept enum_info =
+    enum_info_types_<T>
+ && enum_<typename T::enum_type>
+ && requires
+    (
+          T const &einfo
+        , typename T::op_type &ops
+        , typename T::groups_type &groups
+        , typename T::masks_type &masks
+        , std::size_t &sz
+        , typename T::elements_type &elems
+    )
+    {
+        sz = T::size;
         ops = einfo.m_ops;
-        einfo.m_groups;
-        einfo.m_masks;
-        { einfo.min_value() } -> std::same_as<typename T::enum_type>;
-        { einfo.max_value() } -> std::same_as<typename T::enum_type>;
+        groups = einfo.m_groups;
+        masks = einfo.m_masks;
+        elems = einfo.m_elements;
+        { std::as_const(einfo).kind() } -> std::same_as<enum_::kind_t>;
+        { std::as_const(einfo).min_value() } -> std::same_as<typename T::enum_type>;
+        { std::as_const(einfo).max_value() } -> std::same_as<typename T::enum_type>;
+        { std::as_const(einfo).nullable() } -> std::same_as<bool>;
     }
 ;
 

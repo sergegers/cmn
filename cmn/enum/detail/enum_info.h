@@ -8,22 +8,11 @@
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 // ReSharper disable CppUnusedIncludeDirective
 #include <boost/fusion/adapted/std_tuple.hpp>
-#include <boost/fusion/adapted/std_array.hpp>
 // ReSharper restore CppUnusedIncludeDirective
-#if __has_include(<boost/fusion/concepts.hpp>)
-#   include <boost/fusion/concepts.hpp>
-#else
-#   include <cmn/meta/boost/fusion/concepts.hpp>
-#endif
-#if __has_include(<boost/fusion/type_traits.hpp>)
-#   include <boost/fusion/type_traits.hpp>
-#else
-#   include <cmn/meta/boost/fusion/type_traits.hpp>
-#endif
 
 #include <cmn/fwd.h>  // kind_t, op_t
 #include <cmn/meta/concepts.h>
-#include <cmn/util/feature.h>
+#include <cmn/algorithm/find.h>
 
 #include "group_info.h"
 
@@ -33,6 +22,12 @@ namespace cmn::enum_::detail
 template <c::enum_ E, std::size_t... Szs_>
 struct enum_info
 {
+    //-----------------------------------------------------------------------------
+    //
+    // enum_info concept
+    //
+    static constexpr auto size = (Szs_ + ...);
+
     using enum_type = E;
     using record_type = record_info<E>;
     using op_type = interop_type_t<op_t>;
@@ -40,12 +35,13 @@ struct enum_info
     using mask_type = record_type::mask_type;
     using masks_type = std::array<mask_type, sizeof... (Szs_)>;
     using interop_type = record_type::interop_type;
-
-    //-----------------------------------------------------------------------------
-    //
-    // enum_info concept
+    using elements_type = std::array<enum_type, size>;
 
     op_type                 m_ops;
+    groups_type             m_groups;
+    // keep after m_groups
+    masks_type              m_masks;
+    elements_type           m_elements;
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -62,9 +58,30 @@ struct enum_info
             ((Szs_ == 1) && ...)? bitfield: combo;
     }
 
-    groups_type             m_groups;
-    masks_type              m_masks;
+    [[nodiscard]] consteval auto min_value() const -> enum_type
+    {
+        return this->min_enum_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
+    }
 
+    [[nodiscard]] consteval auto max_value() const -> enum_type
+    {
+        return this->max_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
+    }
+
+    [[nodiscard]] consteval auto nullable() const noexcept -> bool
+    {
+        return find_if_fus
+        (
+            m_groups,
+            [](auto const& group) noexcept -> bool { return group.contains(0); }
+        )
+            != -1
+        ;
+
+    }
+
+    //
+    // end enum_info concept
     //
     //-----------------------------------------------------------------------------
 
@@ -72,42 +89,58 @@ struct enum_info
     consteval enum_info(op_type ops, Groups &&... groups) noexcept(false):
         m_ops{ ops },
         m_groups{ std::forward<Groups>(groups)... },
-        m_masks{ calc_masks() }
+        m_masks{ calc_masks() },
+        m_elements{ calc_elements() }
     {
     }
 private:
     template <std::size_t... Idss_>
-    consteval auto calc_masks_impl(std::index_sequence<Idss_...>) const -> masks_type
+    consteval auto calc_masks_impl(std::index_sequence<Idss_...>) const noexcept -> masks_type
     {
         return { std::get<Idss_>(m_groups).m_mask... };
     }
 
-    consteval auto calc_masks() const -> masks_type
+    consteval auto calc_masks() const noexcept -> masks_type
     {
         return calc_masks_impl(std::make_index_sequence<sizeof... (Szs_)>{});
     }
-    //-----------------------------------------------------------------------------
 
+    //-----------------------------------------------------------------------------
     template <std::size_t... Idss_>
-    consteval auto min_enum_value_impl(std::index_sequence<Idss_...>) const -> enum_type
+    consteval auto min_enum_value_impl(std::index_sequence<Idss_...>) const noexcept -> enum_type
     {
         return static_cast<enum_type>(std::min({ static_cast<mask_type>(std::get<Idss_>(m_groups).min_value())... }));
     }
 
     template <std::size_t... Idss_>
-    consteval auto max_value_impl(std::index_sequence<Idss_...>) const -> enum_type
+    consteval auto max_value_impl(std::index_sequence<Idss_...>) const noexcept -> enum_type
     {
         return static_cast<enum_type>(std::max({ static_cast<mask_type>(std::get<Idss_>(m_groups).max_value())... }));
     }
-public:
-    consteval auto min_value() const -> enum_type
-    {
-        return this->min_enum_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
-    }
 
-    consteval auto max_value() const -> enum_type
+    consteval auto calc_elements() const -> elements_type
     {
-        return this->max_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
+        elements_type elems;
+
+        std::ignore = boost::fusion::fold
+        (
+            m_groups,
+            0ul,
+            [&elems](std::size_t idx, auto const &group)
+            {
+                return std::ranges::fold_left
+                (
+                    group.m_records,
+                    idx,
+                    [&elems](std::size_t idx, auto const& record)
+                    {
+                        return elems[idx++] = record.m_value, idx;
+                    }
+                );
+            }
+        );
+
+        return elems;
     }
 };
 
@@ -120,35 +153,5 @@ consteval enum_info(interop_type_t<op_t> ops, Group &&, Groups &&... groups) ->
         , group_::size_v<std::remove_reference_t<Group>>, group_::size_v<std::remove_reference_t<Groups>>...
     >;
 
-///////////////////////////////////////////////////////////////////////////////
-template
-<
-      boost::c::fus_sequence Groups
-    , c::adapted_enum E
->
-constexpr auto fold
-(
-      Groups const &groups
-    , std::array<mask_type_t<E>, boost::fusion::result_of::size_v<Groups>> const &masks
-    , E en
-    , std::invocable<record_info<E> const&, mask_type_t<E>> auto const &op
-    , mask_type_t<E> addditional_mask = no_mask<E>
-) noexcept
--> E // return remainder
-{
-    return boost::fusion::fold
-    (
-        groups,
-        get_feature(en, addditional_mask),
-        [&op, addditional_mask]
-        (E remainder, auto const &group) constexpr
-        {
-            // check it in group_::find()
-            //if (!empty(group.m_mask & addditional_mask))
-
-            return group_::find(group, remainder, op, addditional_mask);
-        }
-    );
-}
 
 }

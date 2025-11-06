@@ -3,7 +3,6 @@
 #include <iomanip>
 #include <ios>
 #include <limits>
-#include <cassert>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/implicit_cast.hpp>

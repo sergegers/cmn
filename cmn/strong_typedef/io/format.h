@@ -56,9 +56,9 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
             {
             case to_char(symbols_type::octothorpe): m_fmt_opt = set_features(m_fmt_opt, showbase, lowercase); break;
             case to_char(symbols_type::x): m_fmt_opt = set_features(m_fmt_opt, hex, c, nosign); break;
-            case to_char(symbols_type::a): m_fmt_opt = set_feature(m_fmt_opt, long_asm_up_hex); break;
-            case to_char(symbols_type::s): m_fmt_opt = set_feature(m_fmt_opt, short_); break;
-            case to_char(symbols_type::u): m_fmt_opt = set_feature(m_fmt_opt, uppercase); break;
+            case to_char(symbols_type::a): m_fmt_opt = set_features(m_fmt_opt, long_asm_up_hex); break;
+            case to_char(symbols_type::s): m_fmt_opt = set_features(m_fmt_opt, short_); break;
+            case to_char(symbols_type::u): m_fmt_opt = set_features(m_fmt_opt, uppercase); break;
 
             default:
                     throw std::format_error{ std::format("Unexpected formatting symbol [{}]", ch)};
