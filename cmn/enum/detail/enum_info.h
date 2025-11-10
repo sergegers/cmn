@@ -13,7 +13,9 @@
 #include <cmn/fwd.h>  // kind_t, op_t
 #include <cmn/meta/concepts.h>
 #include <cmn/algorithm/find.h>
+#include <cmn/util/util.h>
 
+#include "record_info.h"
 #include "group_info.h"
 
 namespace cmn::enum_::detail
@@ -41,7 +43,7 @@ struct enum_info
     groups_type             m_groups;
     // keep after m_groups
     masks_type              m_masks;
-    elements_type           m_elements;
+    elements_type           m_elements; // sorted
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -58,12 +60,12 @@ struct enum_info
             ((Szs_ == 1) && ...)? bitfield: combo;
     }
 
-    [[nodiscard]] consteval auto min_value() const -> enum_type
+    [[nodiscard]] consteval auto min_value() const noexcept -> enum_type
     {
         return this->min_enum_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
     }
 
-    [[nodiscard]] consteval auto max_value() const -> enum_type
+    [[nodiscard]] consteval auto max_value() const noexcept -> enum_type
     {
         return this->max_value_impl(std::make_index_sequence<sizeof... (Szs_)>{});
     }
@@ -79,6 +81,12 @@ struct enum_info
         ;
 
     }
+
+    //[[nodiscard]] consteval auto unique() const noexcept -> bool
+    //{
+    //    namespace rng = std::ranges;
+    //    return rng::adjacent_find(m_elements) == rng::end(m_elements);
+    //}
 
     //
     // end enum_info concept
@@ -118,7 +126,8 @@ private:
         return static_cast<enum_type>(std::max({ static_cast<mask_type>(std::get<Idss_>(m_groups).max_value())... }));
     }
 
-    consteval auto calc_elements() const -> elements_type
+    //-----------------------------------------------------------------------------
+    consteval auto calc_elements() const noexcept -> elements_type
     {
         elements_type elems;
 
@@ -140,6 +149,11 @@ private:
             }
         );
 
+        std::ranges::sort
+        (
+            elems, 
+            [](auto const lhs, auto const rhs) { return interop_cast(lhs) < interop_cast(rhs); }
+        );
         return elems;
     }
 };

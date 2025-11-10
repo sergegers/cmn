@@ -569,7 +569,8 @@ concept enum_info =
         { std::as_const(einfo).min_value() } -> std::same_as<typename T::enum_type>;
         { std::as_const(einfo).max_value() } -> std::same_as<typename T::enum_type>;
         { std::as_const(einfo).nullable() } -> std::same_as<bool>;
-    }
+        //{ std::as_const(einfo).unique() } -> std::same_as<bool>;
+}
 ;
 
 //-----------------------------------------------------------------------------

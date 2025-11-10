@@ -66,7 +66,6 @@ add_library (
 "cmn/meta/boost/spirit/ext.hpp"
  
  "cmn/util/symbols.h"
-
  "cmn/util/fixed_string.h"
  "cmn/util/lexical_cast.h"
  "cmn/util/lexical_cast.cpp"
@@ -123,6 +122,8 @@ add_library (
  "cmn/enum/enum.h" 
  "cmn/enum/bitfield.h" 
  "cmn/enum/combo.h" 
+ "cmn/enum/feature.h" 
+ "cmn/enum/util.h"
  "cmn/enum/io/format.h"
  "cmn/enum/io.h" 
  "cmn/enum/io/printer.h" 
@@ -157,7 +158,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  "cmn/enum/feature.h" "cmn/enum/util.h")
+)
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -174,8 +175,10 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test_cmn/main.cpp"
   "test_cmn/error.cpp"
   "test_cmn/algorithm.cpp"
+  "test_cmn/enum/defs.h"
   "test_cmn/enum/enum.cpp" 
   "test_cmn/enum/io.cpp"
+  "test_cmn/enum/feature.cpp"
   "test_cmn/strong_typedef.cpp" 
   "test_cmn/tuple/tuple.cpp"
   "test_cmn/tuple/va.cpp"
@@ -188,7 +191,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test_cmn/util/util.cpp" 
   "test_cmn/util/fixed_string.cpp" 
   "test_cmn/util/feature.cpp"
-  "test_cmn/enum/feature.cpp")
+ )
 
 target_include_directories(test_cmn PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
 set_target_properties(test_cmn PROPERTIES LINK_DEPENDS ${cmn_NatvisPath})
