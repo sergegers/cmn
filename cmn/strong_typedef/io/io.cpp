@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <ios>
 #include <limits>
+#include <cmath>
 
 #include <boost/lexical_cast.hpp>
 #include <boost/implicit_cast.hpp>
@@ -469,13 +470,13 @@ struct radix final
 template <std::integral Unit>
 struct width final
 {
-    static constexpr auto hex_digits = std::numeric_limits<std::make_unsigned_t<Unit>>::digits / 4;
-    static constexpr auto oct_digits = std::numeric_limits<std::make_unsigned_t<Unit>>::digits / 2;
-    static constexpr auto dec_digits = std::numeric_limits<Unit>::digits10;
+    static constexpr auto dec_digits = 10;  // TODO:
 
-    int_fmt_t const   m_fmt_opt;
+    static constexpr auto hex_digits = std::numeric_limits<Unit>::digits / 4;
+    static constexpr auto oct_digits = std::numeric_limits<Unit>::digits / 3;
 
-    width(Unit, int_fmt_t fmt): m_fmt_opt { fmt } {}
+    Unit                m_unit;
+    int_fmt_t const     m_fmt_opt;
 
     [[nodiscard]] constexpr auto test() const -> test_result_t
     {
@@ -492,31 +493,36 @@ struct width final
     >
     friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, width const &w)
     {
+        using enum int_fmt_t;
+
         using symbols_type = symbols<Char, CharTraits>;
         static constexpr auto zero = to_char(symbols_type::zero);
 
+        auto const radix = static_cast<radix_fmt_t>(get_feature(w.m_fmt_opt, radix_mask));
+
+        auto const digits = [radix]() -> std::size_t
+            {
+
+                switch (radix)
+                {
+                using enum radix_fmt_t;
+
+                case dec: return dec_digits;
+                case oct: return oct_digits;
+                case hex: return hex_digits;
+                default:
+                    BOOST_THROW_EXCEPTION(cmn::unexpected{});
+                }
+            }
+        ();
+
         switch (w.test())
         {
-        using enum int_fmt_t;
         using enum test_result_t;
 
-        case yes:
-        {
-            if (has_feature(w.m_fmt_opt, dec))
-                return ostr << std::internal << std::setw(dec_digits) << std::setfill(zero);
-            else if (has_feature(w.m_fmt_opt, oct))
-                return ostr << std::internal << std::setw(oct_digits) << std::setfill(zero);
-            else if (has_feature(w.m_fmt_opt, hex))
-                return ostr << std::internal << std::setw(hex_digits) << std::setfill(zero);
-            else
-                BOOST_THROW_EXCEPTION(cmn::unexpected{});
-        }
-
-        case no:
-            return ostr.unsetf(std::ios_base::internal), ostr;
-
-        case def:
-            return ostr;
+        case yes: return ostr << std::internal << std::setw(digits) << std::setfill(zero);
+        case no: return ostr.unsetf(std::ios_base::internal), ostr << std::setw(0ul);
+        case def: return ostr;
 
         default:
             BOOST_THROW_EXCEPTION(cmn::unexpected{});

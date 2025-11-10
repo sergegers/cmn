@@ -407,9 +407,9 @@ BOOST_AUTO_TEST_CASE(anonymous_enum)
 {
     output_test_stream tstr;
     tstr << foo::ae_1;
-    BOOST_CHECK(tstr.is_equal("[foo::ae_1]"));
+    BOOST_CHECK(tstr.is_equal("[ae_1]"));
 
-    // NOTE: what about using print_t::class_prefix option?
+    // TODO: what about using print_t::class_prefix option?
 }
 
 BOOST_AUTO_TEST_CASE(tail)

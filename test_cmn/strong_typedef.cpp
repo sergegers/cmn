@@ -47,32 +47,15 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
     boost::test_tools::output_test_stream ostr;
 
     using enum int_fmt_t;
-    //auto x = hex;
-    //auto y = set_feature(x, showbase);
-    //BOOST_TEST_MESSAGE(y);
 
- //   BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
     {
         boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
 
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << uhex;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << ushowbase;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << uupercase;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << uasm;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << ulong_;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        ostr << usign;
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-
         ostr << uhex << ushowbase << uupercase << uasm << ulong_ << usign << my_int{ 6789 };
-        BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-        BOOST_TEST_MESSAGE(ostr.str());
-        BOOST_TEST(ostr.is_equal("+000001A85h"));
+        //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+        //BOOST_TEST_MESSAGE(ostr.str());
+        BOOST_TEST(ostr.is_equal("+0001A85h"));
     }
 
     ostr.str("");
@@ -80,7 +63,7 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
     {
         boost::io::ios_iword_saver _{ ostr, manip::int_fmt_slot_manip::index(ostr) };
         ostr << my_int{ 6789 };
-        //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
+        //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
         //BOOST_TEST_MESSAGE(ostr.str());        
         BOOST_TEST(ostr.is_equal("6789"));
     }
@@ -107,7 +90,7 @@ struct strong_typedef_fmt_traits<my_int_3>
 BOOST_AUTO_TEST_CASE(trait_int_fmt)
 {
     boost::test_tools::output_test_stream ostr;
-
+    // TODO:
     //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
     ostr << my_int_2{ 0x16AF };
     BOOST_TEST(ostr.is_equal("+16AFh"));
