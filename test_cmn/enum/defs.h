@@ -8,7 +8,7 @@
 #include <cmn/enum/bitfield.h>
 #include <cmn/enum/combo.h>
 
-// to avoid ODR violations
+// place definitions here to avoid ODR violations
 
 namespace cmn::enum_
 {

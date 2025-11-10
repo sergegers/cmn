@@ -9,7 +9,7 @@
         </Expand>
     </Type>
     
-    <Type Name="cmn::enum_::basic_qualified_name&lt;*,*&gt;">
+    <Type Name="cmn::enum_::detail::basic_qualified_name&lt;*,*&gt;">
         <DisplayString>{{ {m_name,na} }}</DisplayString>
         <Expand>
             <Item Name="[name]">m_name,na</Item>
@@ -18,7 +18,7 @@
         </Expand>    
     </Type>
     
-    <Type Name="cmn::enum_::basic_qualified_member_name&lt;*,*&gt;">
+    <Type Name="cmn::enum_::detail::basic_qualified_member_name&lt;*,*&gt;">
         <DisplayString>{{ {m_name,na} }}</DisplayString>
         <Expand>
             <Item Name="[name]">m_name,na</Item>

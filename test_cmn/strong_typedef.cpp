@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(trait_int_fmt)
 {
     boost::test_tools::output_test_stream ostr;
     // TODO:
-    //BOOST_TEST_MESSAGE(int_fmt_slot_manip::value(ostr));
+    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
     ostr << my_int_2{ 0x16AF };
     BOOST_TEST(ostr.is_equal("+16AFh"));
 
