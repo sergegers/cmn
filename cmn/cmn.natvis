@@ -69,6 +69,7 @@
             <Item Name="[base]">base()</Item>
             <Item Name="[language]">lang()</Item>
             <Item Name="[width]">width()</Item>
+            <Item Name="[case]">case_()</Item>
             <Item Name="[sign]">sign()</Item>
 			<Item Name="[reminder]">reminder()</Item>
         </Expand>

@@ -121,6 +121,12 @@ static_assert(c::strong_bitfield<int_fmt_t>);
 static_assert(!enum_::nullable_v<int_fmt_t>);
 
 // for debugging purposes
-struct int_fmt_wrapper_t { int_fmt_t m_fmt_opt; };
+struct int_fmt_wrapper_t
+{
+    int_fmt_t m_fmt_opt;
+
+	constexpr int_fmt_wrapper_t(int_fmt_t fmt_opt): m_fmt_opt{ fmt_opt } {}
+	constexpr operator int_fmt_t () const noexcept { return m_fmt_opt; }
+};
 
 }

@@ -246,17 +246,17 @@ BOOST_AUTO_TEST_CASE(read_enum)
 {
     using namespace std::string_literals;
 
-    //BOOST_TEST(en_apple == boost::lexical_cast<en_2_t>("[en_2_apple]"s));
-    //BOOST_CHECK_THROW(boost::lexical_cast<en_2_t>("en_2_apple"s), cmn::io_error);
+    BOOST_TEST(en_apple == boost::lexical_cast<en_2_t>("[en_2_apple]"s));
+    BOOST_CHECK_THROW(boost::lexical_cast<en_2_t>("en_2_apple"s), cmn::io_error);
 
     std::stringstream sstr;
 
     sstr << eopen() << eclose();
-    sstr << en_carrot;
+    sstr << en_2_carrot;
 
     en_2_t out = static_cast<en_2_t>(0);
     sstr >> std::skipws >> out;
-    BOOST_TEST(out == en_carrot);
+    BOOST_TEST(out == en_2_carrot);
 }
 
 BOOST_AUTO_TEST_CASE(class_prefix_)

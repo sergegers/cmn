@@ -78,9 +78,9 @@ template
 >
 auto get_value(std::basic_ios<Char, CharTraits> &ios, Unit const &/*unit*/) -> int_fmt_t
 {
-    auto const unit_default = default_v<Unit>;  // get default type formatting options from traits
+    int_fmt_wrapper_t const unit_default = default_v<Unit>;  // get default type formatting options from traits
     auto const manip_value = manip::int_fmt_slot_manip::value(ios);
-    return set_feature(unit_default, manip_value); // override default values by the stream ones
+    return set_feature(unit_default.m_fmt_opt, manip_value); // override default values by the stream ones
 }
 
 ///////////////////////////////////////////////////////////////////////////////

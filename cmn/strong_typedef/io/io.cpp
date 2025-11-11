@@ -470,7 +470,7 @@ struct radix final
 template <std::integral Unit>
 struct width final
 {
-    static constexpr auto dec_digits = 10;  // TODO:
+    static constexpr auto dec_digits = std::numeric_limits<Unit>::digits10;
 
     static constexpr auto hex_digits = std::numeric_limits<Unit>::digits / 4;
     static constexpr auto oct_digits = std::numeric_limits<Unit>::digits / 3;

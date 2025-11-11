@@ -258,7 +258,7 @@ template
 auto try_parse
 (
       int_<kind_t::enum_>
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
+    , qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
     , basic_fmt_specs<Char, CharTraits> const &fmt_specs
     , It const &begin
@@ -278,7 +278,7 @@ template
 auto try_parse
 (
       int_<kind_t::bitfield>
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &item
+    , qi::symbols<Char, std::ptrdiff_t> const &item
     , basic_qualified_name<Char, CharTraits> const &enum_name
     , basic_fmt_specs<Char, CharTraits> const &fmt_specs
     , It const &begin
@@ -299,7 +299,7 @@ template
 auto try_parse
 (
       int_<kind_t::combo>
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &item
+    , qi::symbols<Char, std::ptrdiff_t> const &item
     , basic_qualified_name<Char, CharTraits> const &enum_name
     , basic_fmt_specs<Char, CharTraits> const &fmt_specs
     , It const &begin
@@ -344,7 +344,7 @@ template
 auto parse
 (
       int_<kind_t::enum_>
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
+    , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
     , basic_fmt_specs<Char, CharTraits> const &fmt_specs
     , It const &begin
@@ -365,7 +365,7 @@ template
 auto parse
 (
       int_<kind_t::bitfield>
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
+    , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
     , basic_fmt_specs<Char, CharTraits> const &fmt_specs
     , It const &begin
@@ -386,7 +386,7 @@ template
 auto parse
 (
       int_<kind_t::combo>
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
+    , qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
     , basic_fmt_specs<Char, CharTraits> const &fmt_specs
     , It const &begin
