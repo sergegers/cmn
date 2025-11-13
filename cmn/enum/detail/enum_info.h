@@ -82,11 +82,11 @@ struct enum_info
 
     }
 
-    //[[nodiscard]] consteval auto unique() const noexcept -> bool
-    //{
-    //    namespace rng = std::ranges;
-    //    return rng::adjacent_find(m_elements) == rng::end(m_elements);
-    //}
+    [[nodiscard]] consteval auto unique() const noexcept -> bool
+    {
+        namespace rng = std::ranges;
+        return rng::adjacent_find(m_elements) == rng::end(m_elements);
+    }
 
     //
     // end enum_info concept

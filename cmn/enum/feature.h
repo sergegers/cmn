@@ -20,7 +20,6 @@ template <typename Policy, c::bitfield Feature>
     std::ignore = fold
     (
           groups_v<Feature>
-        , masks_v<Feature>
         , feat
         , [&pol](record_info<Feature> const& rec, mask_type_t<Feature> mask)
         {

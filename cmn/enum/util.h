@@ -34,7 +34,7 @@ namespace group_
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <c::adapted_enum E, std::size_t Sz_> //requires (!nullable_v<E>)
-constexpr auto find
+constexpr auto find_if
 (
       group_info<E, Sz_> const &group
     , E en
@@ -80,7 +80,6 @@ template
 constexpr auto fold
 (
       Groups const &groups
-    , std::array<mask_type_t<E>, boost::fusion::result_of::size_v<Groups>> const &masks
     , E en
     , std::invocable<record_info<E> const&, mask_type_t<E>> auto const &op
     , mask_type_t<E> addditional_mask = no_mask<E>
@@ -97,7 +96,7 @@ constexpr auto fold
             // check it in group_::find()
             //if (!empty(group.m_mask & addditional_mask))
 
-            return group_::find(group, remainder, op, addditional_mask);
+            return group_::find_if(group, remainder, op, addditional_mask);
         }
     );
 }
@@ -206,25 +205,15 @@ template <c::adapted_enum E>
 [[nodiscard]] constexpr auto mask_by_enum(E en) noexcept -> mask_type_t<E>
 {
     auto const &groups = groups_v<E>;
-    auto const &masks = masks_v<E>;
 
     mask_type_t<E> res = no_mask<E>;
     std::ignore = fold
     (
         groups,
-        masks,
         en,
-        [en, &res](record_info<E> const &rec, mask_type_t<E> mask) constexpr
+        [en, &res](record_info<E> const &rec, mask_type_t<E> mask) constexpr noexcept -> bool
         {
-            if (rec.m_value == en)
-            {
-                res = mask;
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return rec.m_value == en? res = mask, true: false;
         }
     );
 
@@ -251,14 +240,14 @@ consteval auto default_ops(E, kind_t kind) -> interop_type_t<kind_t>
     using enum kind_t;
     if constexpr (c::scoped_enum<E>)
         return
-        kind == enum_ ? (op_comparable | op_steppable | op_io) :
-        kind == bitfield ? (op_bitwise | op_io) :
-        kind == combo ? (op_comparable | op_steppable | op_bitwise | op_io) :
-        op_empty
+            kind == enum_? (op_comparable | op_steppable | op_io):
+            kind == bitfield? (op_bitwise | op_io):
+            kind == combo? (op_comparable | op_steppable | op_bitwise | op_io):
+            op_empty
         ;
     else
         // by default use builtin operators for C enums
-        return contains(kind, enum_, bitfield, combo) ? op_io : op_empty;
+        return contains(kind, enum_, bitfield, combo)? op_io: op_empty;
 }
 
 }
