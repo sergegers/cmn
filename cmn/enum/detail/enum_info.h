@@ -52,7 +52,7 @@ struct enum_info
     // combo: n groups with m records in each
     //
     ////////////////////////////////////////////////////////////////////////////////
-    static consteval auto kind() -> kind_t
+    [[nodiscard]] static consteval auto kind() noexcept -> kind_t
     {
         using enum kind_t;
         return sizeof... (Szs_) == 1?

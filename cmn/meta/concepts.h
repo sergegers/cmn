@@ -565,11 +565,11 @@ concept enum_info =
         groups = einfo.m_groups;
         masks = einfo.m_masks;
         elems = einfo.m_elements;
-        { std::as_const(einfo).kind() } -> std::same_as<enum_::kind_t>;
-        { std::as_const(einfo).min_value() } -> std::same_as<typename T::enum_type>;
-        { std::as_const(einfo).max_value() } -> std::same_as<typename T::enum_type>;
-        { std::as_const(einfo).nullable() } -> std::same_as<bool>;
-        //{ std::as_const(einfo).unique() } -> std::same_as<bool>;
+        { T::kind() } noexcept -> std::same_as<enum_::kind_t>;
+        { std::as_const(einfo).min_value() } noexcept -> std::same_as<typename T::enum_type>;
+        { std::as_const(einfo).max_value() } noexcept -> std::same_as<typename T::enum_type>;
+        { std::as_const(einfo).nullable() } noexcept -> std::same_as<bool>;
+        { std::as_const(einfo).unique() } noexcept -> std::same_as<bool>;
 }
 ;
 
@@ -579,7 +579,7 @@ concept adapted_enum =
     enum_<E>
  && requires (E e)
     {
-        { adapt_enum_info(e) } -> enum_info;
+        { adapt_enum_info(e) } /*noexcept*/ -> enum_info;
     }
 ;
 
