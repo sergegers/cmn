@@ -2,6 +2,7 @@
 
 #include <iosfwd>
 #include <concepts>
+#include <algorithm>
 
 #include <boost/optional.hpp>
 
@@ -81,15 +82,19 @@ auto get_value(std::basic_ios<Char, CharTraits> &ios, Unit const &/*unit*/) -> i
     int_fmt_wrapper_t const value = default_v<Unit>;  // get default type formatting options from traits
     int_fmt_wrapper_t const manip_value = manip::int_fmt_slot_manip::value(ios);
 
-    int_fmt_wrapper_t res{ int_fmt_t::empty };
     // override default value from traits by the stream ones
-    for (auto const mask: enum_::masks_v<int_fmt_t>)
-    {
-        auto const manip_masked_value = get_feature(manip_value.m_fmt_opt, mask);
-        res = manip_masked_value != int_fmt_t::empty? 
-            res | manip_masked_value: res | get_feature(value.m_fmt_opt, mask);
-    }
-    return res;
+    return std::ranges::fold_left
+    (
+        enum_::masks_v<int_fmt_t>, 
+        int_fmt_t::empty, 
+        [manip_value, value](int_fmt_t res, mask_type_t<int_fmt_t> mask)
+        {
+            auto const manip_masked_value = get_feature(manip_value.m_fmt_opt, mask);
+            return manip_masked_value != int_fmt_t::empty? 
+                res | manip_masked_value: 
+                res | get_feature(value.m_fmt_opt, mask);
+          }
+    );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

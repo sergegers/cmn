@@ -472,8 +472,8 @@ struct width final
 {
     static constexpr auto dec_digits = std::numeric_limits<Unit>::digits10;
 
-    static constexpr auto hex_digits = std::numeric_limits<Unit>::digits / 4;
-    static constexpr auto oct_digits = std::numeric_limits<Unit>::digits / 3;
+    static constexpr auto hex_digits = div_up(std::numeric_limits<Unit>::digits, 4);
+    static constexpr auto oct_digits = div_up(std::numeric_limits<Unit>::digits, 3);
 
     Unit                m_unit;
     int_fmt_t const     m_fmt_opt;

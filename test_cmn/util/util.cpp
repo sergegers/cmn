@@ -1,10 +1,11 @@
 
-#include <string_view>
-
 #include <boost/test/unit_test.hpp>
 
 #include <cmn/meta/concepts.h>
+
 #include <cmn/util/util.h>
+#include <cmn/util/math.h>
+#include <cmn/util/fixed_string.h>
 
 BOOST_AUTO_TEST_SUITE(cmn)
 BOOST_AUTO_TEST_SUITE(util)

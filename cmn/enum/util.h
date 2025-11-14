@@ -16,7 +16,7 @@
 #endif
 
 #include <cmn/meta/concepts.h>
-#include <cmn/util/util.h>
+#include <cmn/util/math.h>
 #include <cmn/util/feature.h>
 
 #include "traits.h"

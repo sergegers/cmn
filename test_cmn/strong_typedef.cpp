@@ -97,6 +97,7 @@ BOOST_AUTO_TEST_CASE(trait_int_fmt)
 
     ostr.str("");
     BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
+    BOOST_TEST_MESSAGE(detail::get_value(ostr, my_int_3{ 0 }));
     ostr << my_int_3{ 0x16AF };
     BOOST_TEST(ostr.is_equal("0x000016af"));
 }
