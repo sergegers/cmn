@@ -78,9 +78,18 @@ template
 >
 auto get_value(std::basic_ios<Char, CharTraits> &ios, Unit const &/*unit*/) -> int_fmt_t
 {
-    int_fmt_wrapper_t const unit_default = default_v<Unit>;  // get default type formatting options from traits
+    int_fmt_wrapper_t const value = default_v<Unit>;  // get default type formatting options from traits
     int_fmt_wrapper_t const manip_value = manip::int_fmt_slot_manip::value(ios);
-    return set_feature(unit_default.m_fmt_opt, manip_value.m_fmt_opt); // override default values by the stream ones
+
+    int_fmt_wrapper_t res{ int_fmt_t::empty };
+    // override default value from traits by the stream ones
+    for (auto const mask: enum_::masks_v<int_fmt_t>)
+    {
+        auto const manip_masked_value = get_feature(manip_value.m_fmt_opt, mask);
+        res = manip_masked_value != int_fmt_t::empty? 
+            res | manip_masked_value: res | get_feature(value.m_fmt_opt, mask);
+    }
+    return res;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

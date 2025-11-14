@@ -31,10 +31,10 @@ struct out_to_stream
     template<typename FmtContext>
     constexpr auto format(this auto &self_, T const &t, FmtContext &ctx) -> context_iterator_t<FmtContext>
     {
-        std::basic_ostringstream<Char, CharTraits> ostr;
-        self_.prepare_stream(ostr) << t;
+        std::basic_ostringstream<Char, CharTraits> sstr;
+        self_.prepare_stream(sstr) << t;
 
-        return std::ranges::copy(std::move(ostr).str(), ctx.out()).out;
+        return std::ranges::copy(std::move(sstr).str(), ctx.out()).out;
     }    
 };
 

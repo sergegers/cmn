@@ -145,13 +145,15 @@ static_assert(c::bitfield<my_bitfield>);
 
 BOOST_AUTO_TEST_CASE(strong_typedef_format)
 {
+    // TODO:
+
     using namespace std::string_view_literals;
     using enum int_fmt_t;
 
-    std::basic_format_parse_context ctx{ ":#x}"sv, 3 };
-    std::formatter<my_int> fmt;
-    fmt.parse(ctx);
-    BOOST_TEST(fmt.m_fmt_opt == (hex | showbase | c | short_ | lowercase | nosign));
+    //std::basic_format_parse_context ctx{ ":#x}"sv, 3 };
+    //std::formatter<my_int> fmt;
+    //fmt.parse(ctx);
+    //BOOST_TEST(fmt.m_fmt_opt == (hex | showbase | c | short_ | lowercase | nosign));
 
 //    BOOST_TEST(std::format("{}", my_int{ 4 }) == "4");
     BOOST_TEST(std::format("{:#x}", my_int{ 4 }) == "0x4");

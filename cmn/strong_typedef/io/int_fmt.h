@@ -5,6 +5,8 @@
 #include <cmn/enum/traits.h>
 #include <cmn/enum/util.h>
 
+#include <boost/operators.hpp>
+
 namespace cmn::io
 {
 
@@ -121,12 +123,16 @@ static_assert(c::strong_bitfield<int_fmt_t>);
 static_assert(!enum_::nullable_v<int_fmt_t>);
 
 // for debugging purposes
-struct int_fmt_wrapper_t
+struct int_fmt_wrapper_t: boost::bitwise<int_fmt_wrapper_t, int_fmt_t>
 {
     int_fmt_t m_fmt_opt;
 
 	constexpr int_fmt_wrapper_t(int_fmt_t fmt_opt): m_fmt_opt{ fmt_opt } {}
 	constexpr operator int_fmt_t () const noexcept { return m_fmt_opt; }
+
+    constexpr auto operator |= (int_fmt_t rhs) -> int_fmt_wrapper_t & { return m_fmt_opt |= rhs, *this; }
+    constexpr auto operator &= (int_fmt_t rhs) -> int_fmt_wrapper_t & { return m_fmt_opt &= rhs, *this; }
+    constexpr auto operator ^= (int_fmt_t rhs) -> int_fmt_wrapper_t & { return m_fmt_opt ^= rhs, *this; }
 };
 
 }
