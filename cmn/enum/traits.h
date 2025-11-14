@@ -79,6 +79,7 @@ template <c::adapted_enum E> constexpr auto groups_v = enum_info_v<E>.m_groups;
 template <c::adapted_enum E, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<E>);
 template <c::adapted_enum E> constexpr auto masks_v = enum_info_v<E>.m_masks;
 template <c::adapted_enum E> constexpr bool nullable_v = enum_info_v<E>.nullable();
+template <c::adapted_enum E> constexpr bool unique_v = enum_info_v<E>.unique();
 
 }
 

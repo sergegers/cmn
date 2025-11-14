@@ -33,7 +33,7 @@ namespace group_
 // enum value remainder
 //
 ///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E, std::size_t Sz_> //requires (!nullable_v<E>)
+template <c::adapted_enum E, std::size_t Sz_>
 constexpr auto find_if
 (
       group_info<E, Sz_> const &group
@@ -76,7 +76,6 @@ template
       boost::c::fus_sequence Groups
     , c::adapted_enum E
 >
-    //requires (!nullable_v<E>)
 constexpr auto fold
 (
       Groups const &groups
@@ -201,7 +200,7 @@ static constexpr auto mask_overlap(std::array<Mask, Size_> const &masks)
 template <c::adapted_enum E> constexpr bool is_masks_overlapped_v = 0 != mask_overlap(masks_v<E>);
 
 ///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E>
+template <c::adapted_enum E> requires unique_v<E>
 [[nodiscard]] constexpr auto mask_by_enum(E en) noexcept -> mask_type_t<E>
 {
     auto const &groups = groups_v<E>;

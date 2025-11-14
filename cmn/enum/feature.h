@@ -31,7 +31,8 @@ template <typename Policy, c::bitfield Feature>
     return pol;
 }
 
-template <typename Policy, c::bitfield Feature> requires c::adapted_enum<Feature>
+template <typename Policy, c::bitfield Feature> 
+    requires c::adapted_enum<Feature> && unique_v<Feature>
 constexpr auto inplace_set_feature_adapted(Policy &pol, Feature feat) noexcept -> Policy &
 {
     auto const mask = mask_by_enum(feat);
@@ -58,7 +59,10 @@ template <c::strong_bitfield Policy>
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::bitfield Policy, c::bitfield... Features>
-    requires (... && std::same_as<Policy, Features>) && c::adapted_enum<Policy>
+    requires 
+           (... && std::same_as<Policy, Features>) 
+        && c::adapted_enum<Policy>
+        && unique_v<Policy>
 [[nodiscard]] constexpr auto set_features(interop_type_t<Policy> pol, Policy feat, Features... feats) noexcept
     -> interop_type_t<Policy>
 {
@@ -67,7 +71,10 @@ template <c::bitfield Policy, c::bitfield... Features>
 }
 
 template <c::strong_bitfield Policy, c::strong_bitfield... Features>
-    requires (... && std::same_as<Policy, Features>) && c::adapted_enum<Policy>
+    requires 
+            (... && std::same_as<Policy, Features>) 
+        && c::adapted_enum<Policy>
+        && unique_v<Policy>
 [[nodiscard]] constexpr auto set_features(Policy pol, Policy feat, Features... feats) noexcept -> Policy
 {
     using detail::inplace_set_feature_adapted;
