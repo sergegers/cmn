@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
         ostr << uhex << ushowbase << uupercase << uasm << ulong_ << usign << my_int{ 6789 };
         //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
         //BOOST_TEST_MESSAGE(ostr.str());
-        BOOST_TEST(ostr.is_equal("+0001A85h"));
+        BOOST_TEST(ostr.is_equal("+00001A85h"));
     }
 
     ostr.str("");

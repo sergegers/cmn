@@ -74,5 +74,9 @@
 			<Item Name="[reminder]">reminder()</Item>
         </Expand>
     </Type>
-	
+
+    <Type Name="cmn::strong_typedef_impl&lt;*,*,*&gt;">
+        <DisplayString>{{ {m_t} }}</DisplayString>
+    </Type>
+    
 </AutoVisualizer>

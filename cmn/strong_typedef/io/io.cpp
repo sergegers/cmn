@@ -470,57 +470,20 @@ struct radix final
 template <std::integral Unit>
 struct width final
 {
-    static constexpr auto dec_digits = std::numeric_limits<Unit>::digits10;
+    Unit m_unit;
+    int_fmt_t const m_fmt_opt;
 
-    static constexpr auto hex_digits = div_up(std::numeric_limits<Unit>::digits, 4);
-    static constexpr auto oct_digits = div_up(std::numeric_limits<Unit>::digits, 3);
-
-    Unit                m_unit;
-    int_fmt_t const     m_fmt_opt;
-
-    [[nodiscard]] constexpr auto test() const -> test_result_t
+    template <typename Char, typename CharTraits>
+    friend decltype(auto) operator<<(std::basic_ostream<Char, CharTraits> &ostr, width const &w)
     {
-        using enum int_fmt_t;
-        using enum test_result_t;
-
-        return has_feature(m_fmt_opt, long_)? yes: has_feature(m_fmt_opt, short_)? no: def;
-    }
-
-    template
-    <
-          typename Char
-        , typename CharTraits
-    >
-    friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, width const &w)
-    {
-        using enum int_fmt_t;
-
         using symbols_type = symbols<Char, CharTraits>;
         static constexpr auto zero = to_char(symbols_type::zero);
 
-        auto const radix = static_cast<radix_fmt_t>(get_feature(w.m_fmt_opt, radix_mask));
-
-        auto const digits = [radix]() -> std::size_t
-            {
-
-                switch (radix)
-                {
-                using enum radix_fmt_t;
-
-                case dec: return dec_digits;
-                case oct: return oct_digits;
-                case hex: return hex_digits;
-                default:
-                    BOOST_THROW_EXCEPTION(cmn::unexpected{});
-                }
-            }
-        ();
-
         switch (w.test())
         {
-        using enum test_result_t;
+            using enum test_result_t;
 
-        case yes: return ostr << std::internal << std::setw(digits) << std::setfill(zero);
+        case yes: return ostr << std::internal << std::setw(w.digits()) << std::setfill(zero);
         case no: return ostr.unsetf(std::ios_base::internal), ostr << std::setw(0ul);
         case def: return ostr;
 
@@ -529,30 +492,50 @@ struct width final
         }
     }
 
-    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto& istr, width w)
+    friend decltype(auto) operator>>(c::instance_of<std::basic_istream> auto &istr, width w)
     {
         switch (w.test())
         {
+            using enum int_fmt_t;
+            using enum test_result_t;
+
+        case yes: return istr >> std::internal >> std::setw(w.digits());
+        case no: return istr.unsetf(std::ios_base::internal), istr;
+        case def: return istr;
+
+        default:
+            BOOST_THROW_EXCEPTION(cmn::unexpected{});
+        }
+    }
+
+private:
+    static constexpr auto dec_digits = std::numeric_limits<Unit>::digits10;
+
+    static constexpr auto hex_digits = div_up(std::numeric_limits<Unit>::digits, 4);
+    static constexpr auto oct_digits = div_up(std::numeric_limits<Unit>::digits, 3);
+
+    [[nodiscard]] constexpr auto test() const noexcept -> test_result_t
+    {
         using enum int_fmt_t;
         using enum test_result_t;
 
-        case yes:
+        return has_feature(m_fmt_opt, long_)? yes: has_feature(m_fmt_opt, short_)? no: def;
+    }
+
+    [[nodiscard]] auto digits() const -> std::size_t
+    {
+        using enum int_fmt_t;
+
+        auto const radix = static_cast<radix_fmt_t>(get_feature(m_fmt_opt, radix_mask));
+        bool const base = has_all_features(m_fmt_opt, c, showbase);
+
+        switch (radix)
         {
-            if (has_feature(w.m_fmt_opt, dec))
-                return istr >> std::internal >> std::setw(dec_digits);
-            else if (has_feature(w.m_fmt_opt, oct))
-                return istr >> std::internal >> std::setw(oct_digits);
-            else if (has_feature(w.m_fmt_opt, hex))
-                return istr >> std::internal >> std::setw(hex_digits);
-            else
-                BOOST_THROW_EXCEPTION(cmn::unexpected{});
-        }
+            using enum radix_fmt_t;
 
-        case no:
-            return istr.unsetf(std::ios_base::internal), istr;
-
-        case def:
-            return istr;
+        case dec: return dec_digits;
+        case oct: return base? oct_digits + 1 /* zero prefix slot */ : oct_digits;
+        case hex: return base? hex_digits + 2 /* 0x prefix slot */ : hex_digits;
 
         default:
             BOOST_THROW_EXCEPTION(cmn::unexpected{});
