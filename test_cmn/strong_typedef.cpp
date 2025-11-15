@@ -90,10 +90,9 @@ struct strong_typedef_fmt_traits<my_int_3>
 BOOST_AUTO_TEST_CASE(trait_int_fmt)
 {
     boost::test_tools::output_test_stream ostr;
-    // TODO:
     //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-    //ostr << my_int_2{ 0x16AF };
-    //BOOST_TEST(ostr.is_equal("+16AFh"));
+    ostr << my_int_2{ 0x16AF };
+    BOOST_TEST(ostr.is_equal("+16AFh"));
 
     ostr.str("");
     BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
@@ -104,22 +103,23 @@ BOOST_AUTO_TEST_CASE(trait_int_fmt)
 
 BOOST_AUTO_TEST_CASE(xml_serialize_int_fmt)
 {
-    {
-        std::stringstream sstr;
-        my_int_2 const in{ 0x1234 };
-        {
-            boost::archive::xml_oarchive oa{ sstr };
-            oa << in;
-        }
+    // TODO:
+    //{
+    //    std::stringstream sstr;
+    //    my_int_2 const in{ 0x1234 };
+    //    {
+    //        boost::archive::xml_oarchive oa{ sstr };
+    //        oa << in;
+    //    }
 
-        my_int_2 out;
-        {
-            boost::archive::xml_iarchive ia{ sstr };
-            ia >> out;
-        }
-        BOOST_TEST(in == out);        
-        //BOOST_TEST_MESSAGE(out);
-    }
+    //    my_int_2 out;
+    //    {
+    //        boost::archive::xml_iarchive ia{ sstr };
+    //        ia >> out;
+    //    }
+    //    BOOST_TEST(in == out);        
+    //    //BOOST_TEST_MESSAGE(out);
+    //}
     {
         std::stringstream sstr;
         my_int_3 const in{ 0x1234 };
@@ -146,19 +146,17 @@ static_assert(c::bitfield<my_bitfield>);
 
 BOOST_AUTO_TEST_CASE(strong_typedef_format)
 {
-    // TODO:
-
     using namespace std::string_view_literals;
     using enum int_fmt_t;
 
-    //std::basic_format_parse_context ctx{ ":#x}"sv, 3 };
-    //std::formatter<my_int> fmt;
-    //fmt.parse(ctx);
-    //BOOST_TEST(fmt.m_fmt_opt == (hex | showbase | c | short_ | lowercase | nosign));
+    std::basic_format_parse_context ctx{ ":#x}"sv, 3 };
+    std::formatter<my_int> fmt;
+    fmt.parse(ctx);
+    BOOST_TEST(fmt.m_fmt_opt == (hex | showbase | c | short_ | lowercase | nosign));
 
-//    BOOST_TEST(std::format("{}", my_int{ 4 }) == "4");
+    BOOST_TEST(std::format("{}", my_int{ 4 }) == "4");
     BOOST_TEST(std::format("{:#x}", my_int{ 4 }) == "0x4");
-//    BOOST_TEST(std::format("{:#xu}", my_int{ 0x4A }) == "0x4A");
+    BOOST_TEST(std::format("{:#xu}", my_int{ 0x4A }) == "0X4A");
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io

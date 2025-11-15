@@ -10,6 +10,8 @@
 #include <boost/io/ios_state.hpp>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/meta/macro.h>
+
 #include <cmn/error/exception.h>
 #include <cmn/util/lexical_cast.h>
 #include <cmn/util/util.h>
@@ -474,7 +476,7 @@ struct width final
     int_fmt_t const m_fmt_opt;
 
     template <typename Char, typename CharTraits>
-    friend decltype(auto) operator<<(std::basic_ostream<Char, CharTraits> &ostr, width const &w)
+    friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, width const &w)
     {
         using symbols_type = symbols<Char, CharTraits>;
         static constexpr auto zero = to_char(symbols_type::zero);
@@ -492,7 +494,7 @@ struct width final
         }
     }
 
-    friend decltype(auto) operator>>(c::instance_of<std::basic_istream> auto &istr, width w)
+    friend decltype(auto) operator >> (c::instance_of<std::basic_istream> auto &istr, width w)
     {
         switch (w.test())
         {
@@ -607,7 +609,7 @@ template
 >
 auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, Int const &unit) -> std::basic_ostream<Char, CharTraits> &
 {
-    boost::io::basic_ios_all_saver const _{ ostr };
+    boost::io::basic_ios_all_saver const CMN_ANONYMOUS_VARIABLE() { ostr };
 
     ostr << base_prefix { fmt } << write_sign{ unit, fmt } /*<< write_c_prefix{ fmt }*/ << radix { fmt };
     ostr << width { unit, fmt } << case_ { fmt };
@@ -642,7 +644,7 @@ template
 >
 auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, Int &unit) -> std::basic_istream<Char, CharTraits> &
 {
-    boost::io::basic_ios_all_saver const _{ istr };
+    boost::io::basic_ios_all_saver const CMN_ANONYMOUS_VARIABLE() { istr };
 
     istr.exceptions(std::ios_base::eofbit | std::ios_base::badbit);    // enable exceptions
     //istr.ignore(std::numeric_limits<std::streamsize>::max(), symbols_type::c_eos());
