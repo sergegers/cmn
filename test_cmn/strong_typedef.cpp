@@ -70,7 +70,6 @@ BOOST_AUTO_TEST_CASE(int_fmt_)
 }
 
 using my_int_2 = strong_typedef<int, struct my_int_2_>;
-using my_int_3 = strong_typedef<int, struct my_int_3_>;
 
 template <>
 struct strong_typedef_fmt_traits<my_int_2>
@@ -79,27 +78,38 @@ struct strong_typedef_fmt_traits<my_int_2>
     static constexpr auto default_ = int_fmt_t::sshort_asm_up_hex;    
 };
 
+BOOST_AUTO_TEST_CASE(trait_int_2_fmt)
+{
+    std::stringstream sstr;
+    sstr << my_int_2{0x16AF};
+    BOOST_TEST(sstr.str() == "+16AFh");
+
+    my_int_2 dst;
+    sstr >> dst;
+    BOOST_TEST(dst == 0x16AF);
+}
+
+using my_int_3 = strong_typedef<int, struct my_int_3_>;
+
 template <>
 struct strong_typedef_fmt_traits<my_int_3>
 {
-    static constexpr bool enable_luxury_io = true;        
-    static constexpr auto default_ = int_fmt_t::hex | int_fmt_t::showbase | 
-        int_fmt_t::c | int_fmt_t::long_ | int_fmt_t::lowercase | int_fmt_t::nosign;
+    static constexpr bool enable_luxury_io = true;
+    static constexpr auto default_ = int_fmt_t::hex | int_fmt_t::showbase | int_fmt_t::c | int_fmt_t::long_ |
+        int_fmt_t::lowercase | int_fmt_t::nosign;
 };
 
-BOOST_AUTO_TEST_CASE(trait_int_fmt)
+BOOST_AUTO_TEST_CASE(trait_int_3_fmt)
 {
-    boost::test_tools::output_test_stream ostr;
-    //BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-    ostr << my_int_2{ 0x16AF };
-    BOOST_TEST(ostr.is_equal("+16AFh"));
+    std::stringstream sstr;
+    sstr << my_int_3{0x16AF};
+    BOOST_TEST(sstr.str()  == "0x000016af");
 
-    ostr.str("");
-    BOOST_TEST_MESSAGE(manip::int_fmt_slot_manip::value(ostr));
-    BOOST_TEST_MESSAGE(detail::get_value(ostr, my_int_3{ 0 }));
-    ostr << my_int_3{ 0x16AF };
-    BOOST_TEST(ostr.is_equal("0x000016af"));
+    my_int_3 dst;
+    sstr >> dst;
+    BOOST_TEST(dst == 0x000016AF);
 }
+
 
 BOOST_AUTO_TEST_CASE(xml_serialize_int_fmt)
 {
