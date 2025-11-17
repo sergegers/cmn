@@ -130,26 +130,6 @@ struct base_prefix final
 {
     int_fmt_t const   m_fmt_opt;
 
-    [[nodiscard]] constexpr auto test() const -> test_result_t
-    {
-        using enum int_fmt_t;
-        using enum test_result_t;
-
-        // set std::showbase, std::hidebase flags for c language and hex and oct formats
-        auto const really_set = [](int_fmt_t fmt_opt)
-        {
-            return has_feature(fmt_opt, c) && has_any_feature(fmt_opt, hex, oct);
-        };
-
-        return
-            really_set(m_fmt_opt)?
-                has_feature(m_fmt_opt, showbase)?
-                    yes:
-                    has_feature(m_fmt_opt, hidebase)? no: def:
-                def
-        ;
-    }
-
     friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto &ostr, base_prefix cs)
     {
         switch (cs.test())
@@ -177,6 +157,28 @@ struct base_prefix final
         default: BOOST_THROW_EXCEPTION(cmn::unexpected{});
         }
 
+    }
+private:
+    [[nodiscard]] constexpr auto test() const -> test_result_t
+    {
+        using enum int_fmt_t;
+        using enum test_result_t;
+
+        // set std::showbase, std::hidebase flags for c language and hex and oct formats
+        auto const really_set = [](int_fmt_t fmt_opt)
+        {
+            return has_feature(fmt_opt, c) && has_any_feature(fmt_opt, hex, oct);
+        };
+
+        return really_set(m_fmt_opt)? 
+            has_feature(m_fmt_opt, showbase)? 
+                yes: 
+                has_feature(m_fmt_opt, hidebase)? 
+                    no: 
+                    def
+            : 
+            def
+        ;
     }
 };
 
@@ -483,7 +485,7 @@ struct width final
 
         switch (w.test())
         {
-            using enum test_result_t;
+        using enum test_result_t;
 
         case yes: return ostr << std::internal << std::setw(w.digits()) << std::setfill(zero);
         case no: return ostr.unsetf(std::ios_base::internal), ostr << std::setw(0ul);
@@ -498,8 +500,8 @@ struct width final
     {
         switch (w.test())
         {
-            using enum int_fmt_t;
-            using enum test_result_t;
+        using enum int_fmt_t;
+        using enum test_result_t;
 
         case yes: return istr >> std::internal >> std::setw(w.digits());
         case no: return istr.unsetf(std::ios_base::internal), istr;
@@ -623,7 +625,10 @@ auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, Int const 
             out_int(ostr, -unit);
         }
         else
+        {
+            fmtflags_t flags{ostr.flags()};
             out_int(ostr, unit);
+        }
     }
     else
         out_int(ostr, unit);
@@ -646,8 +651,8 @@ auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, Int &unit) 
 {
     boost::io::basic_ios_all_saver const CMN_ANONYMOUS_VARIABLE() { istr };
 
-    istr.exceptions(std::ios_base::eofbit | std::ios_base::badbit);    // enable exceptions
-    //istr.ignore(std::numeric_limits<std::streamsize>::max(), symbols_type::c_eos());
+    // enable exceptions, eofbit could be reached during reading
+    istr.exceptions(/*std::ios_base::eofbit |*/ std::ios_base::badbit);
 
     istr >> base_prefix{ fmt } >> read_sign { unit, fmt } /*>> read_c_prefix { fmt }*/ >> radix{ fmt };
     istr >> width { unit, fmt } >> case_{ fmt };
@@ -686,7 +691,7 @@ template
 >
 [[nodiscard]] auto try_read_(std::basic_istream<Char, CharTraits> &istr) noexcept -> boost::optional<std::ptrdiff_t>
 {
-    boost::io::basic_ios_all_saver const _{ istr };
+    boost::io::basic_ios_all_saver const CMN_ANONYMOUS_VARIABLE() {istr};
     istr.exceptions(std::ios_base::goodbit);    // disable exceptions
 
     std::ptrdiff_t unit;

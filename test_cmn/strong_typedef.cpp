@@ -102,6 +102,7 @@ struct strong_typedef_fmt_traits<my_int_3>
 BOOST_AUTO_TEST_CASE(trait_int_3_fmt)
 {
     std::stringstream sstr;
+
     sstr << my_int_3{0x16AF};
     BOOST_TEST(sstr.str()  == "0x000016af");
 
