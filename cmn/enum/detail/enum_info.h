@@ -75,11 +75,10 @@ struct enum_info
         return find_if_fus
         (
             m_groups,
-            [](auto const& group) noexcept -> bool { return group.contains(0); }
+            [](auto const& group) noexcept -> bool { return group.nullable(); }
         )
             != -1
         ;
-
     }
 
     [[nodiscard]] consteval auto unique() const noexcept -> bool

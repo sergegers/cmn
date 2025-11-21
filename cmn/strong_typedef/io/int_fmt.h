@@ -1,10 +1,7 @@
 #pragma once
 
-#include <ios>
-
 #include <cmn/meta/concepts.h>
 #include <cmn/enum/combo.h>
-#include <cmn/enum/bitfield.h>
 #include <cmn/enum/traits.h>
 #include <cmn/enum/util.h>
 
@@ -140,32 +137,5 @@ struct int_fmt_wrapper_t: boost::bitwise<int_fmt_wrapper_t, int_fmt_t>
     constexpr auto operator &= (int_fmt_t rhs) -> int_fmt_wrapper_t & { return m_fmt_opt &= rhs, *this; }
     constexpr auto operator ^= (int_fmt_t rhs) -> int_fmt_wrapper_t & { return m_fmt_opt ^= rhs, *this; }
 };
-
-//-----------------------------------------------------------------------------
-enum class fmtflags_t
-{
-    skipws = std::ios_base::skipws,
-    unitbuf = std::ios_base::unitbuf,
-    uppercase = std::ios_base::uppercase,
-    showbase = std::ios_base::showbase,
-    showpoint = std::ios_base::showpoint,
-    showpos = std::ios_base::showpos,
-    left = std::ios_base::left,
-    right = std::ios_base::right,
-    internal = std::ios_base::internal,
-    dec = std::ios_base::dec,
-	oct = std::ios_base::oct,
-	hex = std::ios_base::hex,
-    scientific = std::ios_base::scientific,
-    fixed = std::ios_base::fixed,
-    boolalpha = std::ios_base::boolalpha
-};
-
-consteval auto adapt_enum_info(fmtflags_t)
-{
-	using enum fmtflags_t;
-    return enum_::adapt_bitfield_info_helper<skipws, unitbuf, uppercase, showbase, showpoint, showpos, left,
-        right, internal, dec, oct, hex, scientific, fixed, boolalpha>();
-}
 
 }

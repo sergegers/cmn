@@ -7,7 +7,13 @@
 
 #include <boost/lexical_cast.hpp>
 #include <boost/implicit_cast.hpp>
+
 #include <boost/io/ios_state.hpp>
+
+#include <boost/iostreams/concepts.hpp>
+#include <boost/iostreams/categories.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/pipeline.hpp>
 
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/macro.h>
@@ -367,20 +373,6 @@ struct base_postfix final
 {
     int_fmt_t const   m_fmt_opt;
 
-    [[nodiscard]] constexpr auto test() const -> bool
-    {
-        using enum int_fmt_t;
-        using enum test_result_t;
-
-        // set h postfix for asm language and hex format
-        auto const really_set = [](int_fmt_t fmt_opt)
-        {
-            return has_feature(fmt_opt, asm_) && has_any_feature(fmt_opt, hex);
-        };
-
-        return really_set(m_fmt_opt) && has_feature(m_fmt_opt, showbase);
-    }
-
     template
     <
           typename Char
@@ -415,6 +407,19 @@ struct base_postfix final
         {
             return istr;
         }
+    }
+
+private:
+    [[nodiscard]] constexpr auto test() const -> bool
+    {
+        using enum int_fmt_t;
+        using enum test_result_t;
+
+        // set h postfix for asm language and hex format
+        auto const really_set = [](int_fmt_t fmt_opt)
+        { return has_feature(fmt_opt, asm_) && has_any_feature(fmt_opt, hex); };
+
+        return really_set(m_fmt_opt) && has_feature(m_fmt_opt, showbase);
     }
 };
 
@@ -531,15 +536,15 @@ private:
         using enum int_fmt_t;
 
         auto const radix = static_cast<radix_fmt_t>(get_feature(m_fmt_opt, radix_mask));
-        bool const base = has_all_features(m_fmt_opt, c, showbase);
+        bool const show_base = has_all_features(m_fmt_opt, c, showbase);
 
         switch (radix)
         {
             using enum radix_fmt_t;
 
         case dec: return dec_digits;
-        case oct: return base? oct_digits + 1 /* zero prefix slot */ : oct_digits;
-        case hex: return base? hex_digits + 2 /* 0x prefix slot */ : hex_digits;
+        case oct: return show_base? oct_digits + 1 /* zero prefix slot */ : oct_digits;
+        case hex: return show_base? hex_digits + 2 /* 0x prefix slot */ : hex_digits;
 
         default:
             BOOST_THROW_EXCEPTION(cmn::unexpected{});
@@ -551,26 +556,6 @@ private:
 struct case_ final
 {
     int_fmt_t const   m_fmt_opt;
-
-    [[nodiscard]] constexpr auto test() const -> test_result_t
-    {
-        using enum int_fmt_t;
-        using enum test_result_t;
-
-        // set std::uppercase, std::nouppercase flags
-        auto const really_set = [](int_fmt_t fmt_opt)
-        {
-            return has_any_feature(fmt_opt, uppercase, lowercase);
-        };
-
-        return
-            really_set(m_fmt_opt)?
-                has_feature(m_fmt_opt, uppercase)?
-                yes:
-                has_feature(m_fmt_opt, lowercase)? no: def:
-            def
-        ;
-    }
 
     friend decltype(auto) operator << (c::instance_of<std::basic_ostream> auto& ostr, case_ cs)
     {
@@ -598,7 +583,26 @@ struct case_ final
 
         default: BOOST_THROW_EXCEPTION(cmn::unexpected{});
         }
+    }
 
+private:
+    [[nodiscard]] constexpr auto test() const -> test_result_t
+    {
+        using enum int_fmt_t;
+        using enum test_result_t;
+
+        // set std::uppercase, std::nouppercase flags
+        auto const really_set = [](int_fmt_t fmt_opt) { return has_any_feature(fmt_opt, uppercase, lowercase); };
+
+        return really_set(m_fmt_opt)? 
+            has_feature(m_fmt_opt, uppercase)? 
+                yes: 
+                has_feature(m_fmt_opt, lowercase)? 
+                    no: 
+                    def
+            : 
+            def
+        ;
     }
 };
 
@@ -626,7 +630,6 @@ auto write(std::basic_ostream<Char, CharTraits> &ostr, int_fmt_t fmt, Int const 
         }
         else
         {
-            fmtflags_t flags{ostr.flags()};
             out_int(ostr, unit);
         }
     }
@@ -641,6 +644,62 @@ template auto write(std::ostream &ostr, int_fmt_t fmt, unsigned const &unit) -> 
 template auto write(std::ostream &ostr, int_fmt_t fmt, unsigned char const &unit) -> std::ostream &;
 
 ///////////////////////////////////////////////////////////////////////////////
+//
+// basic_xml_garbage_filter - filtering whitespace, EOS characters,
+// inserted by XML archive generator
+//
+///////////////////////////////////////////////////////////////////////////////
+
+template <typename Char, typename... Chars>
+constexpr auto any_of(Char c, Chars... cch) -> bool
+{
+    return ((c == cch) || ...);
+}
+
+//-----------------------------------------------------------------------------
+template 
+<
+      typename Char
+    , typename CharTraits
+>
+struct basic_xml_garbage_filter : boost::iostreams::multichar_filter<boost::iostreams::input, Char>
+{
+    auto read(auto &src, char *s, std::streamsize n) -> std::streamsize
+    {
+        namespace io = boost::iostreams;
+        using io_traits = io::char_traits<Char>;
+        using symbols_type = symbols<Char, CharTraits>;
+
+        int c;
+        char *first = s;
+        char *last = s + n;
+
+        while 
+        (
+            first != last &&
+            !any_of
+            (
+                  c = io::get(src)
+                , io_traits::eof()
+                , io_traits::would_block()
+                , io_traits::newline()
+                , to_char(symbols_type::whitespace)
+            )
+        )
+        {
+            *first++ = c;
+        }
+
+        auto const result = first - s;
+        return result == 0 && io_traits::would_block(c)? -1: result;
+    }
+private:
+    using inherited = boost::iostreams::multichar_filter;
+};
+
+BOOST_IOSTREAMS_PIPABLE(basic_xml_garbage_filter, 2)
+
+///////////////////////////////////////////////////////////////////////////////
 template
 <
       typename Char
@@ -649,12 +708,22 @@ template
 >
 auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, Int &unit) -> std::basic_istream<Char, CharTraits> &
 {
-    boost::io::basic_ios_all_saver const CMN_ANONYMOUS_VARIABLE() { istr };
+    //namespace io = boost::iostreams;
+    //
+    //using filtering_stream_type = io::filtering_stream<io::input, Char, CharTraits>;
+    //using symbols_type = symbols<Char, CharTraits>;
+    //using xml_garbage_filter_type = basic_xml_garbage_filter<Char, CharTraits>;
+
+    //boost::io::basic_ios_all_saver const CMN_ANONYMOUS_VARIABLE() { istr };
+
+    //filtering_stream_type fistr{ xml_garbage_filter_type{} | boost::ref(istr) };
+    
 
     // enable exceptions, eofbit could be reached during reading
     istr.exceptions(/*std::ios_base::eofbit |*/ std::ios_base::badbit);
+    //istr.ignore(std::numeric_limits<std::streamsize>::max(), to_char(symbols_type::ends));
 
-    istr >> base_prefix{ fmt } >> read_sign { unit, fmt } /*>> read_c_prefix { fmt }*/ >> radix{ fmt };
+    istr >> base_prefix{ fmt } >> read_sign { unit, fmt } >> radix{ fmt };
     istr >> width { unit, fmt } >> case_{ fmt };
 
     if constexpr (std::signed_integral<Int>)
@@ -676,7 +745,12 @@ auto read(std::basic_istream<Char, CharTraits> &istr, int_fmt_t fmt, Int &unit) 
     else
         in_int(istr, unit);
 
-    return istr >> base_postfix { fmt };
+    istr >> base_postfix { fmt };
+    return istr;
+    //auto const &iistr = static_cast<std::basic_stringstream<Char, CharTraits> const &>(istr);
+    //auto const &buf = iistr.str();
+    //fistr >> std::hex >> std::showbase >> unit;
+    //return istr;
 }
 
 template auto read(std::istream &istr, int_fmt_t fmt, int &unit) -> std::istream &;

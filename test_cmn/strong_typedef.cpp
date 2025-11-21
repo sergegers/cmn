@@ -1,6 +1,7 @@
 
 #include <format>
 #include <string_view>
+#include <fstream>
 
 #include <boost/io/ios_state.hpp>
 #include <boost/archive/xml_oarchive.hpp>
@@ -87,6 +88,7 @@ BOOST_AUTO_TEST_CASE(trait_int_2_fmt)
     my_int_2 dst;
     sstr >> dst;
     BOOST_TEST(dst == 0x16AF);
+    BOOST_CHECK_MESSAGE(sstr.eof(), "Partial reading");
 }
 
 using my_int_3 = strong_typedef<int, struct my_int_3_>;
@@ -109,37 +111,22 @@ BOOST_AUTO_TEST_CASE(trait_int_3_fmt)
     my_int_3 dst;
     sstr >> dst;
     BOOST_TEST(dst == 0x000016AF);
+    BOOST_CHECK_MESSAGE(sstr.eof(), "Partial reading");
 }
 
 
 BOOST_AUTO_TEST_CASE(xml_serialize_int_fmt)
 {
     // TODO:
-    //{
-    //    std::stringstream sstr;
-    //    my_int_2 const in{ 0x1234 };
-    //    {
-    //        boost::archive::xml_oarchive oa{ sstr };
-    //        oa << in;
-    //    }
-
-    //    my_int_2 out;
-    //    {
-    //        boost::archive::xml_iarchive ia{ sstr };
-    //        ia >> out;
-    //    }
-    //    BOOST_TEST(in == out);        
-    //    //BOOST_TEST_MESSAGE(out);
-    //}
     {
         std::stringstream sstr;
-        my_int_3 const in{ 0x1234 };
+        my_int_2 const in{ 0x1234 };
         {
             boost::archive::xml_oarchive oa{ sstr };
             oa << in;
         }
 
-        my_int_3 out;
+        my_int_2 out;
         {
             boost::archive::xml_iarchive ia{ sstr };
             ia >> out;
@@ -147,6 +134,30 @@ BOOST_AUTO_TEST_CASE(xml_serialize_int_fmt)
         BOOST_TEST(in == out);        
         //BOOST_TEST_MESSAGE(out);
     }
+    //{
+    //    std::stringstream sstr;
+    //    my_int_3 const in{ 0x1234 };
+    //    {
+    //        boost::archive::xml_oarchive oa{ sstr };
+    //        oa << in;
+    //    }
+    //    BOOST_TEST_MESSAGE(sstr.str());
+
+    //    //{
+    //    //    std::fstream fstr{};
+    //    //    fstr.exceptions(std::ios_base::failbit | std::ios_base::badbit);
+    //    //    fstr.open("c:\\tmp\\tmp.xml", std::ios_base::in | std::ios_base::out | std::ios_base::trunc);
+    //    //    fstr << sstr.rdbuf();
+    //    //}
+
+    //    my_int_3 out;
+    //    {
+    //        boost::archive::xml_iarchive ia{ sstr };
+    //        ia >> out;
+    //    }
+    //    BOOST_TEST(in == out);        
+    //    //BOOST_TEST_MESSAGE(out);
+    //}
 }
 
 using my_ptr = strong_typedef_ptr<unsigned, struct my_strong_typedef_ptr_>;

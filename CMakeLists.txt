@@ -36,9 +36,9 @@ set(Boost_USE_STATIC_LIBS ON)
 set(Boost_USE_STATIC_RUNTIME ON)
 
 find_package(Boost REQUIRED COMPONENTS 
-   # system
     exception
     serialization
+    iostreams
     unit_test_framework 
 )
 
@@ -86,6 +86,7 @@ add_library (
 "cmn/io/format/context_traits.h"
 "cmn/io/format/util.h"
 "cmn/io/format/list.h"
+"cmn/io/debug.h"
 "cmn/io/format.h"
 
  "cmn/range/io/format.h"

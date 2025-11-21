@@ -35,10 +35,16 @@ struct group_info
 private:
     consteval auto check_constraints() const noexcept(false) -> void
     {
+        namespace rng = std::ranges;
+
         // MSVC bug
         constexpr auto check_limit = 340;
 
-        if (Sz_ < check_limit && std::ranges::adjacent_find(m_records, {}, &record_type::as_interop) != std::ranges::end(m_records))
+        if 
+        (
+               Sz_ < check_limit 
+            && rng::adjacent_find(m_records, {}, &record_type::as_interop) != rng::end(m_records)
+        )
             throw std::logic_error{ "There are duplicate values in group" };
     }
 
@@ -110,14 +116,19 @@ public:
         ;
     }
 
-    [[nodiscard]] constexpr auto contains(interop_type en) const -> bool
+    [[nodiscard]] constexpr auto contains(interop_type en) const noexcept -> bool
     {
         return std::ranges::binary_search(m_records, en, {}, &record_info<E>::as_interop);
     }
 
-    [[nodiscard]] constexpr auto contains(enum_type en) const -> bool
+    [[nodiscard]] constexpr auto contains(enum_type en) const noexcept -> bool
     {
         return this->contains(interop_cast(en));
+    }
+
+    [[nodiscard]] constexpr auto nullable() const noexcept -> bool
+    {
+        return this->contains(0);
     }
 };
 
