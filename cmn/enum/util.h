@@ -3,6 +3,9 @@
 #include <cstddef>
 #include <tuple>
 #include <utility>
+#include <concepts>
+#include <type_traits>
+#include <functional>
 
 #include <boost/fusion/algorithm/iteration/fold.hpp>
 // ReSharper disable CppUnusedIncludeDirective
@@ -33,12 +36,18 @@ namespace group_
 // enum value remainder
 //
 ///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E, std::size_t Sz_>
+template 
+<
+      c::adapted_enum E
+    , std::size_t Sz_
+    , c::invocable_r<bool, E, E> Cmp = std::equal_to<E>
+>
 constexpr auto find_if
 (
       group_info<E, Sz_> const &group
     , E en
-    , std::invocable<record_info<E> const &, mask_type_t<E>> auto const &op
+    , std::invocable<record_info<E> const &, mask_type_t<E>> auto op
+    , Cmp cmp = std::equal_to<E>{}
     , mask_type_t<E> additional_mask = no_mask<E>
 ) -> E
 {
@@ -53,9 +62,10 @@ constexpr auto find_if
     std::ignore = std::ranges::find_if
     (
         group.m_records,
-        [&en, mval, &op, mask](record_type const &rec) constexpr -> bool
+        [&en, mval, op = std::move(op), cmp = std::move(cmp), mask]
+        (record_type const &rec) constexpr -> bool
         {
-            bool const found = (rec.m_value == mval);
+            bool const found = cmp(rec.m_value, mval);
             if (found)
             {
                 op(rec, mask);
@@ -75,27 +85,29 @@ template
 <
       boost::c::fus_sequence Groups
     , c::adapted_enum E
+    , c::invocable_r<bool, E, E> Cmp = std::equal_to<E>
 >
 constexpr auto fold
 (
       Groups const &groups
     , E en
-    , std::invocable<record_info<E> const&, mask_type_t<E>> auto const &op
+    , std::invocable<record_info<E> const &, mask_type_t<E>> auto op
+    , Cmp cmp = std::equal_to<E>{}
     , mask_type_t<E> addditional_mask = no_mask<E>
 ) noexcept
--> E // return remainder
+    -> E // return remainder
 {
     return boost::fusion::fold
     (
         groups,
         get_feature(en, addditional_mask),
-        [&op, addditional_mask]
-        (E remainder, auto const &group) constexpr
+        [op = std::move(op), cmp = std::move(cmp), addditional_mask]
+        (E remainder, auto const &group) constexpr -> E
         {
             // check it in group_::find()
             //if (!empty(group.m_mask & addditional_mask))
 
-            return group_::find_if(group, remainder, op, addditional_mask);
+            return group_::find_if(group, remainder, op, cmp, addditional_mask);
         }
     );
 }

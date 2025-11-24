@@ -43,7 +43,7 @@ auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> co
     auto const &name = rec.name(ostr);
     static auto const scope_resolution = symbols<Char, CharTraits>::scope_resolution;
 
-    if (has_feature(po, ns) )ostr << name.m_ns << scope_resolution;
+    if (has_feature(po, ns)) ostr << name.m_ns << scope_resolution;
     if (has_feature(po, class_prefix)) ostr << name.m_enum_name << scope_resolution;
     return ostr << name.m_enum_member_name;
 }
@@ -115,8 +115,14 @@ constexpr auto out_enum(E en, basic_fmt_specs<Char, CharTraits> const &fmt_specs
     ostr << fmt_specs.open;
 
     bool first = true;
-    auto const remain = group_::find_if(group, en, out_record_op{ fmt_specs, ostr, first },
-        static_cast<mask_type>(fmt_specs.mask));
+    auto const remain = group_::find_if
+    (
+          group
+        , en
+        , out_record_op{ fmt_specs, ostr, first }
+        , {}
+        , static_cast<mask_type>(fmt_specs.mask)
+    );
 
     out_tail(fmt_specs, ostr, first, interop_cast(remain));
 
@@ -139,8 +145,14 @@ constexpr auto out_bitfield(E en, basic_fmt_specs<Char, CharTraits> const &fmt_s
 
     ostr << fmt_specs.open;
 
-    auto const remain = fold(groups, en, out_record_op{ fmt_specs, ostr, first }, 
-        static_cast<mask_type>(fmt_specs.mask));
+    auto const remain = fold
+    (
+          groups
+        , en
+        , out_record_op{ fmt_specs, ostr, first }
+        , {}
+        , static_cast<mask_type>(fmt_specs.mask)
+    );
 
     out_tail(fmt_specs, ostr, first, interop_cast(remain));
 

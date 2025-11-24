@@ -29,8 +29,8 @@ struct printer<E, Kind_>
 {
     using kkind_type = int_<Kind_>;
 
-    E                                    m_val;
-    [[no_unique_address]] kkind_type        m_kind;
+    E                                   m_val;
+    [[no_unique_address]] kkind_type    m_kind;
 
     constexpr printer(E val, kkind_type kind): m_val{ val }, m_kind{ kind } {}
 

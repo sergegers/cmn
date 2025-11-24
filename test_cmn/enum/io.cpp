@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(enum_class_out)
 
 BOOST_AUTO_TEST_CASE(enum_out)
 {
-    auto const e = static_cast<cmb_t>(one | green);
+    auto const e = static_cast<zero_cmb_t>(one | green);
 
     {
         output_test_stream tstr;
@@ -86,7 +86,7 @@ BOOST_AUTO_TEST_CASE(enum_out)
 
 BOOST_AUTO_TEST_CASE(double_zero)
 {
-    auto const e = static_cast<cmb_t>(one | red);
+    auto const e = static_cast<zero_cmb_t>(one | red);
 
     {
         output_test_stream tstr;
@@ -112,7 +112,7 @@ BOOST_AUTO_TEST_CASE(open_close)
     using namespace std::string_literals;
 
     std::ostringstream ostr;
-    auto const val = static_cast<cmb_t>(two | blue);
+    auto const val = static_cast<zero_cmb_t>(two | blue);
     ostr << val;
     BOOST_CHECK_MESSAGE(ostr.str() == "[two blue]", ostr.str());
     BOOST_TEST(open_manip::value(ostr) == "[");
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(save_flags)
     using namespace std::string_literals;
 
     std::ostringstream ostr;
-    constexpr auto val = static_cast<cmb_t>(two | blue);
+    constexpr auto val = static_cast<zero_cmb_t>(two | blue);
 
     BOOST_TEST(open_manip::value(ostr) == "[");
     BOOST_TEST(close_manip::value(ostr) == "]");
@@ -415,7 +415,7 @@ BOOST_AUTO_TEST_CASE(anonymous_enum)
 BOOST_AUTO_TEST_CASE(tail)
 {
     output_test_stream tstr;
-    tstr << eprint(print_t::tail) << static_cast<cmb_t>(one | green | 0x1000);
+    tstr << eprint(print_t::tail) << static_cast<zero_cmb_t>(one | green | 0x1000);
     BOOST_CHECK(tstr.is_equal("[one green 0X1000]"));
 
 }
@@ -464,7 +464,7 @@ BOOST_AUTO_TEST_CASE(format_combo)
     BOOST_TEST(std::format("{:: :>}", list{ red | two }) == "two red>");
     BOOST_TEST(std::format("{:::>}", list{ red | two }) == "twored>");
     BOOST_TEST(std::format("{:::}", list{ red | two }) == "twored");
-    BOOST_TEST(std::format("{:::}", list<cmb_t>{ cmb_t::two | cmb_t::green }) == "twogreen");
+    BOOST_TEST(std::format("{:::}", list<zero_cmb_t>{ zero_cmb_t::two | zero_cmb_t::green }) == "twogreen");
     BOOST_TEST(std::format("{:{{: :}}}", list{ red | two }) == "{two red}");
 }
 

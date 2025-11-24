@@ -76,7 +76,16 @@ template <c::adapted_enum E> constexpr E begin_v = enum_info_v<E>.min_value();
 template <c::adapted_enum E> constexpr E last_v = enum_info_v<E>.max_value();
 template <c::adapted_enum E> constexpr E end_v = static_cast<E>(interop_cast(last_v<E>) + 1);
 template <c::adapted_enum E> constexpr auto groups_v = enum_info_v<E>.m_groups;
-template <c::adapted_enum E, std::size_t GroupId_> constexpr auto records_v = std::get<GroupId_>(groups_v<E>);
+template <c::adapted_enum E, std::size_t GroupId_> constexpr auto group_v = std::get<GroupId_>(groups_v<E>);
+
+template 
+<
+      c::adapted_enum E
+    , std::size_t GroupId_
+    , std::size_t RecId_
+> 
+constexpr auto record_v = group_v<E, GroupId_>.m_records[RecId_];
+
 template <c::adapted_enum E> constexpr auto masks_v = enum_info_v<E>.m_masks;
 template <c::adapted_enum E> constexpr bool nullable_v = enum_info_v<E>.nullable();
 template <c::adapted_enum E> constexpr bool unique_v = enum_info_v<E>.unique();

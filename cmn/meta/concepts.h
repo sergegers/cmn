@@ -91,7 +91,10 @@ concept c_array_of =
  && std::same_as<std::remove_all_extents_t<T>, Elem>
 ;
 
-///////////////////////////////////////////////////////////////////////////////
+template <typename T, typename Res, typename... Args>
+concept invocable_r = std::is_invocable_r_v<Res, T, Args...>;
+
+    ///////////////////////////////////////////////////////////////////////////////
 namespace detail
 {
 

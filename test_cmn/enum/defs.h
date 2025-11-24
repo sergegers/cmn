@@ -30,7 +30,7 @@ static_assert(std::same_as<mask_type_t<ce>, unsigned short>);
 static_assert(no_mask<ce> == 0xFFFF);
 
 //-----------------------------------------------------------------------------
-enum class cl_cmb_t
+enum class zero_cl_cmb_t
 {
     zero = 0x0,
     one = 0x1,
@@ -45,9 +45,9 @@ enum class cl_cmb_t
     color_mask = red | green | blue
 };
 
-consteval auto adapt_enum_info(cl_cmb_t en)
+consteval auto adapt_enum_info(zero_cl_cmb_t en)
 {
-    using enum cl_cmb_t;
+    using enum zero_cl_cmb_t;
     return enum_info
     {
           default_ops(en, kind_t::combo) | op_interoperable
@@ -57,35 +57,35 @@ consteval auto adapt_enum_info(cl_cmb_t en)
 
 CMN_ENUM_INJECT_OPS()
 
-static_assert(std::same_as<interop_type_t<cl_cmb_t>, int>);
-static_assert(c::adapted_enum<cl_cmb_t>);
-static_assert(ops_v<cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
-static_assert(std::tuple_size_v<decltype(groups_v<cl_cmb_t>)> == 2);
-static_assert(kind_v<cl_cmb_t> == kind_t::combo);
-static_assert(c::bitfield<cl_cmb_t>);
+static_assert(std::same_as<interop_type_t<zero_cl_cmb_t>, int>);
+static_assert(c::adapted_enum<zero_cl_cmb_t>);
+static_assert(ops_v<zero_cl_cmb_t> == (op_comparable | op_steppable | op_bitwise | op_io | op_interoperable));
+static_assert(std::tuple_size_v<decltype(groups_v<zero_cl_cmb_t>)> == 2);
+static_assert(kind_v<zero_cl_cmb_t> == kind_t::combo);
+static_assert(c::bitfield<zero_cl_cmb_t>);
 
 // magic get
-static_assert(magic_enum_name_v<cl_cmb_t> == "cmn::enum_::cl_cmb_t");
-static_assert(magic_enum_wname_v<cl_cmb_t> == L"cmn::enum_::cl_cmb_t");
-static_assert(magic_enum_member_name_v<cl_cmb_t::one> == "cmn::enum_::cl_cmb_t::one");
-static_assert(magic_enum_member_wname_v<cl_cmb_t::one> == L"cmn::enum_::cl_cmb_t::one");
+static_assert(magic_enum_name_v<zero_cl_cmb_t> == "cmn::enum_::zero_cl_cmb_t");
+static_assert(magic_enum_wname_v<zero_cl_cmb_t> == L"cmn::enum_::zero_cl_cmb_t");
+static_assert(magic_enum_member_name_v<zero_cl_cmb_t::one> == "cmn::enum_::zero_cl_cmb_t::one");
+static_assert(magic_enum_member_wname_v<zero_cl_cmb_t::one> == L"cmn::enum_::zero_cl_cmb_t::one");
 
 // qualified name
-static_assert(qualified_name{ cl_cmb_t{} }.m_ns == "cmn::enum_");
-static_assert(qualified_name{ cl_cmb_t{} }.m_enum_name == "cl_cmb_t");
+static_assert(qualified_name{ zero_cl_cmb_t{} }.m_ns == "cmn::enum_");
+static_assert(qualified_name{ zero_cl_cmb_t{} }.m_enum_name == "zero_cl_cmb_t");
 // qualified member name
-static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_ns == "cmn::enum_");
-static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_name == "cl_cmb_t");
-static_assert(qualified_member_name{ int_<cl_cmb_t::green>{} }.m_enum_member_name == "green");
+static_assert(qualified_member_name{ int_<zero_cl_cmb_t::green>{} }.m_ns == "cmn::enum_");
+static_assert(qualified_member_name{ int_<zero_cl_cmb_t::green>{} }.m_enum_name == "zero_cl_cmb_t");
+static_assert(qualified_member_name{ int_<zero_cl_cmb_t::green>{} }.m_enum_member_name == "green");
 
 // mask_by_enum
-//static_assert(mask_by_enum(cl_cmb_t::zero) == cl_cmb_t::digit_mask);
-static_assert(mask_by_enum(cl_cmb_t::one) == cl_cmb_t::digit_mask);
-static_assert(mask_by_enum(cl_cmb_t::two) == cl_cmb_t::digit_mask);
-static_assert(mask_by_enum(cl_cmb_t::three) == cl_cmb_t::digit_mask);
+//static_assert(mask_by_enum(zero_cl_cmb_t::zero) == cl_cmb_t::digit_mask);
+static_assert(mask_by_enum(zero_cl_cmb_t::one) == zero_cl_cmb_t::digit_mask);
+static_assert(mask_by_enum(zero_cl_cmb_t::two) == zero_cl_cmb_t::digit_mask);
+static_assert(mask_by_enum(zero_cl_cmb_t::three) == zero_cl_cmb_t::digit_mask);
 //static_assert(mask_by_enum(cl_cmb_t::red) == cl_cmb_t::color_mask);
-static_assert(mask_by_enum(cl_cmb_t::green) == cl_cmb_t::color_mask);
-static_assert(mask_by_enum(cl_cmb_t::blue) == cl_cmb_t::color_mask);
+static_assert(mask_by_enum(zero_cl_cmb_t::green) == zero_cl_cmb_t::color_mask);
+static_assert(mask_by_enum(zero_cl_cmb_t::blue) == zero_cl_cmb_t::color_mask);
 
 //-----------------------------------------------------------------------------
 CMN_ENUM_DEFINE_ENUM
@@ -183,7 +183,7 @@ consteval auto adapt_enum_info(cl_cmb_2_t en)
 CMN_ENUM_INJECT_OPS()
 
 //-----------------------------------------------------------------------------
-enum cmb_t
+enum zero_cmb_t
 {
     one = 0x0,
     two = 0x1,
@@ -197,7 +197,7 @@ enum cmb_t
     color_mask = 0xC
 };
 
-consteval auto adapt_enum_info(cmb_t en)
+consteval auto adapt_enum_info(zero_cmb_t en)
 {
     return enum_info
     {
@@ -207,10 +207,10 @@ consteval auto adapt_enum_info(cmb_t en)
     };
 }
 
-static_assert(c::adapted_enum<cmb_t>);
-static_assert(c::bitfield<cmb_t>);
-static_assert(kind_v<cmb_t> == kind_t::combo);
-static_assert(ops_v<cmb_t> == op_io);
+static_assert(c::adapted_enum<zero_cmb_t>);
+static_assert(c::bitfield<zero_cmb_t>);
+static_assert(kind_v<zero_cmb_t> == kind_t::combo);
+static_assert(ops_v<zero_cmb_t> == op_io);
 
 //-----------------------------------------------------------------------------
 CMN_ENUM_DEFINE_BITFIELD
