@@ -130,8 +130,8 @@ add_library (
  "cmn/enum/io/printer.h" 
  "cmn/enum/io/manip.h" 
  "cmn/enum/io/reader.h" 
- "cmn/enum/io/in.h" 
- "cmn/enum/io/in.cpp"
+ "cmn/enum/io/parser.h" 
+ "cmn/enum/io/parser.cpp"
 
  "cmn/strong_typedef.h"
  "cmn/strong_typedef/strong_typedef.h" 
