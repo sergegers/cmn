@@ -23,9 +23,6 @@ namespace cmn
 namespace io
 {
 
-template <c::unit Unit> constexpr bool enable_luxury_io_v = strong_typedef_fmt_traits<Unit>::enable_luxury_io;
-template <c::unit Unit> constexpr int_fmt_t default_v = strong_typedef_fmt_traits<Unit>::default_;
-
 //-----------------------------------------------------------------------------
 template
 <

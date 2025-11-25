@@ -19,7 +19,7 @@ consteval auto adapt_enum_info_helper(interop_type_t<op_t> ops = default_ops(En_
 
 ///////////////////////////////////////////////////////////////////////////////
 #define CMN_ENUM_ADAPT_ENUM_INFO(name, group_nvp_seq) \
-    consteval auto adapt_enum_info(name)    \
+    consteval auto adapt_type_info(name)    \
     {   \
         using enum name;    \
         return ::cmn::enum_::adapt_enum_info_helper<CMN_ENUM_EXTRACT_GROUP_SEQ(group_nvp_seq)>();  \

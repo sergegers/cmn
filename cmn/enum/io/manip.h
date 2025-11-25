@@ -9,8 +9,9 @@
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
 #include <cmn/io/manip/slot/util.h>
+#include <cmn/io/manip/format_options.h>
 
-#include "fmt_specs.h"
+#include "print.h"
 
 namespace cmn::enum_::io
 {
@@ -119,8 +120,8 @@ inline constexpr cmn::io::slot_manip_forwarder<wbitfield_separator_manip> wbfsep
 // Print options manipulator
 //
 ///////////////////////////////////////////////////////////////////////////////
-using print_manip = cmn::io::int_slot_manip<struct print_, print_t::tail, print_t::empty>;
-inline constexpr cmn::io::slot_manip_forwarder<print_manip> eprint {};
+using print_manip = cmn::io::manip::format_options_manip<print_t>;
+inline constexpr cmn::io::manip::format_options_forwarder<print_t> eprint {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //

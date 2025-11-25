@@ -28,7 +28,7 @@
 #include <cmn/enum/detail/record_info.h>
 
 #include "manip.h"
-#include "fmt_specs.h"
+#include "print.h"
 
 namespace cmn::enum_
 {

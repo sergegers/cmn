@@ -5,6 +5,7 @@
 #include <type_traits>
 
 #include <cmn/meta/concepts.h>
+// ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/io/manip/slot/decoder.h>   // TODO: investigate why decoder.h inclusion is required?
 
 namespace cmn::io::manip
@@ -32,7 +33,7 @@ private:
     template <typename Manip, std::size_t Idx_>
     auto restore_manip(std::integral_constant<long, 0>) -> void
     {
-        using storage_type = typename Manip::storage_type;
+        using storage_type = Manip::storage_type;
         if constexpr (c::restore_storage<storage_type>)
             storage_type::restore(m_ios);
 
@@ -42,7 +43,7 @@ private:
     template <typename Manip, std::size_t Idx_>
     auto restore_manip(std::integral_constant<void *, nullptr>) -> void
     {
-        using storage_type = typename Manip::storage_type;
+        using storage_type = Manip::storage_type;
         if constexpr (c::restore_storage<storage_type>)
             storage_type::restore(m_ios);
 

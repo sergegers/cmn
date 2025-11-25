@@ -1,9 +1,12 @@
 #pragma once
 
 #include <string>
+#include <utility>
 
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
+
+#include <cmn/io/manip/format_options.h>
 
 #include <cmn/enum/op.h>
 #include <cmn/enum/detail/enum_info.h>
@@ -12,7 +15,10 @@
 // Do not include <cmn/enum/bitfield.h> to avoid circular dependency
 //#include <cmn/enum/bitfield.h>
 
-namespace cmn::enum_::io
+namespace cmn
+{
+
+namespace enum_::io
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,13 +40,15 @@ enum class print_t
 // Print options manipulator
 //
 ///////////////////////////////////////////////////////////////////////////////
-consteval auto adapt_enum_info(print_t)
+consteval auto adapt_type_info(print_t)
 {
+    // TODO: + empty to magic constants
+
     using enum print_t;
     return enum_info
     {
         op_comparable | op_bitwise | op_interoperable,
-        group_::make<empty, tail, class_prefix>()
+        group_::make<tail, ns, class_prefix>()
     };
 }
 
@@ -71,5 +79,18 @@ struct basic_fmt_specs
     print_t         po;
     long            mask;
 };
+
+}
+
+namespace io
+{
+
+consteval auto get_format_options_info(c::adapted_enum auto)
+{
+    using enum enum_::io::print_t;
+    return std::pair{ true, tail };
+}
+
+}
 
 }

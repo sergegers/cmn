@@ -27,6 +27,7 @@ if(POLICY CMP0074)
 endif()
 
 add_compile_definitions("$<$<CONFIG:Debug>:CMN_STATIC_TEST>")
+add_compile_definitions("$<$<CONFIG:Debug>:CMN_TEST_MOCK>")
 
 project ("cmn")
 
@@ -55,15 +56,18 @@ add_library (
  cmn 
  STATIC
 
+ "cmn/meta/concepts.h"
+ "cmn/meta/function_traits.h"
  "cmn/meta/macro.h"
  "cmn/meta/type_traits.h"
- "cmn/meta/function_traits.h"
 
-"cmn/meta/boost/fusion/concepts.hpp"
-"cmn/meta/boost/fusion/type_traits.hpp"
-"cmn/meta/boost/mp11/concepts.hpp"
-"cmn/meta/boost/mp11/type_traits.hpp"
-"cmn/meta/boost/spirit/ext.hpp"
+ "cmn/meta/concepts/type_info.h"
+
+ "cmn/meta/boost/fusion/concepts.hpp"
+ "cmn/meta/boost/fusion/type_traits.hpp"
+ "cmn/meta/boost/mp11/concepts.hpp"
+ "cmn/meta/boost/mp11/type_traits.hpp"
+ "cmn/meta/boost/spirit/ext.hpp"
  
  "cmn/util/symbols.h"
  "cmn/util/fixed_string.h"
@@ -79,15 +83,18 @@ add_library (
  "cmn/io/manip/slot/traits.h"
  "cmn/io/manip/slot/storage.h"
  "cmn/io/manip/slot/param.h"
+ "cmn/io/manip/slot.h" 
+ "cmn/io/manip/format_options.h"
 
-"cmn/io/format/mix/parse_arg.h"
-"cmn/io/format/mix/mixins.h"
-"cmn/io/format/mix.h"
-"cmn/io/format/context_traits.h"
-"cmn/io/format/util.h"
-"cmn/io/format/list.h"
-"cmn/io/debug.h"
-"cmn/io/format.h"
+ "cmn/io/format/mix/parse_arg.h"
+ "cmn/io/format/mix/mixins.h"
+ "cmn/io/format/mix.h"
+ "cmn/io/format/context_traits.h"
+ "cmn/io/format/util.h"
+ "cmn/io/format/list.h"
+ "cmn/io/debug.h"
+ "cmn/io/manip.h"
+ "cmn/io/format.h"
 
  "cmn/range/io/format.h"
  "cmn/range/io/io.h"
@@ -138,7 +145,10 @@ add_library (
  "cmn/strong_typedef/io/io.h" 
  "cmn/strong_typedef/io/io.cpp" 
  "cmn/strong_typedef/io/int_fmt.h"
+ "cmn/strong_typedef/io/int_fmt.cpp"
  "cmn/strong_typedef/io/format.h"
+ "cmn/strong_typedef/io/manip.h" 
+ "cmn/strong_typedef/io/manip.cpp"  
  "cmn/strong_typedef/io.h" 
 
  "cmn/algorithm/detail/result.h"

@@ -34,8 +34,8 @@ template <typename Iterator> using scroll_pos = std::pair<Iterator, boost::promo
 // parse context and format context helpers
 //
 //-----------------------------------------------------------------------------
-template <typename Context> using context_iterator_t = typename Context::iterator;
-template <typename Context> using context_char_t = typename Context::char_type;
+template <typename Context> using context_iterator_t = Context::iterator;
+template <typename Context> using context_char_t = Context::char_type;
 
 template <typename Context> using context_scroll_to_t = scroll_to<context_char_t<Context>>;
 template <typename Context> using context_scroll_pos_t = scroll_pos<context_iterator_t<Context>>;

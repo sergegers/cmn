@@ -1,6 +1,9 @@
 #pragma once
 
+#include <type_traits>
+
 #include <cmn/meta/concepts.h>
+
 #include <cmn/enum/combo.h>
 #include <cmn/enum/traits.h>
 #include <cmn/enum/util.h>
@@ -58,49 +61,54 @@ enum class sign_fmt_t
 };
 
 //-----------------------------------------------------------------------------
+consteval auto to_int_fmt(c::scoped_enum auto x) -> std::underlying_type_t<int_fmt_t>
+{
+    return static_cast<std::underlying_type_t<int_fmt_t>>(x);
+}
+
+//-----------------------------------------------------------------------------
 //
 // NOTE: zero value isn't used, so we can get mask from value
 //
 enum class int_fmt_t : short
 {
-	dec = radix_fmt_t::dec,					// default
-	oct = radix_fmt_t::oct,					// o
-	hex = radix_fmt_t::hex,					// x
+	dec = to_int_fmt(radix_fmt_t::dec),				// default
+	oct = to_int_fmt(radix_fmt_t::oct),				// o
+	hex = to_int_fmt(radix_fmt_t::hex),				// x
 
-	showbase = base_fmt_t::showbase,		// #
-	hidebase = base_fmt_t::hidebase,		// default
+	showbase = to_int_fmt(base_fmt_t::showbase),		// #
+	hidebase = to_int_fmt(base_fmt_t::hidebase),		// default
 
-	asm_ = lang_fmt_t::asm_,				// a
-	c = lang_fmt_t::c,						// default
+	asm_ = to_int_fmt(lang_fmt_t::asm_),				// a
+    c = to_int_fmt(lang_fmt_t::c),					// default
 
-	short_ = width_fmt_t::short_,			// s, default
-	long_ = width_fmt_t::long_,				// l
+	short_ = to_int_fmt(width_fmt_t::short_),			// s, default
+    long_ = to_int_fmt(width_fmt_t::long_),			// l
 
-	uppercase = case_fmt_t::uppercase,		// u
-	lowercase = case_fmt_t::lowercase,		// default
+	uppercase = to_int_fmt(case_fmt_t::uppercase),	// u
+	lowercase = to_int_fmt(case_fmt_t::lowercase),	// default
 
-	sign = sign_fmt_t::sign,				// ( ) space for zero
-	nosign = sign_fmt_t::nosign,			// default
-	forcesign = sign_fmt_t::forcesign,		// (+) + for zero
+	sign = to_int_fmt(sign_fmt_t::sign),				// ( ) space for zero
+    nosign = to_int_fmt(sign_fmt_t::nosign),			// default
+    forcesign = to_int_fmt(sign_fmt_t::forcesign),	// (+) + for zero
 
 	empty = 0b0000'0000'0000'0000,
-	default_ = dec | hidebase | c | short_ | lowercase | nosign,      // must be synced with
-	// strong_typedef_traits::default_
-
+	default_ = dec | hidebase | c | short_ | lowercase | nosign,	// must be synced with
+	                                                                // strong_typedef_traits::default_
 	// masks                            
-	radix_mask = radix_fmt_t::mask,
-	base_mask = base_fmt_t::mask,
-	lang_mask = lang_fmt_t::mask,
-	width_mask = width_fmt_t::mask,
-	case_mask = case_fmt_t::mask,
-	sign_mask = sign_fmt_t::mask,
+	radix_mask = to_int_fmt(radix_fmt_t::mask),
+	base_mask = to_int_fmt(base_fmt_t::mask),
+	lang_mask = to_int_fmt(lang_fmt_t::mask),
+    width_mask = to_int_fmt(width_fmt_t::mask),
+	case_mask = to_int_fmt(case_fmt_t::mask),
+	sign_mask = to_int_fmt(sign_fmt_t::mask),
 	// predefined formats
 	sshort_asm_up_hex = hex | showbase | asm_ | short_ | uppercase | sign,    // +1Bh
 	long_asm_up_hex = hex | showbase | asm_ | long_ | uppercase | nosign,     // 0000001Bh
 	long_c_up_hex = hex | showbase | c | long_ | uppercase | forcesign        // +0x0000001B
 };
 
-consteval auto adapt_enum_info(int_fmt_t en)
+consteval auto adapt_type_info(int_fmt_t en)
 {
 	using namespace cmn::enum_;
 	using enum int_fmt_t;
@@ -137,5 +145,13 @@ struct int_fmt_wrapper_t: boost::bitwise<int_fmt_wrapper_t, int_fmt_t>
     constexpr auto operator &= (int_fmt_t rhs) -> int_fmt_wrapper_t & { return m_fmt_opt &= rhs, *this; }
     constexpr auto operator ^= (int_fmt_t rhs) -> int_fmt_wrapper_t & { return m_fmt_opt ^= rhs, *this; }
 };
+
+}
+
+namespace cmn::enum_::op
+{
+
+extern template auto operator << (std::ostream &, cmn::io::int_fmt_t) -> std::ostream &;
+extern template auto operator << (std::wostream &, cmn::io::int_fmt_t) -> std::wostream &;
 
 }

@@ -21,7 +21,7 @@ enum class strong_feature_t
     mB  = f4 | f8
 };
 
-consteval auto adapt_enum_info(strong_feature_t)
+consteval auto adapt_type_info(strong_feature_t)
 {
     using namespace enum_;
     using enum strong_feature_t;

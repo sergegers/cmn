@@ -8,7 +8,8 @@
 
 #include <cmn/strong_typedef/strong_typedef.h>
 
-#include "io.h"
+#include "int_fmt.h"
+#include "manip.h"
 
 namespace cmn::io
 {

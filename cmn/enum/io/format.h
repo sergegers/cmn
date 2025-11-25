@@ -41,7 +41,7 @@ struct formatter<E, Char>:
       cmn::io::mix::out_to_stream<E, Char>
     , cmn::io::mix::skip_parse<E, Char>
 {
-    using ostream_type = typename cmn::io::mix::out_to_stream<E, Char>::ostream_type;
+    using ostream_type = cmn::io::mix::out_to_stream<E, Char>::ostream_type;
     using symbols_type = cmn::symbols<Char>;
     using string_view_type = basic_string_view<Char>;
 

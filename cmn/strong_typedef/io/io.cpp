@@ -23,39 +23,13 @@
 #include <cmn/util/util.h>
 
 #include <cmn/enum/traits.h>
-#include <cmn/enum/io.h>
 #include <cmn/enum/feature.h>
 
 #include "io.h"
+#include "int_fmt.h"
 
 namespace cmn::io
 {
-
-namespace manip
-{
-
-auto int_fmt_storage_t::index(std::ios_base &ios) -> int
-{
-    // call xalloc once to get an index at which we can store data for this
-    // manipulator.
-    static auto const idx = std::ios_base::xalloc();
-    return idx;
-}
-
-auto int_fmt_storage_t::value(std::ios_base &ios) -> keep_type
-{
-    return ios.iword(index(ios));
-}
-
-auto int_fmt_storage_t::value(std::ios_base &ios, keep_type value) -> void
-{
-    auto const old_value = static_cast<int_fmt_t>(int_fmt_storage_t::value(ios));
-    auto const new_value = set_feature(old_value, static_cast<int_fmt_t>(value));
-
-    ios.iword(index(ios)) = static_cast<int>(new_value);
-}
-
-}
 
 namespace detail
 {
@@ -783,13 +757,5 @@ template auto try_read_(std::istream &istr) noexcept -> boost::optional<std::ptr
 template auto try_read_(std::wistream &istr) noexcept -> boost::optional<std::ptrdiff_t>;
 
 }
-
-}
-
-namespace cmn::enum_::op
-{
-
-template auto operator << (std::ostream &, cmn::io::int_fmt_t) -> std::ostream &;
-template auto operator << (std::wostream &, cmn::io::int_fmt_t) -> std::wostream &;
 
 }

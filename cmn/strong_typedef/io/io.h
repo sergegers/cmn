@@ -2,21 +2,12 @@
 
 #include <iosfwd>
 #include <concepts>
-#include <algorithm>
 
 #include <boost/optional.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
-
-#include <cmn/enum/feature.h>
-
-#include <cmn/io/manip/slot/fwd.h>
-#include <cmn/io/manip/slot/manip.h>
-#include <cmn/io/manip/slot/forwarder.h>
-
+#include <cmn/io/manip/format_options.h>
 #include <cmn/strong_typedef/strong_typedef.h>
-#include <cmn/strong_typedef/io/int_fmt.h>
 
 namespace cmn
 {
@@ -24,80 +15,9 @@ namespace cmn
 namespace io
 {
 
-namespace manip
-{
-
-// set one group at once
-struct int_fmt_storage_t
-{
-    using keep_type = int_keep_type;
-    using tag_type = int_fmt_storage_t;
-
-    static auto index(std::ios_base &ios) -> int;
-    static auto value(std::ios_base &ios) -> keep_type;
-    static auto value(std::ios_base &ios, keep_type value) -> void;
-};
-
-using int_fmt_slot_manip = slot_manip
-<
-      int_fmt_t 
-    , int_fmt_t::empty      // here is empty values, initial value
-    , int_fmt_t::empty      // supplies by strong_typedef_fmt_traits
-    , int_decoder<int_fmt_t>
-    , int_fmt_storage_t
->;
-
-using int_fmt_forwarder = slot_manip_forwarder<int_fmt_slot_manip>;
-
-inline constexpr int_fmt_forwarder int_fmt{};
-
-constexpr auto udec = int_fmt(int_fmt_t::dec);
-constexpr auto uoct = int_fmt(int_fmt_t::oct);
-constexpr auto uhex = int_fmt(int_fmt_t::hex);
-constexpr auto ushowbase = int_fmt(int_fmt_t::showbase);
-constexpr auto uhidebase = int_fmt(int_fmt_t::hidebase);
-constexpr auto uupercase = int_fmt(int_fmt_t::uppercase);
-constexpr auto ulowercase = int_fmt(int_fmt_t::lowercase);
-constexpr auto uc = int_fmt(int_fmt_t::c);
-constexpr auto uasm = int_fmt(int_fmt_t::asm_);
-constexpr auto ulong_ = int_fmt(int_fmt_t::long_);
-constexpr auto ushort_ = int_fmt(int_fmt_t::short_);
-constexpr auto usign = int_fmt(int_fmt_t::sign);
-constexpr auto unosign = int_fmt(int_fmt_t::nosign);
-constexpr auto uforcesign = int_fmt(int_fmt_t::forcesign);
-
-}
-
 namespace detail
 {
 
-template
-<
-      typename Char
-    , typename CharTraits
-    , c::unit Unit
->
-auto get_value(std::basic_ios<Char, CharTraits> &ios, Unit const &/*unit*/) -> int_fmt_t
-{
-    int_fmt_wrapper_t const value = default_v<Unit>;  // get default type formatting options from traits
-    int_fmt_wrapper_t const manip_value = manip::int_fmt_slot_manip::value(ios);
-
-    // override default value from traits by the stream ones
-    return std::ranges::fold_left
-    (
-        enum_::masks_v<int_fmt_t>, 
-        int_fmt_t::empty, 
-        [manip_value, value](int_fmt_t res, mask_type_t<int_fmt_t> mask)
-        {
-            auto const manip_masked_value = get_feature(manip_value.m_fmt_opt, mask);
-            return manip_masked_value != int_fmt_t::empty? 
-                res | manip_masked_value: 
-                res | get_feature(value.m_fmt_opt, mask);
-          }
-    );
-}
-
-///////////////////////////////////////////////////////////////////////////////
 template
 <
       typename Char
@@ -125,21 +45,6 @@ template
 
 }
 
-using manip::int_fmt;
-using manip::udec;
-using manip::uhex;
-using manip::ushowbase;
-using manip::uhidebase;
-using manip::uupercase;
-using  manip::ulowercase;
-using manip::uc;
-using manip::uasm;
-using manip::ulong_;
-using manip::ushort_;
-using manip::usign;
-using manip::unosign;
-using manip::uforcesign;
-
 template
 <
       c::unit Unit
@@ -148,7 +53,7 @@ template
 >
 [[nodiscard]] auto try_read(std::basic_istream<Char, CharTraits> &istr) noexcept -> boost::optional<Unit>
 {
-    using underlying_type = typename Unit::underlying_type;
+    using underlying_type = Unit::underlying_type;
     return detail::try_read_(istr).map
     (
         [](std::ptrdiff_t i)
@@ -171,7 +76,7 @@ template
 auto operator << (std::basic_ostream<Char, CharTraits> &ostr, Unit const &unit) -> std::basic_ostream<Char, CharTraits> &
 {
     using namespace io::detail;
-    return write(ostr, get_value(ostr, unit), io::access::value_ref(unit));
+    return write(ostr, io::get_format_options(ostr, unit), io::access::value_ref(unit));
 }
 
 template
@@ -185,15 +90,7 @@ template
 auto operator >> (std::basic_istream<Char, CharTraits> &istr, Unit &unit) -> std::basic_istream<Char, CharTraits> &
 {
     using namespace io::detail;
-    return read(istr,  get_value(istr, unit), io::access::value_ref(unit));
-}
-
-namespace enum_::op
-{
-
-extern template auto operator << (std::ostream &, cmn::io::int_fmt_t) -> std::ostream &;
-extern template auto operator << (std::wostream &, cmn::io::int_fmt_t) -> std::wostream &;
-
+    return read(istr,  io::get_format_options(istr, unit), io::access::value_ref(unit));
 }
 
 }
