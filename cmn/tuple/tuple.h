@@ -10,9 +10,11 @@ namespace cmn
 {
 
 ////////////////////////////////////////////////////////////////////////////////
+//
 // tuple_cut_right(), tuple_cut_left(), tuple_cut()
 // make tuple from the another one by trimming their edges
 // http://stackoverflow.com/questions/17854219/creating-a-sub-tuple-starting-from-a-stdtuplesome-types
+//
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename Tuple, std::size_t... Idx_>

@@ -1,27 +1,16 @@
 #pragma once
 
+#include <cstddef>
 #include <concepts>
-#include <type_traits>
 #include <utility>
+#include <tuple>
 
 #include <cmn/fwd.h>
 
+#include "traits.h"
+
 namespace cmn::c
 {
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// republish some type traits as concepts
-//
-////////////////////////////////////////////////////////////////////////////////
-template <typename T>
-concept enum_ = std::is_enum_v<T>;
-
-template <typename T>
-concept scoped_enum = enum_<T> && std::is_scoped_enum_v<T>;
-
-template <typename T>
-concept c_enum = enum_<T> && !std::is_scoped_enum_v<T>;
 
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -34,21 +23,14 @@ concept adapted_type = requires (T t)
     { adapt_type_info(t) };
 };
 
-//-----------------------------------------------------------------------------
-template <typename T>
-concept formatted_type =
-    adapted_type<T> 
- && requires(decltype(adapt_type_info(std::declval<T>())) ti) 
-    {
-        { ti.formatting_options() } -> enum_;
-    }
-;
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Extended enum concepts
 //
 ///////////////////////////////////////////////////////////////////////////////
+namespace detail
+{
+
 template <typename T>
 concept enum_info_types_ = requires 
 {
@@ -62,10 +44,21 @@ concept enum_info_types_ = requires
     typename T::elements_type;
 };
 
+}
+
 template <typename T>
-concept enum_info = enum_info_types_<T> && enum_<typename T::enum_type> &&
-    requires(T const &einfo, typename T::op_type &ops, typename T::groups_type &groups, typename T::masks_type &masks,
-             std::size_t &sz, typename T::elements_type &elems) 
+concept enum_info = 
+    detail::enum_info_types_<T> 
+ && enum_<typename T::enum_type> &&
+    requires
+    (
+          T const &einfo
+        , typename T::op_type &ops
+        , typename T::groups_type &groups
+        , typename T::masks_type &masks
+        , std::size_t &sz
+        , typename T::elements_type &elems
+    ) 
     {
         sz = T::size;
         ops = einfo.m_ops;

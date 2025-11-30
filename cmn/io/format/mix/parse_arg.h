@@ -1,14 +1,11 @@
 #pragma once
 
-#include <format>
 #include <utility>
 #include <string_view>
 #include <ranges>
 #include <optional>
 
-#include <cmn/meta/type_traits.h>
 #include <cmn/util/feature.h>
-
 #include <cmn/io/format/util.h>
 
 namespace cmn::io::mix

@@ -9,7 +9,9 @@ template <typename S>
 concept fus_sequence = fusion::traits::is_sequence<S>::value;
 
 template <typename S>
-concept random_access_fus_sequence =
-       fus_sequence<S> && fusion::traits::is_random_access<S>::value;
+concept random_access_fus_sequence = fus_sequence<S> && fusion::traits::is_random_access<S>::value;
+
+template <typename M>
+concept associative_fus_sequence = fus_sequence<M> && fusion::traits::is_associative<M>::value;
 
 }

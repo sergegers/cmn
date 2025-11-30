@@ -199,12 +199,16 @@ template <c::string T> using char_traits_t = T::traits_type;
 //
 ///////////////////////////////////////////////////////////////////////////////
 template <c::adapted_type T>
-constexpr c::enum_info auto type_info_v = []
+constexpr auto type_info_v = []
 {
     // initialize through lambda to avoid linking errors during
     // constructor execution if the constructor throws exception
     return adapt_type_info(T{});
 }();
+
+//-----------------------------------------------------------------------------
+template <c::formatted_type T> 
+constexpr c::format_info auto default_format_info_v = get_default_format_info(T{});
 
 
 }

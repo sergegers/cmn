@@ -10,6 +10,8 @@
 #include <boost/fusion/sequence/intrinsic/size.hpp>
 #include <boost/fusion/sequence/intrinsic/begin.hpp>
 #include <boost/fusion/sequence/intrinsic/end.hpp>
+#include <boost/fusion/sequence/intrinsic/at_key.hpp>
+#include <boost/fusion/sequence/intrinsic/value_at_key.hpp>
 
 #include <boost/fusion/container/vector/convert.hpp>
 
@@ -46,6 +48,10 @@ template <c::fus_sequence Seq, typename First, typename Last = use_default>
 using erase_t = erase<Seq, First, Last>::type;
 
 template <c::fus_sequence Seq> using as_vector_t = as_vector<Seq>::type;
+
+//-----------------------------------------------------------------------------
+template <c::associative_fus_sequence Seq, typename N> using at_key_t = at_key<Seq, N>::type;
+template <c::associative_fus_sequence Seq, typename N> using value_at_key_t = value_at_key<Seq, N>::type;
 
 }
 

@@ -62,6 +62,9 @@ add_library (
  "cmn/meta/type_traits.h"
 
  "cmn/meta/concepts/type_info.h"
+ "cmn/meta/concepts/format_info.h"
+ "cmn/meta/concepts/traits.h"
+ "cmn/meta/concepts/slot_manip.h"
 
  "cmn/meta/boost/fusion/concepts.hpp"
  "cmn/meta/boost/fusion/type_traits.hpp"
@@ -76,7 +79,7 @@ add_library (
  "cmn/util/inverse.h" 
  "cmn/util/feature.h"
  
-"cmn/io/manip/slot/fwd.h"
+ "cmn/io/manip/slot/fwd.h"
  "cmn/io/manip/slot/param.h"
  "cmn/io/manip/slot/decoder.h"
  "cmn/io/manip/slot/forwarder.h"
@@ -132,6 +135,7 @@ add_library (
  "cmn/enum/combo.h" 
  "cmn/enum/feature.h" 
  "cmn/enum/util.h"
+ "cmn/enum/io/default_format_info.h"
  "cmn/enum/io/format.h"
  "cmn/enum/io.h" 
  "cmn/enum/io/printer.h" 
@@ -169,7 +173,8 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
- "cmn/util/math.h")
+ "cmn/util/math.h" 
+ )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

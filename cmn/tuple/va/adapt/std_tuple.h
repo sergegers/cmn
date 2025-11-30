@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <tuple>
 #include <type_traits>
 
@@ -27,7 +28,7 @@ struct tuple_size<cmn::va::tuple_view<Sig>> :
     integral_constant<size_t, cmn::va::tuple_view<Sig>::size()>
 {};
 
-template <std::size_t Idx_, cmn::c::function Sig>
+template <size_t Idx_, cmn::c::function Sig>
 struct tuple_element < Idx_, cmn::va::tuple_view<Sig>>
 {
     using tuple_view_type = cmn::va::tuple_view<Sig>;
@@ -35,22 +36,22 @@ struct tuple_element < Idx_, cmn::va::tuple_view<Sig>>
 };
 
 //-----------------------------------------------------------------------------
-template <std::size_t Idx_, cmn::c::function Sig>
+template <size_t Idx_, cmn::c::function Sig>
 constexpr decltype(auto) get(cmn::va::tuple_view<Sig> &t) noexcept
 {
     return t.template get<Idx_>();
 }
 
-template <std::size_t Idx_, cmn::c::function Sig>
+template <size_t Idx_, cmn::c::function Sig>
 constexpr decltype(auto) get(cmn::va::tuple_view<Sig> const &t) noexcept
 {
     return t.template get<Idx_>();
 }
 
-template <std::size_t Idx_, cmn::c::function Sig>
+template <size_t Idx_, cmn::c::function Sig>
 constexpr decltype(auto) get(cmn::va::tuple_view<Sig> &&t) noexcept
 {
-    return std::move(t).template get<Idx_>();
+    return move(t).template get<Idx_>();
 }
 
 //-----------------------------------------------------------------------------

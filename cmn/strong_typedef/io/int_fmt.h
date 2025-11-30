@@ -61,7 +61,7 @@ enum class sign_fmt_t
 };
 
 //-----------------------------------------------------------------------------
-consteval auto to_int_fmt(c::scoped_enum auto x) -> std::underlying_type_t<int_fmt_t>
+consteval auto to_int_fmt(c::scoped_enum auto x)
 {
     return static_cast<std::underlying_type_t<int_fmt_t>>(x);
 }
