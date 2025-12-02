@@ -1,22 +1,12 @@
 #pragma once
 
-#include <tuple>
-#include <concepts>
+#include <type_traits>
 
-#include "type_info.h"
+#include <cmn/fwd.h>
 
-namespace cmn
-{
+#include "traits.h"
 
-enum format_info_slot_t
-{
-    fis_options,
-    fis_list_open,
-    fis_list_close,
-    fis_list_delim
-};
-
-namespace c
+namespace cmn::c
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -24,30 +14,37 @@ namespace c
 // type formatting concepts
 //
 ///////////////////////////////////////////////////////////////////////////////
-
-namespace detail
-{
-
-template <typename T>
-concept format_info_types_ = requires { typename std::tuple_element_t<fis_options, T>; };
-
-}
-
 template <typename T>
 concept format_info = 
-    detail::format_info_types_<T> 
- && adapted_enum<std::tuple_element_t<fis_options, T>> 
- && requires(T t) 
-    {
-        { std::get<fis_options>(std::as_const(t)) } -> std::same_as<std::tuple_element_t<fis_options, T>>;
-    };
+    adapted_enum<std::remove_cvref_t<decltype(std::declval<T>().options)>>
+;
 
+//-----------------------------------------------------------------------------
 template <typename T>
-concept formatted_type = requires(T t) 
-{
-    { get_default_format_info(t) };
-};
+concept formatted_type = 
+    requires(T t) 
+    {
+        { io::format_traits<T>{}(t) } -> format_info;
+    }
+;
+
+//-----------------------------------------------------------------------------
+template <typename T>
+concept list_symbols = 
+    const_string<std::remove_cvref_t<decltype(std::declval<T>().open)>> 
+ && const_string<std::remove_cvref_t<decltype(std::declval<T>().close)>> 
+ && const_string<std::remove_cvref_t<decltype(std::declval<T>().delimiter)>>
+;
+
+//-----------------------------------------------------------------------------
+template <typename T>
+concept list_format_info = 
+    format_info<T> 
+ && requires() 
+    {
+        &T::list_symbols;
+    }
+;
 
 }
 
-}

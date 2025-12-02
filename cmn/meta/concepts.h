@@ -11,9 +11,7 @@
 #include <utility>
 
 #include <boost/mp11.hpp>
-#include <boost/mpl/pair.hpp>
 #include <boost/type_traits/promote.hpp>
-#include <boost/exception/all.hpp>
 
 #if __has_include(<boost/mp11/concepts.hpp>)
 #   include <boost/mp11/concepts.hpp>
@@ -26,6 +24,7 @@
 #include <cmn/meta/concepts/type_info.h>
 #include <cmn/meta/concepts/format_info.h>
 #include <cmn/meta/concepts/slot_manip.h>
+#include <cmn/meta/concepts/exception.h>
 
 namespace cmn
 {
@@ -58,47 +57,6 @@ consteval auto is_char() -> bool
 }
 
 template <typename T> concept char_ = std::integral<T> && detail::is_char<T>();
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// instance_of
-//
-// https://cukic.co/2019/03/15/template-meta-functions-for-detecting-template-instantiation/
-//
-///////////////////////////////////////////////////////////////////////////////
-namespace detail
-{
-
-template <template <typename...> typename TemplateT, typename T>
-struct is_instance_of_: std::false_type {};
-
-template <template <typename...> typename TemplateT, typename... Args>
-struct is_instance_of_<TemplateT, TemplateT<Args...>>: std::true_type {};
-
-}
-
-template <typename T, template <typename...> typename TemplateT>
-concept instance_of = detail::is_instance_of_<TemplateT, T>::value;
-
-//-----------------------------------------------------------------------------
-//
-// check if type is complete
-// https://stackoverflow.com/a/53298134/8452129
-//
-//-----------------------------------------------------------------------------
-namespace detail
-{
-
-template <typename T, typename Enabler = void>
-struct is_complete : std::false_type {};
-
-template <typename T>
-struct is_complete<T, std::void_t<decltype(sizeof(T) != 0)>> : std::true_type {};
-
-}
-
-template <typename T>
-concept complete = detail::is_complete<T>::value;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -306,166 +264,6 @@ concept ariphmetic =
      && detail::noncommutative_ariphmetic_ops_<T, interop_type_t<T>, T>
  )
 ;
-
-////////////////////////////////////////////////////////////////////////////////
-
-template <typename T>
-concept string = requires (T const &ct, std::size_t idx)
-{
-    typename T::value_type;
-    typename T::traits_type;
-
-//    { ct.c_str() } -> std::same_as<typename T::value_type const *>;
-    { ct[idx] } -> std::same_as<typename T::value_type const &>;
-    { std::size(ct) } -> std::same_as<std::size_t>;
-};
-
-//-----------------------------------------------------------------------------
-template <typename T, typename Char, typename CharTraits>
-concept string_of =
-    string<T>
- && std::same_as<typename T::value_type, Char>
- && std::same_as<typename T::traits_type, CharTraits>
-;
-
-///////////////////////////////////////////////////////////////////////////////
-template <typename T, typename Char, typename CharTraits>
-concept printable = requires (std::basic_ostream<Char, CharTraits> &ostr, T const &t)
-{
-    { ostr << t } -> std::same_as<decltype(ostr)>;
-};
-
-//-----------------------------------------------------------------------------
-template <typename Src, typename Dest>
-concept explicitly_convertible_to = requires (Src src)
-{
-    { static_cast<Dest>(src) } -> std::same_as<Dest>;
-};
-
-//-----------------------------------------------------------------------------
-template <typename T>
-concept predicate =
-    explicitly_convertible_to<T const &, bool>
- && requires (T const &t)
-    {
-        { !t } -> std::same_as<bool>;
-    }
-;
-
-//-----------------------------------------------------------------------------
-//
-// for throwing destructors in test mode only
-//
-#ifdef CMN_TEST_MOCK
-
-template <typename T, typename... Args>
-concept test_constructible_from = requires (Args &&... args)
-{
-    T{ std::forward<Args>(args)... };
-};
-#else
-
-//-----------------------------------------------------------------------------
-template <typename T, typename... Args>
-concept test_constructible_from = std::constructible_from<T, Args...>;
-
-#endif
-//-----------------------------------------------------------------------------
-//
-// for one argument & inverted argument order
-//
-template <typename Arg, typename T>
-concept test_constructible = test_constructible_from<T, Arg>;
-
-//-----------------------------------------------------------------------------
-
-#ifdef CMN_TEST_MOCK
-template <typename T> concept test_move_constuctible = test_constructible_from<T, T &&>;
-#else
-template <typename T> concept test_move_constuctible = std::move_constructible<T>;
-#endif
-
-//-----------------------------------------------------------------------------
-//
-// strong_typedef, offset_value helper concepts
-//
-template <typename U, typename V>
-concept int_convertible_to =
-    std::integral<U>
- && std::integral<V>
- && std::convertible_to<U, V>
-;
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// exception concepts
-//
-template <typename E> concept exception =
-    std::derived_from<E, std::exception>
- && std::derived_from<E, boost::exception>
-;
-
-template <typename E>
-concept std_only_exception =
-    std::derived_from<E, std::exception>
- && !std::derived_from<E, boost::exception>
-;
-
-template <typename E>
-concept boost_only_exception =
-    !std::derived_from<E, std::exception>
- && std::derived_from<E, boost::exception>
-;
-
-//-----------------------------------------------------------------------------
-template <typename T> concept error_info = instance_of<T, boost::error_info>;
-
-template <typename T>
-concept error_info_pair =
-    instance_of<T, boost::mpl::pair>
- && error_info<typename T::first>
- && error_info<typename T::second>
-;
-
-namespace detail
-{
-
-using namespace boost::mp11;
-
-template <typename T>
-struct is_error_info_map_: std::false_type {};
-
-template <error_info_pair... ErrorInfoPairs>
-struct is_error_info_map_<mp_list<ErrorInfoPairs...>>: std::true_type {};
-
-//-----------------------------------------------------------------------------
-template <typename T>
-struct is_error_info_list_: std::false_type {};
-
-template <error_info... ErrorInfos>
-struct is_error_info_list_<mp_list<ErrorInfos...>>: std::true_type {};
-
-//-----------------------------------------------------------------------------
-template <boost::c::mp11_list L>
-constexpr bool mp_is_unique_v = std::is_same_v<L, boost::mp11::mp_unique<L>>;
-
-}
-
-///////////////////////////////////////////////////////////////////////////////
-template <typename T>
-concept error_info_map =
-    detail::is_error_info_map_<T>::value
- && detail::mp_is_unique_v<boost::mp11::mp_map_keys<T>>
-;
-
-template <typename T>
-concept error_info_list =
-    detail::is_error_info_list_<T>::value
- && detail::mp_is_unique_v<T>
-;
-
-//
-///////////////////////////////////////////////////////////////////////////////
 
 }
 

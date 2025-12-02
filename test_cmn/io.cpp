@@ -21,14 +21,14 @@ namespace cmn::io
 
 using my_int = strong_typedef<int, struct my_int_>;
 
-enum format_options_t
+enum fmt_options_t
 {
     fo_empty        = 0x0,
     fo_hex          = 0x1,
     fo_uppercase    = 0x2
 };
 
-consteval auto adapt_type_info(format_options_t fo)
+consteval auto adapt_type_info(fmt_options_t fo)
 {
     return enum_::adapt_bitfield_info_helper<fo_empty, fo_hex, fo_uppercase>();
 }
@@ -48,7 +48,7 @@ struct formatter<cmn::io::my_int, Char>:
     using parse_arg_type = cmn::io::mix::parse_arg<Char>;
     using ostream_type = std::basic_ostream<Char>;
 
-    cmn::interop_type_t<cmn::io::format_options_t> m_fo = cmn::io::fo_empty;
+    cmn::interop_type_t<cmn::io::fmt_options_t> m_fo = cmn::io::fo_empty;
 
     constexpr auto prepare_stream(this auto const &self_, ostream_type &ostr) -> ostream_type &
     {
@@ -82,9 +82,8 @@ struct formatter<cmn::io::my_int, Char>:
             string_view_type const chunk { *range_ };
             for (auto const sym: chunk)
             {
-                using symbols_type = cmn::symbols<Char>;
-                static constexpr auto x = cmn::to_char(symbols_type::x);
-                static constexpr auto u = cmn::to_char(symbols_type::u);
+                static constexpr auto x = cmn::sym::x.as_char<Char>();
+                static constexpr auto u = cmn::sym::u.as_char<Char>();
 
                 switch (sym)
                 {

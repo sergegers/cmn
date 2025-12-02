@@ -21,11 +21,10 @@ template <typename ParseContext>
     -> boost::promote_t<scroll_result_t>
 {
     using char_type = context_char_t<ParseContext>;
-    using symbols_type = symbols<char_type>;
 
-    constexpr char_type separator_fmt = cmn::to_char(symbols_type::colon);
-    constexpr char_type open_fmt = cmn::to_char(symbols_type::open_figure_bracket);
-    constexpr char_type close_fmt = cmn::to_char(symbols_type::close_figure_bracket);
+    constexpr auto separator_fmt = sym::colon.as_char<char_type>();
+    constexpr auto open_fmt = sym::open_figure_bracket.as_char< char_type>();
+    constexpr auto close_fmt = sym::close_figure_bracket.as_char< char_type>();
 
     boost::promote_t<scroll_result_t> state;
     if  (it == ctx.end()) state = sr_eos;

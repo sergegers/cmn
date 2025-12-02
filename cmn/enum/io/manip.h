@@ -2,9 +2,8 @@
 
 #include <limits>
 
-#include <cmn/meta/concepts.h> // c::enum_<>, print_t
-
-#include <cmn/util/symbols.h>
+#include <cmn/meta/concepts.h>      // c::enum_<>, print_t
+#include <cmn/meta/type_traits.h>   // format_info_v
 
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
@@ -12,6 +11,7 @@
 #include <cmn/io/manip/format_options.h>
 
 #include "print.h"
+#include "format_info.h"
 
 namespace cmn::enum_::io
 {
@@ -25,7 +25,7 @@ template <c::enum_ E>
 using bitfield_mask_manip = cmn::io::int_slot_manip
 <
       struct bitfield_mask_
-    , static_cast<E>(std::numeric_limits<unsigned long>::max()) // fill with 0b11111...
+    , cmn::io::format_info_v<E>.bitfield_mask
 >;
 
 inline constexpr cmn::io::deduce_slot_manip_forwarder<bitfield_mask_manip> bitfield_mask {};
@@ -44,8 +44,8 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_open_
-      , symbols<Char, CharTraits>::open_square_bracket
-      , symbols<Char, CharTraits>::nothing
+      , sym::open_square_bracket.value<Char, CharTraits>()
+      , sym::nothing.value<Char, CharTraits>()
     >
 ;
 
@@ -73,8 +73,8 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_close_
-      , symbols<Char, CharTraits>::close_square_bracket
-      , symbols<Char, CharTraits>::nothing
+      , sym::close_square_bracket.value<Char, CharTraits>()
+      , sym::nothing.value<Char, CharTraits>()
     >
 ;
 
@@ -100,8 +100,8 @@ using basic_bitfield_separator_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_bitfield_separator_
-      , symbols<Char, CharTraits>::whitespace
-      , symbols<Char, CharTraits>::nothing
+      , sym::ws.value<Char, CharTraits>()
+      , sym::nothing.value<Char, CharTraits>()
     >
 ;
 

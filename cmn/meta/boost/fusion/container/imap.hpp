@@ -5,7 +5,6 @@
 #include <tuple>
 
 #include <boost/fusion/container/map.hpp>
-#include <boost/fusion/container/generation/make_map.hpp>
 
 #include <boost/fusion/support/pair.hpp>
 #include <boost/fusion/sequence/intrinsic/at_key.hpp>
@@ -16,32 +15,20 @@
 #   include <cmn/meta/boost/fusion/type_traits.hpp>
 #endif
 
+#if __has_include(<boost/fusion/support/ipair.hpp>)
+#   include <boost/fusion/support/ipair.hpp>
+#else
+#   include <cmn/meta/boost/fusion/support/ipair.hpp>
+#endif
+
 namespace boost::fusion
 {
-
-template <std::size_t Key_>
-using ikey = std::integral_constant<std::size_t, Key_>;
-
-//-----------------------------------------------------------------------------
-template <std::size_t Key_, typename Value>
-using ipair = pair<std::integral_constant<std::size_t, Key_>, Value>;
-
-template <std::size_t Key_, typename Value>
-constexpr auto make_ipair(Value &&value)
-{
-    return make_pair<ikey<Key_>>(std::forward<Value>(value));
-}
 
 //-----------------------------------------------------------------------------
 template <std::size_t... Keys_, typename... Values>
     requires (sizeof...(Keys_) == sizeof...(Values))
 using imap = map<ipair<Keys_, Values>...>;
 
-template <std::size_t... Keys_, typename... Values>
-constexpr auto make_imap(Values &&...values)
-{
-    return make_map<std::integral_constant<std::size_t, Keys_>...>(std::forward<Values>(values)...);
-}
 
 }
 

@@ -1,149 +1,180 @@
 #pragma once
 
+#include <concepts>
 #include <string>
+#include <ios>
 
+#include <boost/preprocessor/cat.hpp>
+#include <boost/preprocessor/stringize.hpp>
+#include <boost/preprocessor/wstringize.hpp>
+
+#include <cmn/meta/concepts.h>
 #include <cmn/util/fixed_string.h>
 
-namespace cmn
-{
-
-template <typename Char, typename CharTraits>
-constexpr auto to_char(basic_fixed_string<Char, 1, CharTraits> const &str) -> Char
-{
-    return str[0];
-}
-
-template <typename Char, typename CharTraits>
-constexpr auto to_char(basic_fixed_string<Char, 2, CharTraits> const &str) -> Char
-{
-    if (str[1] != 0) throw std::logic_error{ "Not null terminated string" };
-
-    return str[0];
-}
-
-//-----------------------------------------------------------------------------
-template <typename Char, std::size_t N_, typename CharTraits>
-constexpr auto to_string(basic_fixed_string<Char, N_, CharTraits> const &str) -> std::basic_string<Char, CharTraits>
-{
-    return str.data();
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// symbols
-////////////////////////////////////////////////////////////////////////////////
-namespace symbols_
+namespace cmn::sym
 {
 
 using namespace literals;
 
-template <typename Char, typename CharTraits = std::char_traits<Char>> struct symbols;
-
-template <>
-struct symbols<char>
+////////////////////////////////////////////////////////////////////////////////
+//
+// symbol keys
+//
+////////////////////////////////////////////////////////////////////////////////
+template 
+<
+      c::const_string auto Value_
+    , c::const_string auto WValue_
+>
+struct valued_key_impl
 {
-    static constexpr auto whitespace                = " "_fs;
-    static constexpr auto nothing                   = ""_fs;
-    static constexpr auto endl                      = "\n"_fs;
-    static constexpr auto ends                      = "\0"_fs;
-    static constexpr auto tab                       = "\t"_fs;
-    static constexpr auto open_square_bracket       = "["_fs;
-    static constexpr auto close_square_bracket      = "]"_fs;
-    static constexpr auto open_angle_bracket        = "<"_fs;
-    static constexpr auto close_angle_bracket       = ">"_fs;
-    static constexpr auto open_figure_bracket       = "{"_fs;
-    static constexpr auto close_figure_bracket      = "}"_fs;
-    static constexpr auto open_parenthese           = "("_fs;
-    static constexpr auto close_parenthese          = ")"_fs;
-    static constexpr auto colon                     = ":"_fs;
-    static constexpr auto comma                     = ","_fs;
-    static constexpr auto quote                     = "\""_fs;
-    static constexpr auto plus                      = "+"_fs;
-    static constexpr auto minus                     = "-"_fs;
-    static constexpr auto zero                      = "0"_fs;
-    static constexpr auto asterisk                  = "*"_fs;
-    static constexpr auto ampersand                 = "&"_fs;
-    static constexpr auto circumflex                = "^"_fs;
-    static constexpr auto octothorpe                = "#"_fs;
-    static constexpr auto end                       = "end"_fs;
-    static constexpr auto empty                     = "empty"_fs;
-    static constexpr auto nullptr_                  = "nullptr"_fs;
-    static constexpr auto hex_prefix                = "0x"_fs;
-    static constexpr auto scope_resolution          = "::"_fs;
-    static constexpr auto left_arrow                = "<-"_fs;
-    static constexpr auto right_arrow               = "->"_fs;
-    static constexpr auto void_                     = "void"_fs;
-    static constexpr auto class_                    = "class"_fs;
-    static constexpr auto struct_                   = "struct"_fs;
-    static constexpr auto enum_                     = "enum"_fs;
-    static constexpr auto a                         = "a"_fs;
-    static constexpr auto b                         = "b"_fs;
-    static constexpr auto c                         = "c"_fs;
-    static constexpr auto h                         = "h"_fs;
-    static constexpr auto l                         = "l"_fs;
-    static constexpr auto s                         = "s"_fs;
-    static constexpr auto t                         = "t"_fs;
-    static constexpr auto u                         = "u"_fs;
-    static constexpr auto x                         = "x"_fs;
-    static constexpr auto vm                        = "vm"_fs;
-    static constexpr auto vah                       = "vah"_fs;
-    static constexpr auto vap                       = "vap"_fs;
-    static constexpr auto vach                      = "vach"_fs;
+    static constexpr decltype(Value_) value_ = Value_;
+    static constexpr decltype(WValue_) wvalue_ = WValue_;
+
+#if CMN_STATIC_TEST
+    static_assert(Value_.size() == value_.size());
+#endif
+    static constexpr std::size_t size = Value_.size();
+
+    template 
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    >
+    static constexpr auto value() noexcept
+    {
+        if constexpr (std::same_as<Char, char> && std::same_as<CharTraits, std::char_traits<Char>>)
+            return value_;
+        else if constexpr (std::same_as<Char, wchar_t> && std::same_as<CharTraits, std::char_traits<wchar_t>>)
+            return wvalue_;
+        else
+            static_assert(!std::same_as<Char, Char>, "Not implemented");
+    }
+
+    template 
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    > 
+        requires 
+        (
+            size == 1
+            ||
+            size == 2 && Value_[1] == WValue_[1] == 0
+        )
+    // ReSharper disable once CppNotAllPathsReturnValue
+    static constexpr auto as_char() noexcept -> Char
+    {
+        if constexpr (std::same_as<Char, char> && std::same_as<CharTraits, std::char_traits<Char>>)
+            return value_[0];
+        else if constexpr (std::same_as<Char, wchar_t> && std::same_as<CharTraits, std::char_traits<wchar_t>>)
+            return wvalue_[0];
+        else
+            static_assert(!std::same_as<Char, Char>, "Not implemented");
+    }
+
+    template
+    <
+          c::const_string auto OtherValue_
+        , c::const_string auto OtherWValue_
+    >
+    constexpr auto operator + (valued_key_impl<OtherValue_, OtherWValue_> other) const noexcept
+    {
+        return valued_key_impl<value_ + other.value_, wvalue_ + other.wvalue_>{};
+    }
+
+    template <typename Char, typename CharTraits>
+    friend auto operator << (std::basic_ostream<Char, CharTraits> &ostr, valued_key_impl) -> decltype(ostr)
+    {
+        return ostr << valued_key_impl::value<Char, CharTraits>();
+    }
 };
 
-template <>
-struct symbols<wchar_t>
-{
-    static constexpr auto whitespace                = L" "_wfs;
-    static constexpr auto nothing                   = L""_wfs;
-    static constexpr auto open_square_bracket       = L"["_wfs;
-    static constexpr auto endl                      = L"\n"_wfs;
-    static constexpr auto ends                      = L"\0"_wfs;
-    static constexpr auto tab                       = L"\t"_wfs;
-    static constexpr auto close_square_bracket      = L"]"_wfs;
-    static constexpr auto open_angle_bracket        = L"<"_wfs;
-    static constexpr auto close_angle_bracket       = L">"_wfs;
-    static constexpr auto open_curly_bracket        = L"{"_wfs;
-    static constexpr auto close_curly_bracket       = L"}"_wfs;
-    static constexpr auto open_parenthese           = L"("_wfs;
-    static constexpr auto close_parenthese          = L")"_wfs;
-    static constexpr auto colon                     = L":"_wfs;
-    static constexpr auto comma                     = L","_wfs;
-    static constexpr auto quote                     = L"\""_wfs;
-    static constexpr auto plus                      = L"+"_wfs;
-    static constexpr auto minus                     = L"-"_wfs;
-    static constexpr auto zero                      = L"0"_wfs;
-    static constexpr auto asterisk                  = L"*"_wfs;
-    static constexpr auto ampersand                 = L"&"_wfs;
-    static constexpr auto circumflex                = L"^"_wfs;
-    static constexpr auto octothorpe                = L"#"_wfs;
-    static constexpr auto end                       = L"end"_wfs;
-    static constexpr auto empty                     = L"empty"_wfs;
-    static constexpr auto nullptr_                  = L"nullptr"_wfs;
-    static constexpr auto hex_prefix                = L"0x"_wfs;
-    static constexpr auto scope_resolution          = L"::"_wfs;
-    static constexpr auto left_arrow                = L"<-"_wfs;
-    static constexpr auto right_arrow               = L"->"_wfs;
-    static constexpr auto void_                     = L"void"_wfs;
-    static constexpr auto class_                    = L"class"_wfs;
-    static constexpr auto struct_                   = L"struct"_wfs;
-    static constexpr auto enum_                     = L"enum"_wfs;
-    static constexpr auto a                         = L"a"_wfs;
-    static constexpr auto b                         = L"b"_wfs;
-    static constexpr auto c                         = L"c"_wfs;
-    static constexpr auto h                         = L"h"_wfs;
-    static constexpr auto l                         = L"l"_wfs;
-    static constexpr auto s                         = L"s"_wfs;
-    static constexpr auto t                         = L"t"_wfs;
-    static constexpr auto u                         = L"u"_wfs;
-    static constexpr auto x                         = L"x"_wfs;
-    static constexpr auto vm                        = L"vm"_wfs;
-    static constexpr auto vah                       = L"vah"_wfs;
-    static constexpr auto vap                       = L"vap"_wfs;
-    static constexpr auto vach                      = L"vach"_wfs;
-};
+#define CMN_SYM_KEY_TYPE(key_) BOOST_PP_CAT(key_, _t)
 
-}
+//-----------------------------------------------------------------------------
+#define CMN_SYM_DECLARE_VALUED_KEY(key_, qsym_, qwsym_)                                                                       \
+    struct CMN_SYM_KEY_TYPE(key_): valued_key_impl<BOOST_PP_CAT(qsym_, _fs), BOOST_PP_CAT(qwsym_, _wfs)> {}   \
+    inline constexpr key_
 
-using symbols_::symbols;
+#define CMN_SYM_DECLARE_VALUED_KEY_2(key_, sym_)     \
+    CMN_SYM_DECLARE_VALUED_KEY(key_, BOOST_PP_STRINGIZE(sym_), BOOST_PP_WSTRINGIZE(sym_))
+
+#define CMN_SYM_DECLARE_LETTER_KEY(key_) CMN_SYM_DECLARE_VALUED_KEY_2(key_, key_)
+#define CMN_SYM_DECLARE_DIGIT_KEY(key_) CMN_SYM_DECLARE_VALUED_KEY_2(BOOST_PP_CAT(_, key_), key_)
+
+//-----------------------------------------------------------------------------
+CMN_SYM_DECLARE_VALUED_KEY(ws, " ", L" ");
+CMN_SYM_DECLARE_VALUED_KEY(nothing, "", L"");
+CMN_SYM_DECLARE_VALUED_KEY_2(endl, \n);
+CMN_SYM_DECLARE_VALUED_KEY_2(ends, \0);
+CMN_SYM_DECLARE_VALUED_KEY_2(tab, \t);
+CMN_SYM_DECLARE_VALUED_KEY_2(open_square_bracket, [);
+CMN_SYM_DECLARE_VALUED_KEY_2(close_square_bracket, ]);
+CMN_SYM_DECLARE_VALUED_KEY_2(open_angle_bracket, <);
+CMN_SYM_DECLARE_VALUED_KEY_2(close_angle_bracket, >);
+CMN_SYM_DECLARE_VALUED_KEY_2(open_figure_bracket, {);
+CMN_SYM_DECLARE_VALUED_KEY_2(close_figure_bracket, });
+CMN_SYM_DECLARE_VALUED_KEY(open_parenthese, "(", L"(");
+CMN_SYM_DECLARE_VALUED_KEY(close_parenthese, ")", L")");
+CMN_SYM_DECLARE_VALUED_KEY_2(colon, :);
+CMN_SYM_DECLARE_VALUED_KEY(comma, ",", L",");
+CMN_SYM_DECLARE_VALUED_KEY(quote, "'", L"'");
+CMN_SYM_DECLARE_VALUED_KEY(dquote, "\"", L"\"");
+CMN_SYM_DECLARE_VALUED_KEY_2(asterisk, *);
+CMN_SYM_DECLARE_VALUED_KEY_2(circumflex, ^);
+//CMN_SYM_DECLARE_VALUED_KEY_2(octothorpe, #);
+CMN_SYM_DECLARE_VALUED_KEY(octothorpe, "#", L"#");
+CMN_SYM_DECLARE_VALUED_KEY_2(plus, +);
+CMN_SYM_DECLARE_VALUED_KEY_2(minus, -);
+CMN_SYM_DECLARE_VALUED_KEY_2(less, <);
+CMN_SYM_DECLARE_VALUED_KEY_2(greater, >);
+
+CMN_SYM_DECLARE_LETTER_KEY(a);
+CMN_SYM_DECLARE_LETTER_KEY(b);
+CMN_SYM_DECLARE_LETTER_KEY(c);
+CMN_SYM_DECLARE_LETTER_KEY(d);
+CMN_SYM_DECLARE_LETTER_KEY(e);
+CMN_SYM_DECLARE_LETTER_KEY(f);
+CMN_SYM_DECLARE_LETTER_KEY(g);
+CMN_SYM_DECLARE_LETTER_KEY(h);
+CMN_SYM_DECLARE_LETTER_KEY(i);
+CMN_SYM_DECLARE_LETTER_KEY(l);
+CMN_SYM_DECLARE_LETTER_KEY(m);
+CMN_SYM_DECLARE_LETTER_KEY(n);
+CMN_SYM_DECLARE_LETTER_KEY(o);
+CMN_SYM_DECLARE_LETTER_KEY(p);
+CMN_SYM_DECLARE_LETTER_KEY(r);
+CMN_SYM_DECLARE_LETTER_KEY(s);
+CMN_SYM_DECLARE_LETTER_KEY(t);
+CMN_SYM_DECLARE_LETTER_KEY(u);
+CMN_SYM_DECLARE_LETTER_KEY(v);
+CMN_SYM_DECLARE_LETTER_KEY(x);
+CMN_SYM_DECLARE_LETTER_KEY(y);
+
+CMN_SYM_DECLARE_DIGIT_KEY(0);
+
+CMN_SYM_DECLARE_LETTER_KEY(end);
+CMN_SYM_DECLARE_LETTER_KEY(empty);
+CMN_SYM_DECLARE_VALUED_KEY_2(nullptr_, nullptr);
+CMN_SYM_DECLARE_VALUED_KEY_2(hex_prefix, 0x);
+CMN_SYM_DECLARE_VALUED_KEY_2(scope_resolution, ::);
+CMN_SYM_DECLARE_VALUED_KEY_2(left_arrow, <-);
+CMN_SYM_DECLARE_VALUED_KEY_2(right_arrow, ->);
+CMN_SYM_DECLARE_VALUED_KEY_2(void_, void);
+CMN_SYM_DECLARE_VALUED_KEY_2(class_, class);
+CMN_SYM_DECLARE_VALUED_KEY_2(struct_, struct);
+CMN_SYM_DECLARE_VALUED_KEY_2(enum_, enum);
+CMN_SYM_DECLARE_LETTER_KEY(vm);
+CMN_SYM_DECLARE_LETTER_KEY(vah);
+CMN_SYM_DECLARE_LETTER_KEY(vap);
+CMN_SYM_DECLARE_LETTER_KEY(vach);
+
+//-----------------------------------------------------------------------------
+#undef CMN_SYM_DECLARE_VALUED_KEY
+#undef CMN_SYM_DECLARE_VALUED_KEY_2
+#undef CMN_SYM_DECLARE_LETTER_KEY
+#undef CMN_SYM_DECLARE_DIGIT_KEY
+#undef CMN_SYM_KEY_TYPE
 
 }

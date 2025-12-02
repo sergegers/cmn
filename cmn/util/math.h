@@ -88,19 +88,24 @@ template <std::unsigned_integral auto N_, typename Char, typename CharTraits, st
 constexpr auto itoa_digits(std::index_sequence<Idss_...>) -> basic_fixed_string<Char, log10(N_) + 1, CharTraits>
 {
     auto const count = log10(N_);
-    Char const s_literal[count + 1]{digit_to_char<N_, Char>(int_<Idss_>{})...,
-                                    to_char(symbols<Char, CharTraits>::ends)};
-    return {s_literal};
+    Char const s_literal[count + 1]
+    {
+        digit_to_char<N_, Char>(int_<Idss_>{})...,
+        sym::ends.as_char<Char, CharTraits>()
+    };
+    return { s_literal };
 }
 
 template <std::unsigned_integral auto N_, typename Char, typename CharTraits, std::size_t... Idss_>
 constexpr auto neg_itoa_digits(std::index_sequence<Idss_...>) -> basic_fixed_string<Char, log10(N_) + 1 + 1, CharTraits>
 {
-    using symbols_type = cmn::symbols<Char, CharTraits>;
     auto const count = log10(N_);
-    Char const s_literal[count + 2]{to_char(symbols_type::minus), digit_to_char<N_, Char>(int_<Idss_>{})...,
-                                    to_char(symbols_type::ends)};
-    return {s_literal};
+    Char const s_literal[count + 2]
+    {
+        sym::minus.as_char<Char, CharTraits>(), digit_to_char<N_, Char>(int_<Idss_>{})...,
+        sym::ends.as_char<Char, CharTraits>()
+    };
+    return { s_literal };
 }
 
 } // namespace detail

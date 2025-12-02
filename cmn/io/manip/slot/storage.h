@@ -123,12 +123,14 @@ public:
 
     static auto value(std::ios_base &ios, keep_type value) -> void
     {
+        using namespace sym;
+
         auto const null_pos = value.size();
         auto const new_buffer = realloc(ios, null_pos + 1);
 
         std::ranges::copy(value, new_buffer);
         // terminating null
-        new_buffer[null_pos] = cmn::to_char(symbols<Char, CharTraits>::ends);
+        new_buffer[null_pos] = ends.as_char<Char, CharTraits>();
         ios.pword(index(ios)) = new_buffer;
     }
 };

@@ -78,8 +78,6 @@ struct binary_find_if_mp11_impl
         , Args &&... args
     ) const
     {
-        using namespace literals;
-
         if constexpr (BeginIdx_ == EndIdx_)
         {
             if constexpr (BeginIdx_ == mp_size_v<L>)

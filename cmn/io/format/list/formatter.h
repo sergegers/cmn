@@ -147,7 +147,7 @@ public:
     }
 
     template<typename FmtContext>
-    constexpr auto format(list<T> const &t, FmtContext &ctx) const -> typename FmtContext::iterator
+    constexpr auto format(list<T> const &t, FmtContext &ctx) const -> FmtContext::iterator
     {
         return m_underlying_formatter.format(t.m_t, ctx);
     }    

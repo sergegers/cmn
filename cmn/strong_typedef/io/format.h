@@ -34,10 +34,9 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
         using enum int_fmt_t;
 
         using char_type = context_char_t<ParseContext>;
-        using symbols_type = symbols<char_type>;
 
-        constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
-        constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
+        constexpr auto separator_fmt = sym::colon.as_char<Char>();
+        constexpr auto end_fmt = sym::close_figure_bracket.as_char<Char>();
 
         auto it = ctx.begin();
 
@@ -55,11 +54,11 @@ struct strong_typedef_formatter: mix::out_to_stream<T, Char>
         {
             switch (auto ch = *it++)
             {
-            case to_char(symbols_type::octothorpe): m_fmt_opt = set_features(m_fmt_opt, showbase, lowercase); break;
-            case to_char(symbols_type::x): m_fmt_opt = set_features(m_fmt_opt, hex, c, nosign); break;
-            case to_char(symbols_type::a): m_fmt_opt = set_features(m_fmt_opt, long_asm_up_hex); break;
-            case to_char(symbols_type::s): m_fmt_opt = set_features(m_fmt_opt, short_); break;
-            case to_char(symbols_type::u): m_fmt_opt = set_features(m_fmt_opt, uppercase); break;
+            case sym::octothorpe.as_char<Char>(): m_fmt_opt = set_features(m_fmt_opt, showbase, lowercase); break;
+            case sym::x.as_char<Char>(): m_fmt_opt = set_features(m_fmt_opt, hex, c, nosign); break;
+            case sym::a.as_char<Char>(): m_fmt_opt = set_features(m_fmt_opt, long_asm_up_hex); break;
+            case sym::s.as_char<Char>(): m_fmt_opt = set_features(m_fmt_opt, short_); break;
+            case sym::u.as_char<Char>(): m_fmt_opt = set_features(m_fmt_opt, uppercase); break;
 
             default:
                     throw std::format_error{ std::format("Unexpected formatting symbol [{}]", ch)};

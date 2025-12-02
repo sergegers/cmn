@@ -2,8 +2,6 @@
 
 #include <type_traits>
 #include <utility>
-#include <string>
-#include <string_view>
 
 #include <cmn/meta/concepts.h>
 
@@ -207,8 +205,12 @@ constexpr auto type_info_v = []
 }();
 
 //-----------------------------------------------------------------------------
-template <c::formatted_type T> 
-constexpr c::format_info auto default_format_info_v = get_default_format_info(T{});
+namespace io
+{
 
+template <c::formatted_type T>
+constexpr c::format_info auto format_info_v = format_traits<T>{}(T{});
+
+}
 
 }

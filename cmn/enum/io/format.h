@@ -42,15 +42,14 @@ struct formatter<E, Char>:
     , cmn::io::mix::skip_parse<E, Char>
 {
     using ostream_type = cmn::io::mix::out_to_stream<E, Char>::ostream_type;
-    using symbols_type = cmn::symbols<Char>;
     using string_view_type = basic_string_view<Char>;
 
     static constexpr auto max_slot_size = sizeof(long) / sizeof(Char);
     using manip_str_type = cmn::basic_fixed_string<Char, max_slot_size>;
 
     // custom format {0:[:]}
-    static constexpr auto separator_fmt = cmn::to_char(symbols_type::colon);
-    static constexpr auto end_fmt = cmn::to_char(symbols_type::close_figure_bracket);
+    static constexpr auto separator_fmt = cmn::sym::colon.as_char<Char>();
+    static constexpr auto end_fmt = cmn::sym::close_figure_bracket.as_char<Char>();
 
     using open_manip_type = cmn::enum_::io::basic_open_manip<Char>;
     using separator_manip_type  = cmn::enum_::io::basic_bitfield_separator_manip<Char>;

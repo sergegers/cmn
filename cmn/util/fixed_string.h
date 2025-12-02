@@ -100,7 +100,11 @@ public:
     //
     // constructors
     //
-    constexpr basic_fixed_string() noexcept /*requires (N_ == 0)*/ = default;  // data() == nullptr, size() == 0
+    constexpr basic_fixed_string() noexcept = default;  // data() == nullptr, size() == 0
+
+    constexpr explicit basic_fixed_string(Char c) noexcept:
+        m_data{ c }
+    {}
 
     constexpr basic_fixed_string(value_type const (&array)[N_]) // NOLINT(google-explicit-constructor)
         noexcept(std::copy_constructible<value_type>) requires (N_ > 0)
@@ -599,31 +603,29 @@ constexpr auto operator + (basic_fixed_string<Char, N_, CharTraits> const &lhs, 
     return lhs + rhs2;
 }
 
-namespace detail
-{
-
-template <typename Char>
-constexpr auto from_char(Char ch) -> basic_fixed_string<Char, 1>
-{
-    basic_fixed_string<Char, 1> fs;
-    fs[0] = ch;
-    return fs;
-}
-
-}
-
 template <typename Char, std::size_t N_, typename CharTraits>
 constexpr auto operator + (Char lhs, basic_fixed_string<Char, N_, CharTraits> const &rhs)
     -> basic_fixed_string<Char, N_ + 1, CharTraits>
 {
-    return detail::from_char(lhs) + rhs;
+    return from_char(lhs) + rhs;
 }
 
 template <typename Char, std::size_t N_, typename CharTraits>
 constexpr auto operator + (basic_fixed_string<Char, N_, CharTraits> const &lhs, Char rhs)
     -> basic_fixed_string<Char, N_ + 1, CharTraits>
 {
-    return lhs + detail::from_char(rhs);
+    return lhs + from_char(rhs);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// conversion
+//
+///////////////////////////////////////////////////////////////////////////////
+template <typename Char, std::size_t N_, typename CharTraits>
+constexpr auto to_string(basic_fixed_string<Char, N_, CharTraits> const &str) noexcept ->  std::basic_string<Char, CharTraits>
+{
+    return str.data();
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -645,13 +647,13 @@ auto operator << (std::basic_ostream<Char, CharTraits> &out, basic_fixed_string<
 inline namespace literals
 {
 
-template <fixed_string Fs_> constexpr auto operator""_fs()
+template <fixed_string Fs_> constexpr auto operator""_fs() noexcept
 {
     // drop null for consistent behaviour with string_view
     return Fs_.template substr<0, (Fs_.size() > 0? Fs_.size() - 1: 0)>();
 }
 
-template <fixed_wstring Fs_> constexpr auto operator""_wfs()
+template <fixed_wstring Fs_> constexpr auto operator""_wfs() noexcept
 {
     // drop null for consistent behaviour with string_view
     return Fs_.template substr<0, (Fs_.size() > 0? Fs_.size() - 1: 0)>();

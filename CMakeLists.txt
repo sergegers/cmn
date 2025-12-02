@@ -56,18 +56,23 @@ add_library (
  cmn 
  STATIC
 
+ "cmn/fwd.h"
+
+ "cmn/meta/concepts/type_info.h" 
+ "cmn/meta/concepts/traits.h"
+ "cmn/meta/concepts/slot_manip.h"
+ "cmn/meta/concepts/exception.h"
  "cmn/meta/concepts.h"
+
  "cmn/meta/function_traits.h"
  "cmn/meta/macro.h"
  "cmn/meta/type_traits.h"
 
- "cmn/meta/concepts/type_info.h"
- "cmn/meta/concepts/format_info.h"
- "cmn/meta/concepts/traits.h"
- "cmn/meta/concepts/slot_manip.h"
-
  "cmn/meta/boost/fusion/concepts.hpp"
  "cmn/meta/boost/fusion/type_traits.hpp"
+ "cmn/meta/boost/fusion/container/imap.hpp"
+ "cmn/meta/boost/fusion/container/generation/make_imap.hpp"
+ "cmn/meta/boost/fusion/support/ipair.hpp"
  "cmn/meta/boost/mp11/concepts.hpp"
  "cmn/meta/boost/mp11/type_traits.hpp"
  "cmn/meta/boost/spirit/ext.hpp"
@@ -78,6 +83,8 @@ add_library (
  "cmn/util/lexical_cast.cpp"
  "cmn/util/inverse.h" 
  "cmn/util/feature.h"
+ "cmn/util/math.h" 
+ "cmn/util.h"
  
  "cmn/io/manip/slot/fwd.h"
  "cmn/io/manip/slot/param.h"
@@ -94,10 +101,12 @@ add_library (
  "cmn/io/format/mix.h"
  "cmn/io/format/context_traits.h"
  "cmn/io/format/util.h"
- "cmn/io/format/list.h"
  "cmn/io/debug.h"
  "cmn/io/manip.h"
  "cmn/io/format.h"
+
+ "cmn/io/format/list/formatter.h"
+ "cmn/io/format/list/out.h"
 
  "cmn/range/io/format.h"
  "cmn/range/io/io.h"
@@ -135,7 +144,7 @@ add_library (
  "cmn/enum/combo.h" 
  "cmn/enum/feature.h" 
  "cmn/enum/util.h"
- "cmn/enum/io/default_format_info.h"
+ "cmn/enum/io/format_info.h"
  "cmn/enum/io/format.h"
  "cmn/enum/io.h" 
  "cmn/enum/io/printer.h" 
@@ -173,7 +182,6 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
- "cmn/util/math.h" 
  )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")

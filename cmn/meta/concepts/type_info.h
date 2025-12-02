@@ -2,14 +2,23 @@
 
 #include <cstddef>
 #include <concepts>
+#include <type_traits>
 #include <utility>
-#include <tuple>
 
 #include <cmn/fwd.h>
 
 #include "traits.h"
 
-namespace cmn::c
+namespace cmn
+{
+
+template <typename T>
+consteval auto adapt_type_info(std::type_identity<T>) -> decltype(adapt_type_info(T{}))
+{
+    return adapt_type_info(T{});
+}
+
+namespace c
 {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -18,9 +27,9 @@ namespace cmn::c
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T>
-concept adapted_type = requires (T t)
+concept adapted_type = requires (std::type_identity<T> tt) 
 {
-    { adapt_type_info(t) };
+    { adapt_type_info(tt) };
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -44,13 +53,13 @@ concept enum_info_types_ = requires
     typename T::elements_type;
 };
 
-}
+} // namespace detail
 
 template <typename T>
 concept enum_info = 
     detail::enum_info_types_<T> 
- && enum_<typename T::enum_type> &&
-    requires
+ && enum_<typename T::enum_type> 
+ && requires
     (
           T const &einfo
         , typename T::op_type &ops
@@ -70,17 +79,19 @@ concept enum_info =
         { std::as_const(einfo).max_value() } noexcept -> std::same_as<typename T::enum_type>;
         { std::as_const(einfo).nullable() } noexcept -> std::same_as<bool>;
         { std::as_const(einfo).unique() } noexcept -> std::same_as<bool>;
-    }
-;
+    };
 
 //-----------------------------------------------------------------------------
 template <typename E>
 concept adapted_enum = 
     enum_<E> 
- && adapted_type<E>
+ && adapted_type<E> 
  && requires(E e) 
-{
-    { adapt_type_info(e) } /*noexcept*/-> enum_info;
-};
+    {
+        { adapt_type_info(e) } /*noexcept*/ -> enum_info;
+    }
+;
+
+}
 
 }

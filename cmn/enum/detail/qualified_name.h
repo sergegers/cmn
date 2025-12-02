@@ -29,7 +29,7 @@ struct basic_qualified_name final
     consteval basic_qualified_name(string_view_type name):
         m_name{ name }
     {
-        constexpr std::basic_string_view qualifier = symbols<Char, CharTraits>::scope_resolution;
+        constexpr std::basic_string_view qualifier = sym::scope_resolution.value<Char, CharTraits>();
 
         auto const pos = name.find_last_of(qualifier);
         if (pos == string_view_type::npos)
@@ -54,7 +54,7 @@ struct basic_qualified_name final
         using string_type = std::basic_string<Char, CharTraits>;
 
         string_type pfx{ m_enum_name };
-        pfx += symbols<Char, CharTraits>::scope_resolution.c_str();
+        pfx += sym::scope_resolution.value<Char, CharTraits>().c_str();
         return pfx;
     }
 
@@ -89,7 +89,7 @@ private:
     // ns0::...nsN::class_prefix::enum_member_name
     consteval auto decompose(std::true_type is_scoped_enum, c::instance_of_bool auto decompose_member_name) -> void
     {
-        constexpr std::basic_string_view qualifier = symbols<Char, CharTraits>::scope_resolution;
+        constexpr std::basic_string_view qualifier = sym::scope_resolution.value<Char, CharTraits>();
 
         auto const pos = m_name.find_last_of(qualifier);
         if (pos == string_view_type::npos)
@@ -121,7 +121,7 @@ private:
     // ns0::...nsN::enum_member_name
     consteval auto decompose(std::false_type is_scoped_enum, c::instance_of_bool auto decompose_member_name) -> void
     {
-        constexpr std::basic_string_view qualifier = symbols<Char, CharTraits>::scope_resolution;
+        constexpr std::basic_string_view qualifier = sym::scope_resolution.value<Char, CharTraits>();
 
         auto const pos = m_name.find_last_of(qualifier);
         if (pos == string_view_type::npos)

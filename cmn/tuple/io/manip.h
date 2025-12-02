@@ -25,8 +25,8 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_open_
-      , symbols<Char, CharTraits>::open_parenthese
-      , symbols<Char, CharTraits>::nothing
+      , sym::open_parenthese.value<Char, CharTraits>()
+      , sym::nothing.value<Char, CharTraits>()
     >
 ;
 
@@ -53,8 +53,8 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
           struct basic_range_close_
-		, symbols<Char, CharTraits>::close_parenthese
-        , symbols<Char, CharTraits>::nothing
+		, sym::close_parenthese.value<Char, CharTraits>()
+        , sym::nothing.value<Char, CharTraits>()
     >
 ;
 
@@ -77,8 +77,8 @@ using basic_separator_manip =
     cmn::io::basic_string_slot_manip
     <
           struct basic_separator_
-		, symbols<Char, CharTraits>::comma + symbols<Char, CharTraits>::whitespace
-        , symbols<Char, CharTraits>::nothing
+		, (sym::comma + sym::ws).value<Char, CharTraits>()
+        , sym::nothing.value<Char, CharTraits>()
     >
 ;
 

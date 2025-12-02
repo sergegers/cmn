@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <cmn/meta/concepts.h>
+#include <cmn/util/symbols.h>
 
 #include <cmn/range/io/manip.h>
 
@@ -26,11 +27,12 @@ struct table_out_
     template <typename Char, typename CharTraits>
     friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, table_out_)
     {
-        using symbols = symbols<Char, CharTraits>;
+        using namespace sym;
+
         return ostr << 
-            basic_range_open<Char, CharTraits>(symbols::open_angle_bracket + symbols::endl) << 
-            basic_range_close<Char, CharTraits>(symbols::endl + symbols::close_angle_bracket) <<
-            basic_range_separator<Char, CharTraits>(symbols::endl)
+            basic_range_open<Char, CharTraits>((open_angle_bracket + endl).value<Char, CharTraits>() << 
+            basic_range_close<Char, CharTraits>((endl + close_angle_bracket).value<Char, CharTraits>()) <<
+            basic_range_separator<Char, CharTraits>(endl.value<Char, CharTraits>()))
         ;
     }
 };
@@ -46,11 +48,12 @@ struct compact_table_out_
     template <typename Char, typename CharTraits>
     friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, compact_table_out_)
     {
-        using symbols = symbols<Char, CharTraits>;
-        return ostr << 
-            basic_range_open<Char, CharTraits>(symbols::open_angle_bracket) << 
-            basic_range_close<Char, CharTraits>(symbols::close_angle_bracket) <<
-            basic_range_separator<Char, CharTraits>(symbols::comma + symbols::whitespace)
+        using namespace sym;
+
+        return ostr <<
+            basic_range_open<Char, CharTraits>(open_angle_bracket.value<Char, CharTraits>()) << 
+            basic_range_close<Char, CharTraits>(close_angle_bracket.value<Char, CharTraits>()) <<
+            basic_range_separator<Char, CharTraits>((comma + ws).value<Char, CharTraits>())
         ;
     }
 };

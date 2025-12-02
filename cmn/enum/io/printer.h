@@ -38,13 +38,13 @@ namespace detail
 
 // keep print operations here to avoid circular dependencies
 template <typename Char, typename CharTraits, c::enum_ En>
-auto operator<<(std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
+auto operator << (std::basic_ostream<Char, CharTraits> &ostr, record_info<En> const &rec) -> decltype(ostr)
 {
     using enum io::print_t;
     auto const po = io::print_manip::value(ostr);
 
     auto const &name = rec.name(ostr);
-    static auto const scope_resolution = symbols<Char, CharTraits>::scope_resolution;
+    static auto const scope_resolution = sym::scope_resolution.value<Char, CharTraits>();
 
     if (has_feature(po, ns))
         ostr << name.m_ns << scope_resolution;

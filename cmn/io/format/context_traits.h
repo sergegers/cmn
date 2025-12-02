@@ -23,8 +23,11 @@ enum scroll_result_t: char
 //-----------------------------------------------------------------------------
 template <typename Char> using scroll_to = std::pair<Char, scroll_result_t>;
 
-template <typename Char = char> constexpr scroll_to<Char> scroll_to_sep_ = scroll_to{ cmn::to_char(symbols<Char>::colon), sr_sep };
-template <typename Char = char> constexpr scroll_to<Char> scroll_to_close_ = scroll_to{ cmn::to_char(symbols<Char>::close_figure_bracket), sr_close };
+template <typename Char = char> constexpr scroll_to<Char> scroll_to_sep_ = 
+    scroll_to{ sym::colon.as_char<Char>(), sr_sep };
+
+template <typename Char = char> constexpr scroll_to<Char> scroll_to_close_ = 
+    scroll_to{ sym::close_figure_bracket.as_char<Char>(), sr_close };
 
 //-----------------------------------------------------------------------------
 template <typename Iterator> using scroll_pos = std::pair<Iterator, boost::promote_t<scroll_result_t>>;

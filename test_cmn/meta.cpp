@@ -13,6 +13,12 @@
 #   include <cmn/meta/boost/fusion/container/imap.hpp>
 #endif
 
+#if __has_include(<boost/fusion/container/generation/make_imap.hpp>)
+#   include <cboost/fusion/container/generation/make_imap.hpp>
+#else
+#   include <cmn/meta/boost/fusion/container/generation/make_imap.hpp>
+#endif
+
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/type_traits.h>
 
@@ -145,10 +151,19 @@ enum class my_enum
 };
 static_assert(c::instance_of_enumerable<std::integral_constant<my_enum, my_enum::e1>, my_enum>);
 
-// c::string concept
+// string concepts
+static_assert(c::const_string<std::string>);
+static_assert(c::const_string<std::wstring>);
+static_assert(c::const_string<std::string_view>);
+static_assert(c::const_string_of<std::string, char, std::char_traits<char>>);
+static_assert(c::const_string_of<std::wstring, wchar_t, std::char_traits<wchar_t>>);
+static_assert(c::const_string_of<std::string_view, char, std::char_traits<char>>);
 static_assert(c::string<std::string>);
 static_assert(c::string<std::wstring>);
-static_assert(c::string<std::string_view>);
+static_assert(!c::string<std::string_view>);
+static_assert(c::string_of<std::string, char, std::char_traits<char>>);
+static_assert(c::string_of<std::wstring, wchar_t, std::char_traits<wchar_t>>);
+static_assert(!c::string_of<std::string_view, char, std::char_traits<char>>);
 static_assert(c::string<fixed_string<10>>);
 
 #endif

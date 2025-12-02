@@ -181,13 +181,12 @@ struct write_sign final
     friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, write_sign const &pfx)
     {
         using signed_type = std::make_signed_t<Unit>;
-        using symbols_type = symbols<Char, CharTraits>;
         using enum int_fmt_t;
 
-        static constexpr auto minus = to_char(symbols_type::minus);
-        static constexpr auto space = to_char(symbols_type::whitespace);
-        static constexpr auto plus = to_char(symbols_type::plus);
-        static constexpr auto endl = to_char(symbols_type::endl);
+        static constexpr auto minus = sym::minus.as_char<Char, CharTraits>();
+        static constexpr auto space = sym::ws.as_char<Char, CharTraits>();
+        static constexpr auto plus = sym::plus.as_char<Char, CharTraits>();
+        static constexpr auto endl = sym::endl.as_char<Char, CharTraits>();
 
         if (has_feature(pfx.m_fmt_opt, sign))
         {
@@ -237,13 +236,12 @@ struct read_sign final
     friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, read_sign pfx)
     {
         using signed_type = std::make_signed_t<Unit>;
-        using symbols_type = symbols<Char, CharTraits>;
         using enum int_fmt_t;
 
-        static constexpr auto minus = to_char(symbols_type::minus);
-        static constexpr auto space = to_char(symbols_type::whitespace);
-        static constexpr auto plus = to_char(symbols_type::plus);
-        static constexpr auto endl = to_char(symbols_type::endl);
+        static constexpr auto minus = sym::minus.as_char<Char, CharTraits>();
+        static constexpr auto space = sym::ws.as_char<Char, CharTraits>();
+        static constexpr auto plus = sym::plus.as_char<Char, CharTraits>();
+        static constexpr auto endl = sym::endl.as_char<Char, CharTraits>();
 
         if (has_feature(pfx.m_fmt_opt, sign))
         {
@@ -354,8 +352,7 @@ struct base_postfix final
     >
     friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, base_postfix const &pfx)
     {
-        using symbols_type = symbols<Char, CharTraits>;
-        return pfx.test() ? (ostr << symbols_type::h) : ostr;
+        return pfx.test() ? (ostr << sym::h): ostr;
     }
 
     template
@@ -365,14 +362,13 @@ struct base_postfix final
     >
     friend decltype(auto) operator >> (std::basic_istream<Char, CharTraits> &istr, base_postfix pfx)
     {
-        using symbols_type = symbols<Char, CharTraits>;
         using enum int_fmt_t;
 
         if (pfx.test())
         {
             Char h;
             istr >> h;
-            if (h != to_char(symbols_type::h))
+            if (h != sym::h.as_char<Char, CharTraits>())
                 BOOST_THROW_EXCEPTION(cmn::format_error{ "Stream read operation failed" });
 
             return istr;
@@ -459,8 +455,7 @@ struct width final
     template <typename Char, typename CharTraits>
     friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits> &ostr, width const &w)
     {
-        using symbols_type = symbols<Char, CharTraits>;
-        static constexpr auto zero = to_char(symbols_type::zero);
+        static constexpr auto zero = sym::_0.as_char<Char, CharTraits>();
 
         switch (w.test())
         {
@@ -642,7 +637,6 @@ struct basic_xml_garbage_filter : boost::iostreams::multichar_filter<boost::iost
     {
         namespace io = boost::iostreams;
         using io_traits = io::char_traits<Char>;
-        using symbols_type = symbols<Char, CharTraits>;
 
         int c;
         char *first = s;
@@ -657,7 +651,7 @@ struct basic_xml_garbage_filter : boost::iostreams::multichar_filter<boost::iost
                 , io_traits::eof()
                 , io_traits::would_block()
                 , io_traits::newline()
-                , to_char(symbols_type::whitespace)
+                , sym::ws.as_char<Char, CharTraits>()
             )
         )
         {

@@ -37,7 +37,7 @@ struct mp11_fold_caller
     Fn &m_func;
 
     template <typename S>
-    constexpr friend decltype(auto) operator >> (itself const &self, S &&s)
+    friend constexpr decltype(auto) operator >> (itself const &self, S &&s)
     {
         return self.m_func.template operator ()<mp_at_c<L, Idx_>>(std::forward<S>(s));
     }
@@ -80,7 +80,7 @@ struct fus_fold_caller
     Func        &m_func;
 
     template <typename State>
-    constexpr friend decltype(auto) operator >> (itself const &self, State &&state)
+    friend constexpr decltype(auto) operator >> (itself const &self, State &&state)
     {
         return self.m_func(std::forward<State>(state), fus::at_c<Idx_>(self.m_seq));
     }
