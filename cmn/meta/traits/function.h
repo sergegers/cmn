@@ -2,8 +2,6 @@
 
 #include <type_traits>
 
-
-
 // boost.traits
 #include <boost/type_traits/function_traits.hpp>
 // boost.preprocessor

@@ -8,7 +8,7 @@
 #include <boost/mp11.hpp>
 
 #include <cmn/meta/concepts.h>       // c::enumerable<>
-#include <cmn/meta/type_traits.h>    // underlying_type_t<>
+#include <cmn/meta/traits.h>    // underlying_type_t<>
 
 #include <cmn/algorithm/switch/unordered.h>
 #include <cmn/algorithm/switch/ordered.h>

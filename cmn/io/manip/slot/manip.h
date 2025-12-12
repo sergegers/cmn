@@ -6,7 +6,7 @@
 #include <concepts>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 #include <cmn/meta/macro.h>
 
 #include <cmn/io/manip/slot/decoder.h>

@@ -9,7 +9,7 @@
 #include <compare>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 #include <cmn/util/feature.h>
 
 #include "record_info.h"

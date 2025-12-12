@@ -14,7 +14,7 @@
 #include <boost/fusion/adapted/std_tuple.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 
 #include <cmn/tuple/va/detail/util.h>
 

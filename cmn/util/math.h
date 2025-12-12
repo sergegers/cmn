@@ -7,7 +7,7 @@
 #include <type_traits>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 #include <cmn/util/fixed_string.h>
 #include <cmn/util/symbols.h>
 

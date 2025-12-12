@@ -5,7 +5,7 @@
 #include <boost/mp11.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 #include <cmn/tuple/va/concepts.h>
 
 namespace cmn::va

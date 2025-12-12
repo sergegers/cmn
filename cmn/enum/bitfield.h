@@ -22,7 +22,7 @@ consteval auto adapt_bitfield_info_helper(interop_type_t<op_t> ops = default_ops
 
 ///////////////////////////////////////////////////////////////////////////////
 #define CMN_ENUM_ADAPT_BITFIELD_INFO(name, group_nvp_seq) \
-    consteval auto adapt_type_info(name)    \
+    consteval auto adapt_enum_info(name)    \
     {   \
         using enum name;    \
         return ::cmn::enum_::adapt_bitfield_info_helper<CMN_ENUM_EXTRACT_GROUP_SEQ(group_nvp_seq)>();  \

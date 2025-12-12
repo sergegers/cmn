@@ -3,7 +3,7 @@
 // ReSharper disable once CppUnusedIncludeDirective
 #include <string_view>
 
-#include <cmn/meta/type_traits.h>   // int
+#include <cmn/meta/traits.h>   // int
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //

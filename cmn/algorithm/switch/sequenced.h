@@ -6,7 +6,7 @@
 #include <boost/mp11.hpp>
 
 #include <cmn/meta/concepts.h>      // c::enumerable<>
-#include <cmn/meta/type_traits.h>   // underlying_type_t<>
+#include <cmn/meta/traits.h>   // underlying_type_t<>
 #include <cmn/util/util.h>          // cmn::mp_from_sequence<>
 
 #include <cmn/algorithm/at.h>

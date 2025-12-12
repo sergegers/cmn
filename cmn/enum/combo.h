@@ -18,7 +18,7 @@
     BOOST_PP_COMMA() ::cmn::enum_::group_::make<CMN_ENUM_EXTRACT_GROUP_SEQ(group_nvp_seq)>()
 
 #define CMN_ENUM_ADAPT_COMBO_INFO(name, groups_seq) \
-    consteval auto adapt_type_info(name)    \
+    consteval auto adapt_enum_info(name)    \
     {   \
         using enum name;    \
         return ::cmn::enum_::enum_info{   \

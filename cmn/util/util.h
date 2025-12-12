@@ -6,7 +6,7 @@
 #include <limits>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 
 namespace cmn
 {

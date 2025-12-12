@@ -1,7 +1,6 @@
 #pragma once
 
 #include <type_traits>
-#include <utility>
 
 #include <cmn/meta/concepts.h>
 
@@ -190,27 +189,5 @@ constexpr bool dependent_v = Val_;
 ///////////////////////////////////////////////////////////////////////////////
 template <c::string T> using char_t = T::value_type;
 template <c::string T> using char_traits_t = T::traits_type;
-
-///////////////////////////////////////////////////////////////////////////////
-//
-// type_info
-//
-///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_type T>
-constexpr auto type_info_v = []
-{
-    // initialize through lambda to avoid linking errors during
-    // constructor execution if the constructor throws exception
-    return adapt_type_info(T{});
-}();
-
-//-----------------------------------------------------------------------------
-namespace io
-{
-
-template <c::formatted_type T>
-constexpr c::format_info auto format_info_v = format_traits<T>{}(T{});
-
-}
 
 }

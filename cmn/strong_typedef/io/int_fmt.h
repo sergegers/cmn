@@ -108,7 +108,7 @@ enum class int_fmt_t : short
 	long_c_up_hex = hex | showbase | c | long_ | uppercase | forcesign        // +0x0000001B
 };
 
-consteval auto adapt_type_info(int_fmt_t en)
+consteval auto adapt_enum_info(int_fmt_t en)
 {
 	using namespace cmn::enum_;
 	using enum int_fmt_t;

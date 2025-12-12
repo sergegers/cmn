@@ -58,15 +58,19 @@ add_library (
 
  "cmn/fwd.h"
 
- "cmn/meta/concepts/type_info.h" 
+ "cmn/meta/concepts/enum.h" 
  "cmn/meta/concepts/traits.h"
  "cmn/meta/concepts/slot_manip.h"
  "cmn/meta/concepts/exception.h"
+ "cmn/meta/concepts/operations.h" 
+ "cmn/meta/concepts/int.h" 
+ "cmn/meta/concepts/char.h"   
  "cmn/meta/concepts.h"
 
- "cmn/meta/function_traits.h"
+ "cmn/meta/traits/function.h"
  "cmn/meta/macro.h"
- "cmn/meta/type_traits.h"
+ "cmn/meta/traits/type.h"
+ "cmn/meta/traits.h"
 
  "cmn/meta/boost/fusion/concepts.hpp"
  "cmn/meta/boost/fusion/type_traits.hpp"
@@ -182,7 +186,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
- )
+)
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

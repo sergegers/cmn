@@ -40,7 +40,7 @@ enum class print_t
 // Print options manipulator
 //
 ///////////////////////////////////////////////////////////////////////////////
-consteval auto adapt_type_info(print_t)
+consteval auto adapt_enum_info(print_t)
 {
     // TODO: + empty to magic constants
 

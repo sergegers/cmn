@@ -6,7 +6,7 @@
 #include <cstdint>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 
 #include <cmn/tuple/va/detail/promote.h>
 

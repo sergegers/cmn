@@ -18,7 +18,7 @@
 
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>   // int_<>
+#include <cmn/meta/traits.h>   // int_<>
 
 #include <cmn/tuple/io.h>
 #include <cmn/util/feature.h>

@@ -2,35 +2,14 @@
 
 #include <cstddef>
 #include <concepts>
-#include <type_traits>
 #include <utility>
 
 #include <cmn/fwd.h>
 
 #include "traits.h"
 
-namespace cmn
+namespace cmn::c
 {
-
-template <typename T>
-consteval auto adapt_type_info(std::type_identity<T>) -> decltype(adapt_type_info(T{}))
-{
-    return adapt_type_info(T{});
-}
-
-namespace c
-{
-
-////////////////////////////////////////////////////////////////////////////////
-//
-// type_info concepts
-//
-////////////////////////////////////////////////////////////////////////////////
-template <typename T>
-concept adapted_type = requires (std::type_identity<T> tt) 
-{
-    { adapt_type_info(tt) };
-};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -58,15 +37,15 @@ concept enum_info_types_ = requires
 template <typename T>
 concept enum_info = 
     detail::enum_info_types_<T> 
- && enum_<typename T::enum_type> 
- && requires
-    (
-          T const &einfo
-        , typename T::op_type &ops
-        , typename T::groups_type &groups
-        , typename T::masks_type &masks
-        , std::size_t &sz
-        , typename T::elements_type &elems
+    && enum_<typename T::enum_type> 
+    && requires
+(
+    T const &einfo
+    , typename T::op_type &ops
+    , typename T::groups_type &groups
+    , typename T::masks_type &masks
+    , std::size_t &sz
+    , typename T::elements_type &elems
     ) 
     {
         sz = T::size;
@@ -85,13 +64,10 @@ concept enum_info =
 template <typename E>
 concept adapted_enum = 
     enum_<E> 
- && adapted_type<E> 
- && requires(E e) 
+    && requires(E e) 
     {
-        { adapt_type_info(e) } /*noexcept*/ -> enum_info;
+        { adapt_enum_info(e) } /*noexcept*/ -> enum_info;
     }
-;
-
-}
+    ;
 
 }

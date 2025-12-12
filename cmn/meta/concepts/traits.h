@@ -2,6 +2,8 @@
 
 #include <concepts>
 #include <type_traits>
+#include <tuple>
+#include <utility>
 
 namespace cmn::c
 {
@@ -224,7 +226,7 @@ struct is_instance_of_<TemplateT, TemplateT<Args...>> : std::true_type
 {
 };
 
-} // namespace detail
+}
 
 template <typename T, template <typename...> typename TemplateT>
 concept instance_of = detail::is_instance_of_<TemplateT, T>::value;
@@ -248,10 +250,73 @@ struct is_complete<T, std::void_t<decltype(sizeof(T) != 0)>> : std::true_type
 {
 };
 
-} // namespace detail
+}
 
 template <typename T>
 concept complete = detail::is_complete<T>::value;
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// tuple concepts
+//
+///////////////////////////////////////////////////////////////////////////////
+
+namespace detail
+{
+
+template <typename T, std::size_t Idx_, typename Elem>
+concept const_tuple_elem = requires (T const &t)
+{
+    { std::get<Elem>(t) } -> std::same_as<Elem const &>;
+    { std::get<Idx_>(t) } -> std::same_as<Elem const &>;
+};
+
+template <typename T, typename Idss, typename... Elems>
+struct check_const_tuple_elems : std::false_type {};
+
+template <typename T, std::size_t... Idss_, typename... Elems>
+struct check_const_tuple_elems<T, std::index_sequence<Idss_...>, Elems...> :
+    std::bool_constant<(const_tuple_elem<T, Idss_, Elems> && ...)>
+{
+};
+
+}
+
+template <typename T, typename... Elems>
+concept const_tuple_of =
+    (std::tuple_size_v<T> == sizeof... (Elems))
+ && detail::check_const_tuple_elems<T, std::make_index_sequence<sizeof... (Elems)>, Elems...>::value
+;
+
+//-----------------------------------------------------------------------------
+namespace detail
+{
+
+template <typename T, std::size_t Idx_, typename Elem>
+concept tuple_elem = requires (T t)
+{
+    { std::get<Elem>(t) } -> std::same_as<Elem &>;
+    { std::get<Elem>(std::move(t)) } -> std::same_as<Elem &&>;
+
+    { std::get<Idx_>(t) } -> std::same_as<Elem &>;
+    { std::get<Idx_>(std::move(t)) } -> std::same_as<Elem &&>;
+};
+
+template <typename T, typename Idss, typename... Elems>
+struct check_tuple_elems: std::false_type {};
+
+template <typename T, std::size_t... Idss_, typename... Elems>
+struct check_tuple_elems<T, std::index_sequence<Idss_...>, Elems...>:
+    std::bool_constant<(tuple_elem<T, Idss_, Elems> && ...)>
+{};
+
+}
+
+template <typename T, typename... Elems>
+concept tuple_of =
+    const_tuple_of<T, Elems...>
+ && detail::check_tuple_elems<T, std::make_index_sequence<sizeof... (Elems)>, Elems...>::value
+;
 
 }
 

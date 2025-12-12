@@ -41,7 +41,7 @@
 #   include <cmn/meta/boost/fusion/type_traits.hpp>
 #endif
 
-#include <cmn/meta/type_traits.h>    // underlying_type_t<>
+#include <cmn/meta/traits.h>    // underlying_type_t<>
 #include <cmn/algorithm/detail/result.h>
 #include <cmn/algorithm/detail/visitor.h>
 

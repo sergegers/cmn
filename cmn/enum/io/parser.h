@@ -8,7 +8,7 @@
 #include <boost/spirit/include/qi_symbols.hpp>
 
 #include <cmn/fwd.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 
 #include <cmn/util/symbols.h>
 

@@ -28,7 +28,7 @@ enum fmt_options_t
     fo_uppercase    = 0x2
 };
 
-consteval auto adapt_type_info(fmt_options_t fo)
+consteval auto adapt_enum_info(fmt_options_t fo)
 {
     return enum_::adapt_bitfield_info_helper<fo_empty, fo_hex, fo_uppercase>();
 }

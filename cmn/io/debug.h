@@ -27,7 +27,7 @@ enum class fmtflags_t
     boolalpha = std::ios_base::boolalpha
 };
 
-consteval auto adapt_type_info(fmtflags_t)
+consteval auto adapt_enum_info(fmtflags_t)
 {
     using enum fmtflags_t;
     return enum_::adapt_bitfield_info_helper<skipws, unitbuf, uppercase, showbase, showpoint, showpos, left, right,
@@ -45,7 +45,7 @@ enum class iostate_t
     badbit = std::ios_base::badbit
 };
 
-consteval auto adapt_type_info(iostate_t)
+consteval auto adapt_enum_info(iostate_t)
 {
     using enum iostate_t;
     return enum_::adapt_bitfield_info_helper<goodbit, eofbit, failbit, badbit>();

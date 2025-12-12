@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 
 #include <cmn/enum/traits.h>
 #include <cmn/enum/enum.h>
@@ -45,7 +45,7 @@ enum class zero_cl_cmb_t
     color_mask = red | green | blue
 };
 
-consteval auto adapt_type_info(zero_cl_cmb_t en)
+consteval auto adapt_enum_info(zero_cl_cmb_t en)
 {
     using enum zero_cl_cmb_t;
     return enum_info
@@ -170,7 +170,7 @@ enum class cl_cmb_2_t
     color_mask = red | green | blue
 };
 
-consteval auto adapt_type_info(cl_cmb_2_t en)
+consteval auto adapt_enum_info(cl_cmb_2_t en)
 {
     using enum cl_cmb_2_t;
     return enum_info
@@ -197,7 +197,7 @@ enum zero_cmb_t
     color_mask = 0xC
 };
 
-consteval auto adapt_type_info(zero_cmb_t en)
+consteval auto adapt_enum_info(zero_cmb_t en)
 {
     return enum_info
     {
@@ -373,7 +373,7 @@ enum class large_enum_t
     e1056, e1057, e1058, e1059, e1060, e1061, e1062, e1063, e1064, e1065, e1066, e1067, e1068, e1069, e1070, e1071
 };
 
-consteval auto adapt_type_info(large_enum_t en)
+consteval auto adapt_enum_info(large_enum_t en)
 {
     using enum large_enum_t;
     return adapt_enum_info_helper
@@ -496,7 +496,7 @@ struct foo
 
 };
 
-consteval auto adapt_type_info(decltype(foo::ae_0))
+consteval auto adapt_enum_info(decltype(foo::ae_0))
 {
     return adapt_enum_info_helper<foo::ae_0, foo::ae_1, foo::ae_2>();
 }

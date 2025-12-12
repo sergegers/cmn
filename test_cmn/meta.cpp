@@ -20,7 +20,7 @@
 #endif
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 
 #include <cmn/util/fixed_string.h>
 
@@ -165,6 +165,10 @@ static_assert(c::string_of<std::string, char, std::char_traits<char>>);
 static_assert(c::string_of<std::wstring, wchar_t, std::char_traits<wchar_t>>);
 static_assert(!c::string_of<std::string_view, char, std::char_traits<char>>);
 static_assert(c::string<fixed_string<10>>);
+// tuple
+static_assert(c::const_tuple_of<std::tuple<int, long, char> const, int, long, char>);
+static_assert(c::tuple_of<std::tuple<int, long, char>, int, long, char>);
+static_assert(!c::tuple_of<std::tuple<int, long, char> const, int, long, char>);
 
 #endif
 
@@ -177,6 +181,7 @@ BOOST_AUTO_TEST_CASE(imap_, *utf::tolerance(0.00000001f))
 
 #ifdef CMN_STATIC_TEST
     using sparce_tuple_type = fus::map<fus::ipair<3, int>, fus::ipair<7, char>, fus::ipair<17, float>>;
+
     static_assert(std::tuple_size_v<sparce_tuple_type> == 3);
     static_assert(std::same_as<std::tuple_element_t<3, sparce_tuple_type>, int>);
     static_assert(std::same_as<std::tuple_element_t<7, sparce_tuple_type>, char>);

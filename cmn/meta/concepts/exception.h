@@ -5,6 +5,12 @@
 #include <boost/mp11/map.hpp>
 #include <boost/mpl/pair.hpp>
 
+#if __has_include(<boost/mp11/concepts.hpp>)
+#   include <boost/mp11/concepts.hpp>
+#else
+#   include <cmn/meta/boost/mp11/concepts.hpp>
+#endif
+
 #include "traits.h"
 
 namespace cmn::c

@@ -3,7 +3,7 @@
 #include <limits>
 
 #include <cmn/meta/concepts.h>      // c::enum_<>, print_t
-#include <cmn/meta/type_traits.h>   // format_info_v
+#include <cmn/meta/traits.h>   // format_info_v
 
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
@@ -25,7 +25,7 @@ template <c::enum_ E>
 using bitfield_mask_manip = cmn::io::int_slot_manip
 <
       struct bitfield_mask_
-    , cmn::io::format_info_v<E>.bitfield_mask
+    , static_cast<E>(std::numeric_limits<unsigned long>::max()) // fill with 0b11111...
 >;
 
 inline constexpr cmn::io::deduce_slot_manip_forwarder<bitfield_mask_manip> bitfield_mask {};

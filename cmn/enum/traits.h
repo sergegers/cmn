@@ -5,7 +5,7 @@
 
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 
 #include <cmn/enum/detail/qualified_name.h>
 #include <cmn/enum/detail/name_info.h>
@@ -63,7 +63,14 @@ constexpr auto name(E, std::basic_ios<Char, CharTraits> const &) noexcept
 // enum_info shortcuts
 //
 ///////////////////////////////////////////////////////////////////////////////
-template <c::adapted_enum E> constexpr c::enum_info auto &enum_info_v = type_info_v<E>;
+template <c::adapted_enum E>
+constexpr auto enum_info_v = []
+{
+    // initialize through lambda to avoid linking errors during
+    // constructor execution if the constructor throws exception
+    return adapt_enum_info(E{});
+}();
+
 template <c::adapted_enum E> constexpr kind_t kind_v = enum_info_v<E>.kind();
 template <c::adapted_enum E> constexpr interop_type_t<op_t> ops_v = enum_info_v<E>.m_ops;
 template <c::adapted_enum E> constexpr E begin_v = enum_info_v<E>.min_value();

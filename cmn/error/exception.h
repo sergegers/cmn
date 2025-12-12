@@ -15,7 +15,7 @@
 #include <boost/core/use_default.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>
+#include <cmn/meta/traits.h>
 #include <cmn/util/param.h>
 
 namespace cmn

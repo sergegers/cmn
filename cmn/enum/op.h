@@ -6,7 +6,7 @@
 #include <boost/preprocessor/cat.hpp>
 
 #include <cmn/meta/concepts.h>
-#include <cmn/meta/type_traits.h>   // int_<>
+#include <cmn/meta/traits.h>   // int_<>
 
 #include <cmn/util/util.h>          // lazy_to_interop()
 #include <cmn/util/feature.h>
