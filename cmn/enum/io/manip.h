@@ -3,7 +3,6 @@
 #include <limits>
 
 #include <cmn/meta/concepts.h>      // c::enum_<>, print_t
-#include <cmn/meta/traits.h>   // format_info_v
 
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/forwarder.h>
@@ -11,7 +10,6 @@
 #include <cmn/io/manip/format_options.h>
 
 #include "print.h"
-#include "format_info.h"
 
 namespace cmn::enum_::io
 {

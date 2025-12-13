@@ -5,7 +5,6 @@
 #include <cmn/enum/util.h>
 // ReSharper disable once CppUnusedIncludeDirective
 #include <cmn/enum/op.h>
-#include <cmn/enum/io/format_info.h>
 
 namespace cmn::enum_
 {

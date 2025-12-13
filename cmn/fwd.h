@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 namespace cmn
 {
 
@@ -14,15 +16,12 @@ enum class int_fmt_t: short;
 //
 // traits
 //
-template <typename T>
-struct format_traits
-{
-    consteval auto operator()(T t) const
-        requires( requires { get_format_info(t); })
-    {
-        return get_format_info(t);
-    }
-};
+template <typename TypeOrTag>
+struct format_traits;
+
+//-----------------------------------------------------------------------------
+struct enum_tag;
+
 
 //-----------------------------------------------------------------------------
 

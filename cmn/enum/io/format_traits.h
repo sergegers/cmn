@@ -28,7 +28,7 @@ template
     , std::size_t Close_
     , std::size_t Delim_
 >
-struct list_symbols_t
+struct source_options_t
 {
     template <std::size_t N_>
     using string_t = basic_fixed_string<Char, N_, CharTtraits>;
@@ -37,6 +37,9 @@ struct list_symbols_t
     string_t<Close_> close;
     string_t<Delim_> delimiter;
 };
+
+
+
 
 template <c::adapted_enum E>
 struct format_info
@@ -50,7 +53,7 @@ struct format_info
     template <typename Char, typename CharTraits>
     constexpr auto list_symbols()
     {
-        return list_symbols_t
+        return source_options_t
         {
             .open = sym::open_square_bracket.value<Char, CharTraits>(),
             .close = sym::close_square_bracket.value<Char, CharTraits>(),

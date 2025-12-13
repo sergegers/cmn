@@ -65,6 +65,7 @@ add_library (
  "cmn/meta/concepts/operations.h" 
  "cmn/meta/concepts/int.h" 
  "cmn/meta/concepts/char.h"   
+ "cmn/meta/concepts/format.h"
  "cmn/meta/concepts.h"
 
  "cmn/meta/traits/function.h"
@@ -148,7 +149,7 @@ add_library (
  "cmn/enum/combo.h" 
  "cmn/enum/feature.h" 
  "cmn/enum/util.h"
- "cmn/enum/io/format_info.h"
+ "cmn/enum/io/format_traits.h"
  "cmn/enum/io/format.h"
  "cmn/enum/io.h" 
  "cmn/enum/io/printer.h" 
