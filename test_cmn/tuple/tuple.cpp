@@ -5,6 +5,11 @@
 #include <type_traits>
 
 #include <boost/mp11.hpp>
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
 
 #include <cmn/tuple/tuple.h>
 
@@ -139,10 +144,10 @@ static_assert
     >
 );
 
-static_assert(boost::mp11::mp_find<std::tuple<int, char const, long>, int>::value == 0, "tuple_index failed");
-static_assert(boost::mp11::mp_find<std::tuple<int, char const, long>, char const>::value == 1, "tuple_index failed");
-static_assert(boost::mp11::mp_find<std::tuple<int, char const, long>, long>::value == 2, "tuple_index failed");
-static_assert(boost::mp11::mp_find<std::tuple<int, char const, long>, float>::value == 3, "tuple_index failed");
+static_assert(boost::mp11::mp_find_v<std::tuple<int, char const, long>, int> == 0, "tuple_index failed");
+static_assert(boost::mp11::mp_find_v<std::tuple<int, char const, long>, char const> == 1, "tuple_index failed");
+static_assert(boost::mp11::mp_find_v<std::tuple<int, char const, long>, long> == 2, "tuple_index failed");
+static_assert(boost::mp11::mp_find_v<std::tuple<int, char const, long>, float> == 3, "tuple_index failed");
 
 } 
 

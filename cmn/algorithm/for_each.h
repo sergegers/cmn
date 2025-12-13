@@ -10,6 +10,12 @@
 #   include <cmn/meta/boost/mp11/concepts.hpp>
 #endif
 
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
+
 #include <cmn/algorithm/detail/result.h>
 
 namespace cmn
@@ -34,7 +40,7 @@ constexpr auto for_each_noctor_mp11(Func &&func) -> decltype(std::forward<Func>(
     }
     (
           std::forward<Func>(func)
-        , std::make_index_sequence<boost::mp11::mp_size<L>::value>{}
+        , std::make_index_sequence<boost::mp11::mp_size_v<L>>{}
     );
 };
 

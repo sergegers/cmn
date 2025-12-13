@@ -8,7 +8,13 @@
 #include <string>
 #include <cstdarg>
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <boost/mp11.hpp>
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
 
 #include <boost/fusion/sequence/intrinsic/back.hpp>
 #include <boost/fusion/adapted/std_tuple.hpp>
@@ -198,10 +204,7 @@ private:
     template <std::size_t Idx_> using keep_type_ = std::tuple_element_t<Idx_, keep_args_type>;
 
     template <typename T>
-    static constexpr auto idx_v = (mp_count<args_type, T>::value == 1)?
-        mp_find<args_type, T>::value:
-        mp_size<args_type>::value
-    ;
+    static constexpr auto idx_v = (mp_count_v<args_type, T> == 1)? mp_find_v<args_type, T>: mp_size_v<args_type>;
 
     static constexpr auto va_args_size = sizeof... (VaArgs);
     static constexpr auto args_size = va_args_size;

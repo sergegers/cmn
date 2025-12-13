@@ -272,20 +272,18 @@ concept const_tuple_elem = requires (T const &t)
 };
 
 template <typename T, typename Idss, typename... Elems>
-struct check_const_tuple_elems : std::false_type {};
+constexpr bool check_const_tuple_elems_v = false;
 
 template <typename T, std::size_t... Idss_, typename... Elems>
-struct check_const_tuple_elems<T, std::index_sequence<Idss_...>, Elems...> :
-    std::bool_constant<(const_tuple_elem<T, Idss_, Elems> && ...)>
-{
-};
+constexpr bool check_const_tuple_elems_v<T, std::index_sequence<Idss_...>, Elems...> =
+    (const_tuple_elem<T, Idss_, Elems> && ...);
 
 }
 
 template <typename T, typename... Elems>
 concept const_tuple_of =
     (std::tuple_size_v<T> == sizeof... (Elems))
- && detail::check_const_tuple_elems<T, std::make_index_sequence<sizeof... (Elems)>, Elems...>::value
+ && detail::check_const_tuple_elems_v<T, std::make_index_sequence<sizeof... (Elems)>, Elems...>
 ;
 
 //-----------------------------------------------------------------------------
@@ -303,19 +301,17 @@ concept tuple_elem = requires (T t)
 };
 
 template <typename T, typename Idss, typename... Elems>
-struct check_tuple_elems: std::false_type {};
+constexpr bool check_tuple_elems_v = false;
 
 template <typename T, std::size_t... Idss_, typename... Elems>
-struct check_tuple_elems<T, std::index_sequence<Idss_...>, Elems...>:
-    std::bool_constant<(tuple_elem<T, Idss_, Elems> && ...)>
-{};
+constexpr bool check_tuple_elems_v<T, std::index_sequence<Idss_...>, Elems...> = (tuple_elem<T, Idss_, Elems> && ...);
 
 }
 
 template <typename T, typename... Elems>
 concept tuple_of =
     const_tuple_of<T, Elems...>
- && detail::check_tuple_elems<T, std::make_index_sequence<sizeof... (Elems)>, Elems...>::value
+ && detail::check_tuple_elems_v<T, std::make_index_sequence<sizeof... (Elems)>, Elems...>
 ;
 
 }

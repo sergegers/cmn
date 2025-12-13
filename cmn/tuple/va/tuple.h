@@ -4,7 +4,13 @@
 #include <utility>
 #include <cstdarg>
 
+// ReSharper disable once CppUnusedIncludeDirective
 #include <boost/mp11.hpp>
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
 
 #include <cmn/meta/concepts.h>
 #include <cmn/tuple/va/concepts.h>
@@ -78,10 +84,7 @@ private:
     big_arg_buffer_type     m_big_args_buffer;
 
     template <typename T>
-    static constexpr auto idx_v = (mp_count<args_type, T>::value == 1)?
-        mp_find<args_type, T>::value:
-        mp_size<args_type>::value
-    ;
+    static constexpr auto idx_v = (mp_count_v<args_type, T> == 1)? mp_find_v<args_type, T>: mp_size_v<args_type>;
 
     // The behavior of the va_start macro is undefined if the last parameter before the ellipsis has reference type,
     // or has type that is not compatible with the type that results from default argument promotions
@@ -211,10 +214,7 @@ private:
     big_arg_buffer_type     m_big_args_buffer;
 
     template <typename T>
-    static constexpr auto idx_v = (mp_count<args_type, T>::value == 1)?
-        mp_find<args_type, T>::value:
-        mp_size<args_type>::value
-    ;
+    static constexpr auto idx_v = (mp_count_v<args_type, T> == 1)? mp_find_v<args_type, T>: mp_size_v<args_type>;
 
     template <std::size_t Idx_> using keep_type_ = std::tuple_element_t<Idx_, keep_args_type>;
 

@@ -37,6 +37,7 @@ constexpr auto sequenced_switch_
 {
     using namespace boost::mp11;
 
+    // ReSharper disable once CppRedundantQualifier
     using mp_list_type = cmn::mp_from_sequence<integer_sequence<T, Idss_...>>;
     using int_type = interop_type_t<T>;
 

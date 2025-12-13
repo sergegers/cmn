@@ -5,7 +5,14 @@
 #include <utility>
 
 #include <boost/type_traits/promote.hpp>
+
+// ReSharper disable once CppUnusedIncludeDirective
 #include <boost/mp11.hpp>
+#if __has_include(<boost/mp11/type_traits.hpp>)
+#   include <boost/mp11/type_traits.hpp>
+#else
+#   include <cmn/meta/boost/mp11/type_traits.hpp>
+#endif
 
 #include <cmn/tuple/va/concepts.h>
 
@@ -129,10 +136,10 @@ constexpr auto put(Tpl &tpl, Arg &&arg) noexcept -> void
 template <typename T> using big_arg_ = mp_bool<c::ref_va_arg<T>>;
 template <typename VaIdx, typename VaArg> using big_arg_idx_ = mp_bool<c::ref_va_arg<VaArg>>;
 
-template <typename Tpl> using va_args_ = typename Tpl::va_args_type;
+template <typename Tpl> using va_args_ = Tpl::va_args_type;
 
 template <typename Tpl>
-using va_args_indices_ = mp_from_sequence<std::make_index_sequence<mp_size<va_args_<Tpl>>::value>>;
+using va_args_indices_ = mp_from_sequence<std::make_index_sequence<mp_size_v<va_args_<Tpl>>>>;
 
 template <typename Tpl>
 using big_slot_idss_ = mp_filter<big_arg_idx_, va_args_indices_<Tpl>, va_args_<Tpl>>;
@@ -144,7 +151,7 @@ using big_slot_idss_ = mp_filter<big_arg_idx_, va_args_indices_<Tpl>, va_args_<T
 template <typename Tpl> using big_arg_buffer_t = mp_copy_if<va_args_<Tpl>, big_arg_>;
 
 template <typename Tpl, std::size_t Idx_>
-static constexpr std::size_t big_slot_idx_v = mp_find<big_slot_idss_<Tpl>, mp_size_t<Idx_ - Tpl::named_args_size>>::value;
+static constexpr std::size_t big_slot_idx_v = mp_find_v<big_slot_idss_<Tpl>, mp_size_t<Idx_ - Tpl::named_args_size>>;
 
 
 }
