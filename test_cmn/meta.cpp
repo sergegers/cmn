@@ -171,7 +171,16 @@ static_assert(c::const_tuple_of<std::tuple<int, long, char> const, int, long, ch
 static_assert(c::tuple_of<std::tuple<int, long, char>, int, long, char>);
 static_assert(!c::tuple_of<std::tuple<int, long, char> const, int, long, char>);
 
-static_assert(c::list_formatted<io::enum_tag, char, std::char_traits<char>>);
+static_assert
+(
+    c::list_source_options
+    <
+        io::source_options<char, std::char_traits<char>, 1, 1, 1>, 
+        char, 
+        std::char_traits<char>
+    >
+);
+static_assert(c::list_formatted<enum_::io::tag, char, std::char_traits<char>>);
 
 #endif
 

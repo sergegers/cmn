@@ -132,6 +132,15 @@ concept const_string_of =
 ;
 
 //-----------------------------------------------------------------------------
+template
+<
+    typename T
+    , typename Char
+    , typename CharTraits
+>
+concept const_string_ref_of = const_string_of<std::remove_cvref_t<T>, Char, CharTraits>;
+
+//-----------------------------------------------------------------------------
 template <typename T>
 concept string = 
     const_string<T> 

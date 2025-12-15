@@ -65,12 +65,10 @@ add_library (
  "cmn/meta/concepts/operations.h" 
  "cmn/meta/concepts/int.h" 
  "cmn/meta/concepts/char.h"   
- "cmn/meta/concepts/format.h"
  "cmn/meta/concepts.h"
 
  "cmn/meta/traits/function.h"
  "cmn/meta/traits/type.h"
- "cmn/meta/traits/format.h"
  "cmn/meta/traits.h"
 
  "cmn/meta/macro.h"
@@ -102,6 +100,7 @@ add_library (
  "cmn/io/manip/slot/param.h"
  "cmn/io/manip/slot.h" 
  "cmn/io/manip/format_options.h"
+ "cmn/io/source_options.h"
 
  "cmn/io/format/mix/parse_arg.h"
  "cmn/io/format/mix/mixins.h"
@@ -114,6 +113,8 @@ add_library (
 
  "cmn/io/format/list/formatter.h"
  "cmn/io/format/list/out.h"
+
+ "cmn/io.h"
 
  "cmn/range/io/format.h"
  "cmn/range/io/io.h"
@@ -189,7 +190,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-)
+ "cmn/enum/io/out.h")
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

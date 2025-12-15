@@ -21,7 +21,7 @@ template <c::enum_ E>
 using bitfield_mask_manip = cmn::io::int_slot_manip
 <
       struct bitfield_mask_
-    , static_cast<E>(cmn::io::format_traits<cmn::io::enum_tag>::mask)
+    , static_cast<E>(cmn::io::format_traits<tag>::mask)
 >;
 
 inline constexpr cmn::io::deduce_slot_manip_forwarder<bitfield_mask_manip> bitfield_mask {};
@@ -40,7 +40,7 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_open_
-      , cmn::io::format_traits<cmn::io::enum_tag>::source_options<Char, CharTraits>.open
+      , cmn::io::format_traits<tag>::source_options<Char, CharTraits>.open
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -69,7 +69,7 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_close_
-      , cmn::io::format_traits<cmn::io::enum_tag>::source_options<Char, CharTraits>.close
+      , cmn::io::format_traits<tag>::source_options<Char, CharTraits>.close
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -96,7 +96,7 @@ using basic_bitfield_separator_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_bitfield_separator_
-      , cmn::io::format_traits<cmn::io::enum_tag>::source_options<Char, CharTraits>.delimiter
+      , cmn::io::format_traits<tag>::source_options<Char, CharTraits>.delimiter
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -127,7 +127,7 @@ template <typename Char, typename CharTraits = std::char_traits<Char>>
 
 using basic_esaver = cmn::io::manip::iword_saver
 <
-    basic_open_manip<Char, CharTraits>
+      basic_open_manip<Char, CharTraits>
     , basic_close_manip<Char, CharTraits>
     , basic_bitfield_separator_manip<Char, CharTraits>
     , print_manip
