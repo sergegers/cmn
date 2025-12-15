@@ -69,7 +69,7 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_close_
-      , sym::close_square_bracket.value<Char, CharTraits>()
+      , cmn::io::format_traits<cmn::io::enum_tag>::source_options<Char, CharTraits>.close
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -96,7 +96,7 @@ using basic_bitfield_separator_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_bitfield_separator_
-      , sym::ws.value<Char, CharTraits>()
+      , cmn::io::format_traits<cmn::io::enum_tag>::source_options<Char, CharTraits>.delimiter
       , sym::nothing.value<Char, CharTraits>()
     >
 ;

@@ -15,7 +15,7 @@ template <>
 struct format_traits<enum_tag>
 {
     static constexpr enum_::io::print_t options = enum_::io::print_t::class_prefix | enum_::io::print_t::tail;
-    static constexpr std::uintptr_t mask = std::numeric_limits<unsigned long>::max(); // fill with 0b11111...
+    static constexpr auto mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...
 
 
     template <typename Char, typename CharTraits>
@@ -27,7 +27,7 @@ struct format_traits<enum_tag>
         sym::close_square_bracket.value<Char, CharTraits>(),
 
         // separator between bitfield or combo elements during the output
-        sym::nothing.value<Char, CharTraits>()
+        sym::ws.value<Char, CharTraits>()
     };
 };
 

@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE(masks)
     static_assert(c::adapted_enum<zero_cl_cmb_t>);
     static_assert(std::tuple_size_v<decltype(groups_v<zero_cl_cmb_t>)> == 2, "enum group count mismatch");
 
-    BOOST_TEST(boost::lexical_cast<std::string>(record_v<zero_cl_cmb_t, 1, 1>.m_value) == "green");
+    BOOST_TEST(boost::lexical_cast<std::string>(record_v<zero_cl_cmb_t, 1, 1>) == "green");
 
     static_assert(group_v<zero_cl_cmb_t, 0>.get_values() == std::array { zero, one, two, three });
     static_assert(group_v<zero_cl_cmb_t, 1>.get_values() == std::array{ red, green, blue });
