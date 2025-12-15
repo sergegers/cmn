@@ -69,9 +69,11 @@ add_library (
  "cmn/meta/concepts.h"
 
  "cmn/meta/traits/function.h"
- "cmn/meta/macro.h"
  "cmn/meta/traits/type.h"
+ "cmn/meta/traits/format.h"
  "cmn/meta/traits.h"
+
+ "cmn/meta/macro.h"
 
  "cmn/meta/boost/fusion/concepts.hpp"
  "cmn/meta/boost/fusion/type_traits.hpp"

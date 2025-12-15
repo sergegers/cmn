@@ -1,7 +1,5 @@
 #pragma once
 
-#include <limits>
-
 #include <cmn/meta/concepts.h>      // c::enum_<>, print_t
 
 #include <cmn/io/manip/slot/manip.h>
@@ -9,7 +7,7 @@
 #include <cmn/io/manip/slot/util.h>
 #include <cmn/io/manip/format_options.h>
 
-#include "print.h"
+#include "format_traits.h"
 
 namespace cmn::enum_::io
 {
@@ -23,7 +21,7 @@ template <c::enum_ E>
 using bitfield_mask_manip = cmn::io::int_slot_manip
 <
       struct bitfield_mask_
-    , static_cast<E>(std::numeric_limits<unsigned long>::max()) // fill with 0b11111...
+    , static_cast<E>(cmn::io::format_traits<cmn::io::enum_tag>::mask)
 >;
 
 inline constexpr cmn::io::deduce_slot_manip_forwarder<bitfield_mask_manip> bitfield_mask {};
@@ -42,7 +40,7 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_open_
-      , sym::open_square_bracket.value<Char, CharTraits>()
+      , cmn::io::format_traits<cmn::io::enum_tag>::source_options<Char, CharTraits>.open
       , sym::nothing.value<Char, CharTraits>()
     >
 ;

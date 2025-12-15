@@ -1,13 +1,16 @@
 #pragma once
 
+#include <type_traits>
+
 #include <cmn/fwd.h>
+#include "enum.h"
 
 namespace cmn::c
 {
 
 template <typename T>
 concept formatted = 
-    adapted_enum<std::remove_cvref_t<decltype(T::options)>>
+    adapted_enum<std::remove_cvref_t<decltype(io::format_traits<T>::options)>>
 ;
 
 //-----------------------------------------------------------------------------
@@ -21,7 +24,7 @@ concept source_formatted =
     formatted<T>
  && requires
     {
-        { T::template source_options<Char, CharTraits>() };
+        { io::format_traits<T>::template source_options<Char, CharTraits> };
     }
 ;
 
@@ -36,11 +39,10 @@ concept list_formatted =
     source_formatted<T, Char, CharTraits>
  && requires
     {
-        T::template source_options<Char, CharTraits>().open;
-        T::template source_options<Char, CharTraits>().open.close;
-        T::template source_options<Char, CharTraits>().open.delimiter;
+        io::format_traits<T>::template source_options<Char, CharTraits>.open;
+        io::format_traits<T>::template source_options<Char, CharTraits>.close;
+        io::format_traits<T>::template source_options<Char, CharTraits>.delimiter;
     }
 ;
-
 
 }

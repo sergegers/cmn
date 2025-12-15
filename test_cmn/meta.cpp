@@ -23,6 +23,7 @@
 #include <cmn/meta/traits.h>
 
 #include <cmn/util/fixed_string.h>
+#include <cmn/enum/io/format_traits.h>
 
 
 BOOST_AUTO_TEST_SUITE(cmn)
@@ -169,6 +170,8 @@ static_assert(c::string<fixed_string<10>>);
 static_assert(c::const_tuple_of<std::tuple<int, long, char> const, int, long, char>);
 static_assert(c::tuple_of<std::tuple<int, long, char>, int, long, char>);
 static_assert(!c::tuple_of<std::tuple<int, long, char> const, int, long, char>);
+
+static_assert(c::list_formatted<io::enum_tag, char, std::char_traits<char>>);
 
 #endif
 

@@ -20,10 +20,6 @@ template <typename TypeOrTag>
 struct format_traits;
 
 //-----------------------------------------------------------------------------
-struct enum_tag;
-
-
-//-----------------------------------------------------------------------------
 
 template <typename Unit>
 struct strong_typedef_fmt_traits
