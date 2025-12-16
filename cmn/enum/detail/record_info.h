@@ -42,15 +42,6 @@ struct record_info
         m_wname{ int_<En_>{}, enum_member_wname }
     {}
 
-    //-----------------------------------------------------------------------------
-    template <typename Char, typename CharTraits = std::char_traits<Char>>
-    constexpr auto &name() const noexcept
-    {
-        if constexpr (std::is_same_v<Char, char>) return m_name;
-        else if constexpr (std::is_same_v<Char, wchar_t>) return m_wname;
-        else static_assert(!std::is_same_v<Char, Char>, "Not implemented");
-    }
-
     template <typename Char, typename CharTraits>
     constexpr auto &name(std::basic_ios<Char, CharTraits> const &) const noexcept
     {
@@ -75,6 +66,15 @@ struct record_info
     constexpr auto operator == (record_info const &other) const noexcept
     {
         return (*this <=> other) == std::strong_ordering::equivalent;
+    }
+
+    //-----------------------------------------------------------------------------
+    template <typename Char, typename CharTraits = std::char_traits<Char>>
+    constexpr auto &name() const noexcept
+    {
+        if constexpr (std::is_same_v<Char, char>) return m_name;
+        else if constexpr (std::is_same_v<Char, wchar_t>) return m_wname;
+        else static_assert(!std::is_same_v<Char, Char>, "Not implemented");
     }
 };
 

@@ -180,7 +180,7 @@ add_library (
  "cmn/algorithm/switch.h"
  "cmn/algorithm/at.h"
  "cmn/algorithm/binary_find.h"
- "cmn/algorithm/copy.h"
+ 
  "cmn/algorithm/erase.h"
  "cmn/algorithm/find.h"
  "cmn/algorithm/fold.h"
