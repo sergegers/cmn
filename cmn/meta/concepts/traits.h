@@ -116,7 +116,10 @@ template
     , typename Char
     , typename CharTraits
 >
-concept check_types_ = std::same_as<typename T::value_type, Char> && std::same_as<typename T::traits_type, CharTraits>;
+concept check_string_types_ = 
+    std::same_as<typename T::value_type, Char> 
+ && std::same_as<typename T::traits_type, CharTraits>
+;
 
 }
 
@@ -128,7 +131,7 @@ template
 >
 concept const_string_of =
     const_string<T> 
- && detail::check_types_<T, Char, CharTraits>
+ && detail::check_string_types_<T, Char, CharTraits>
 ;
 
 //-----------------------------------------------------------------------------
@@ -138,7 +141,7 @@ template
     , typename Char
     , typename CharTraits
 >
-concept const_string_ref_of = const_string_of<std::remove_cvref_t<T>, Char, CharTraits>;
+concept const_string_of_cvref = const_string_of<std::remove_cvref_t<T>, Char, CharTraits>;
 
 //-----------------------------------------------------------------------------
 template <typename T>
@@ -153,7 +156,7 @@ concept string =
 
 //-----------------------------------------------------------------------------
 template <typename T, typename Char, typename CharTraits>
-concept string_of = string<T> && detail::check_types_<T, Char, CharTraits>;
+concept string_of = string<T> && detail::check_string_types_<T, Char, CharTraits>;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename T, typename Char, typename CharTraits>

@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <concepts>
+#include <type_traits>
 #include <utility>
 
 #include <cmn/fwd.h>
@@ -68,6 +69,9 @@ concept adapted_enum =
     {
         { adapt_enum_info(e) } /*noexcept*/ -> enum_info;
     }
-    ;
+;
+
+template <typename T>
+concept adapted_enum_cvref = adapted_enum<std::remove_cvref_t<T>>;
 
 }

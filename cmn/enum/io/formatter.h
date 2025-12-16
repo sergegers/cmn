@@ -52,7 +52,7 @@ struct formatter<E, Char>:
     static constexpr auto end_fmt = cmn::sym::close_figure_bracket.as_char<Char>();
 
     using open_manip_type = cmn::enum_::io::basic_open_manip<Char>;
-    using separator_manip_type  = cmn::enum_::io::basic_bitfield_separator_manip<Char>;
+    using separator_manip_type  = cmn::enum_::io::basic_bitfield_delimiter_manip<Char>;
     using close_manip_type =cmn::enum_::io::basic_close_manip<Char>;
 
     open_manip_type         m_open          = open_manip_type { cmn::io::reset_ };

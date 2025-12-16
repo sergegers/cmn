@@ -100,7 +100,7 @@ add_library (
  "cmn/io/manip/slot/param.h"
  "cmn/io/manip/slot.h" 
  "cmn/io/manip/format_options.h"
- "cmn/io/source_options.h"
+ 
 
  "cmn/io/format/mix/parse_arg.h"
  "cmn/io/format/mix/mixins.h"
@@ -109,14 +109,13 @@ add_library (
  "cmn/io/format/util.h"
  "cmn/io/debug.h"
  "cmn/io/manip.h"
- "cmn/io/format.h"
 
  "cmn/io/format/list/formatter.h"
  "cmn/io/format/list/out.h"
 
  "cmn/io.h"
 
- "cmn/range/io/format.h"
+ "cmn/range/io/formatter.h"
  "cmn/range/io/io.h"
  "cmn/range/io/manip.h"
  "cmn/range/io.h"
@@ -124,7 +123,7 @@ add_library (
  "cmn/tuple/tuple.h"
  "cmn/tuple/op.h"
  "cmn/tuple/io/manip.h"
- "cmn/tuple/io/format.h"
+ "cmn/tuple/io/formatter.h"
  "cmn/tuple/io.h"
  
  "cmn/tuple/serialization.h"
@@ -153,13 +152,14 @@ add_library (
  "cmn/enum/feature.h" 
  "cmn/enum/util.h"
  "cmn/enum/io/format_traits.h"
- "cmn/enum/io/format.h"
- "cmn/enum/io.h" 
+ "cmn/enum/io/formatter.h"
+ "cmn/enum/io/out.h"
  "cmn/enum/io/printer.h" 
  "cmn/enum/io/manip.h" 
  "cmn/enum/io/reader.h" 
  "cmn/enum/io/parser.h" 
  "cmn/enum/io/parser.cpp"
+ "cmn/enum/io.h" 
 
  "cmn/strong_typedef.h"
  "cmn/strong_typedef/strong_typedef.h" 
@@ -190,7 +190,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
- "cmn/enum/io/out.h")
+)
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")

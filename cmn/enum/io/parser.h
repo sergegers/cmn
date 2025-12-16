@@ -10,9 +10,8 @@
 #include <cmn/fwd.h>
 #include <cmn/meta/traits.h>
 
-#include <cmn/util/symbols.h>
-
 #include <cmn/enum/traits.h>
+#include <cmn/enum/io/format_traits.h>
 
 #include "print.h"
 
@@ -37,7 +36,7 @@ auto try_parse
       int_<kind_t::enum_>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -55,7 +54,7 @@ auto try_parse
       int_<kind_t::bitfield>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -73,7 +72,7 @@ auto try_parse
       int_<kind_t::combo>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -93,7 +92,7 @@ auto parse
       int_<kind_t::enum_>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -111,7 +110,7 @@ auto parse
       int_<kind_t::bitfield>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -129,7 +128,7 @@ auto parse
       int_<kind_t::combo>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )

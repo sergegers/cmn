@@ -1,6 +1,6 @@
 #pragma once
 
-#include <type_traits>
+#include <concepts>
 
 #include <cmn/fwd.h>
 #include "enum.h"
@@ -9,38 +9,69 @@ namespace cmn::c
 {
 
 template <typename T>
-concept formatted = 
-    adapted_enum<std::remove_cvref_t<decltype(io::format_traits<T>::options)>>
-;
+concept format_options = requires(T const &fo)
+{
+    { fo.options } -> adapted_enum_cvref;
+};
 
 //-----------------------------------------------------------------------------
-template 
+namespace detail
+{
+
+template <typename T>
+concept list_sink_format_option_types_ = 
+    requires
+    {
+        typename T::char_type;
+        typename T::char_traits_type;
+    }
+;
+
+template
 <
       typename T
     , typename Char
     , typename CharTraits
 >
-concept source_formatted =
-    formatted<T>
- && requires
+concept check_list_sink_format_option_types_ =
+    std::same_as<typename T::char_type, Char>
+ && std::same_as<typename T::char_traits_type, CharTraits>
+;
+
+}
+
+template <typename T>
+concept list_sink_format_options =
+    format_options<T>
+ && detail::list_sink_format_option_types_<T>
+ && requires (T const& fo)
+{
+    { fo.open };
+    { fo.close };
+    { fo.delimiter };
+}
+;
+
+template
+<
+    typename T
+    , typename Char
+    , typename CharTraits
+>
+concept list_sink_format_options_of =
+    list_sink_format_options<T>
+ && detail::check_list_sink_format_option_types_<T, Char, CharTraits>
+ && requires (T const &fo)
     {
-        { io::format_traits<T>::template source_options<Char, CharTraits> };
+        { fo.open } -> const_string_of_cvref<Char, CharTraits>;
+        { fo.close } -> const_string_of_cvref<Char, CharTraits>;
+        { fo.delimiter } -> const_string_of_cvref<Char, CharTraits>;
     }
 ;
 
 //-----------------------------------------------------------------------------
-template
-<
-    typename T
-    , typename Char
-    , typename CharTraits
->
-concept list_source_options = requires
-{
-    { T::open } -> const_string_ref_of<Char, CharTraits>;
-    { T::close } -> const_string_ref_of<Char, CharTraits>;
-    { T::delimiter } -> const_string_ref_of<Char, CharTraits>;
-};
+template <typename T>
+concept formatted = format_options<io::format_traits<T>>;
 
 //-----------------------------------------------------------------------------
 template
@@ -49,22 +80,9 @@ template
     , typename Char
     , typename CharTraits
 >
-concept const_list_source_options_ref = list_source_options<std::remove_cvref_t<T>, Char, CharTraits>;
-
-//-----------------------------------------------------------------------------
-template
-<
-    typename T
-    , typename Char
-    , typename CharTraits
->
-concept list_formatted =
-    source_formatted<T, Char, CharTraits>
- && requires
-    {
-        { io::format_traits<T>::template source_options<Char, CharTraits> } -> 
-            const_list_source_options_ref<Char, CharTraits>;
-    }
+concept list_sink_formatted =
+    formatted<T>
+ && list_sink_format_options_of<io::sink_format_traits<T, Char, CharTraits>, Char, CharTraits>
 ;
 
 }

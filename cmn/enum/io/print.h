@@ -15,10 +15,7 @@
 // Do not include <cmn/enum/bitfield.h> to avoid circular dependency
 //#include <cmn/enum/bitfield.h>
 
-namespace cmn
-{
-
-namespace enum_::io
+namespace cmn::enum_::io
 {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -62,35 +59,5 @@ static_assert(c::strong_bitfield<print_t>);
 static_assert(c::bitfield<print_t>);
 
 #endif
-
-template
-<
-      typename Char
-    , typename CharTraits = std::char_traits<Char>
->
-struct basic_fmt_specs
-{
-    using string_type = std::basic_string<Char, CharTraits>;
-
-    // TODO: + default enum values
-    string_type     open;
-    string_type     separator;
-    string_type     close;
-    print_t         po;
-    long            mask;
-};
-
-}
-
-namespace io
-{
-
-consteval auto get_format_options_info(c::adapted_enum auto)
-{
-    using enum enum_::io::print_t;
-    return std::pair{ true, tail };
-}
-
-}
 
 }

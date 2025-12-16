@@ -19,6 +19,14 @@ enum class int_fmt_t: short;
 template <typename TypeOrTag>
 struct format_traits;
 
+template 
+<
+      typename TypeOrTag
+    , typename Char
+    , typename CharTraits = std::char_traits<Char>
+>
+struct sink_format_traits;
+
 //-----------------------------------------------------------------------------
 
 template <typename Unit>

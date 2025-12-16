@@ -32,10 +32,11 @@ struct valued_key_impl
     static constexpr decltype(WValue_) wvalue_ = WValue_;
 
 #if CMN_STATIC_TEST
-    static_assert(Value_.size() == value_.size());
+    static_assert(Value_.size() == WValue_.size());
 #endif
     static constexpr std::size_t size = Value_.size();
 
+    //-----------------------------------------------------------------------------
     template 
     <
           typename Char
@@ -51,6 +52,29 @@ struct valued_key_impl
             static_assert(!std::same_as<Char, Char>, "Not implemented");
     }
 
+    //-----------------------------------------------------------------------------
+    template
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    >
+    static constexpr auto as_string() noexcept -> std::basic_string<Char, CharTraits>
+    {
+        return to_string(value<Char, CharTraits>());
+    }
+
+    //-----------------------------------------------------------------------------
+    template
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    >
+    static constexpr auto c_str() noexcept -> Char const *
+    {
+        return value<Char, CharTraits>().c_str();
+    }
+
+    //-----------------------------------------------------------------------------
     template 
     <
           typename Char
@@ -73,6 +97,7 @@ struct valued_key_impl
             static_assert(!std::same_as<Char, Char>, "Not implemented");
     }
 
+    //-----------------------------------------------------------------------------
     template
     <
           c::const_string auto OtherValue_
@@ -83,6 +108,7 @@ struct valued_key_impl
         return valued_key_impl<value_ + other.value_, wvalue_ + other.wvalue_>{};
     }
 
+    //-----------------------------------------------------------------------------
     template <typename Char, typename CharTraits>
     friend auto operator << (std::basic_ostream<Char, CharTraits> &ostr, valued_key_impl) -> decltype(ostr)
     {
@@ -169,6 +195,8 @@ CMN_SYM_DECLARE_LETTER_KEY(vm);
 CMN_SYM_DECLARE_LETTER_KEY(vah);
 CMN_SYM_DECLARE_LETTER_KEY(vap);
 CMN_SYM_DECLARE_LETTER_KEY(vach);
+
+CMN_SYM_DECLARE_VALUED_KEY_2(def_fmt_1_arg, {}\0);
 
 //-----------------------------------------------------------------------------
 #undef CMN_SYM_DECLARE_VALUED_KEY

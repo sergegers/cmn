@@ -40,7 +40,7 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_open_
-      , cmn::io::format_traits<tag>::source_options<Char, CharTraits>.open
+      , cmn::io::sink_format_traits<tag, Char, CharTraits>::open
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -69,7 +69,7 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_enum_close_
-      , cmn::io::format_traits<tag>::source_options<Char, CharTraits>.close
+      , cmn::io::sink_format_traits<tag, Char, CharTraits>::close
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -86,30 +86,30 @@ inline constexpr cmn::io::slot_manip_forwarder<wclose_manip> weclose {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Manipulator basic_bitfield_separator_manip for customizing separator between
+// Manipulator basic_bitfield_delimiter_manip for customizing separator between
 // bitfield or combo elements during the output.
 // Default value is " "
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Char, typename CharTraits = std::char_traits<Char> >
-using basic_bitfield_separator_manip =
+using basic_bitfield_delimiter_manip =
     cmn::io::basic_string_slot_manip
     <
-        struct basic_bitfield_separator_
-      , cmn::io::format_traits<tag>::source_options<Char, CharTraits>.delimiter
+        struct basic_bitfield_delimiter_
+      , cmn::io::sink_format_traits<tag, Char, CharTraits>::delimiter
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits = std::char_traits<Char> >
-constexpr cmn::io::slot_manip_forwarder<basic_bitfield_separator_manip<Char, CharTraits>> basic_bitfield_separator {};
+constexpr cmn::io::slot_manip_forwarder<basic_bitfield_delimiter_manip<Char, CharTraits>> basic_bitfield_separator {};
 
-using bitfield_separator_manip = basic_bitfield_separator_manip<char>;
-using wbitfield_separator_manip = basic_bitfield_separator_manip<wchar_t>;
+using bitfield_delimiter_manip = basic_bitfield_delimiter_manip<char>;
+using wbitfield_delimiter_manip = basic_bitfield_delimiter_manip<wchar_t>;
 
-inline constexpr cmn::io::slot_manip_forwarder<bitfield_separator_manip> bfsep {};
-inline constexpr cmn::io::slot_manip_forwarder<wbitfield_separator_manip> wbfsep {};
+inline constexpr cmn::io::slot_manip_forwarder<bitfield_delimiter_manip> bfdelim {};
+inline constexpr cmn::io::slot_manip_forwarder<wbitfield_delimiter_manip> wbfdelim {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -129,7 +129,7 @@ using basic_esaver = cmn::io::manip::iword_saver
 <
       basic_open_manip<Char, CharTraits>
     , basic_close_manip<Char, CharTraits>
-    , basic_bitfield_separator_manip<Char, CharTraits>
+    , basic_bitfield_delimiter_manip<Char, CharTraits>
     , print_manip
 >;
 
@@ -149,8 +149,8 @@ using enum_::io::basic_enum_close;
 using enum_::io::eclose;
 using enum_::io::weclose;
 using enum_::io::basic_bitfield_separator;
-using enum_::io::bfsep;
-using enum_::io::wbfsep;
+using enum_::io::bfdelim;
+using enum_::io::wbfdelim;
 using enum_::io::eprint;
 using enum_::io::basic_esaver;
 using enum_::io::esaver;

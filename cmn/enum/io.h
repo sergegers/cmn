@@ -10,7 +10,7 @@
 #include <cmn/enum/io/printer.h>
 #include <cmn/enum/io/reader.h>
 #include <cmn/enum/io/manip.h>
-#include <cmn/enum/io/format.h>
+#include <cmn/enum/io/formatter.h>
 
 namespace cmn::io
 {

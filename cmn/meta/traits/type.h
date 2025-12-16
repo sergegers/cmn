@@ -171,23 +171,28 @@ using underlying_type_t = underlying_type<T>::type;
 template <c::enumerable T> using mask_type_t = std::make_unsigned_t<interop_type_t<T>>;
 
 ///////////////////////////////////////////////////////////////////////////////
+//
+// shortcuts
+//
+///////////////////////////////////////////////////////////////////////////////
 template <c::enumerable auto Int_> using int_ = std::integral_constant<decltype(Int_), Int_>;
 
-template <typename Int> constexpr auto value_v = Int::value;
+template <typename Int> 
+inline constexpr auto value_v = Int::value;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Usable with 'if constexpr' expression for conditional compilation
 //
 template <bool Val_, typename...>
-constexpr bool dependent_v = Val_;
+inline constexpr bool dependent_v = Val_;
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // string helpers
 //
 ///////////////////////////////////////////////////////////////////////////////
-template <c::string T> using char_t = T::value_type;
-template <c::string T> using char_traits_t = T::traits_type;
+template <c::const_string T> using char_t = T::value_type;
+template <c::const_string T> using char_traits_t = T::traits_type;
 
 }

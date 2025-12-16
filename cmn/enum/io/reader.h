@@ -19,6 +19,7 @@
 #include <cmn/util/feature.h>
 
 #include <cmn/enum/traits.h>
+#include <cmn/enum/io/format_traits.h>
 
 #include "manip.h"
 #include "parser.h"
@@ -115,18 +116,17 @@ template <typename E, typename Char, typename CharTraits>
 
     using open_manip_type = basic_open_manip<Char, CharTraits>;
     using close_manip_type = basic_close_manip<Char, CharTraits>;
-    using separator_manip_type = basic_bitfield_separator_manip<Char, CharTraits>;
-    using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
+    using separator_manip_type = basic_bitfield_delimiter_manip<Char, CharTraits>;
     using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
     static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(kind);
 
-    fmt_specs_type const fmt_specs
+    sink_format_options const fmt_specs
     {
+        .options = print_manip::value(istr),
         .open = open_manip_type::value(istr),
         .separator = separator_manip_type::value(istr),
         .close = close_manip_type::value(istr),
-        .po = print_manip::value(istr)
     };
 
     return try_parse
@@ -209,18 +209,17 @@ struct reader<E, Kind_>
     {
         using open_manip_type = basic_open_manip<Char, CharTraits>;
         using close_manip_type = basic_close_manip<Char, CharTraits>;
-        using separator_manip_type = basic_bitfield_separator_manip<Char, CharTraits>;
-        using fmt_specs_type = basic_fmt_specs<Char, CharTraits>;
+        using delimiter_manip_type = basic_bitfield_delimiter_manip<Char, CharTraits>;
         using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
         static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
 
-        fmt_specs_type const fmt_specs
+        sink_format_options const fmt_opt
         {
+            .options = print_manip::value(istr),
             .open = open_manip_type::value(istr),
-            .separator = separator_manip_type::value(istr),
             .close = close_manip_type::value(istr),
-            .po = print_manip::value(istr)
+            .delimiter = delimiter_manip_type::value(istr),
         };
 
         this->m_val = static_cast<E>
@@ -230,7 +229,7 @@ struct reader<E, Kind_>
                   m_kind
                 , items
                 , name(E{}, istr)
-                , fmt_specs
+                , fmt_opt
                 , istream_iterator_type{ istr }
                 , istream_iterator_type{}
             )

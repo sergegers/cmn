@@ -42,12 +42,6 @@ struct record_info
         m_wname{ int_<En_>{}, enum_member_wname }
     {}
 
-    template <typename Char, typename CharTraits>
-    constexpr auto &name(std::basic_ios<Char, CharTraits> const &) const noexcept
-    {
-        return this->name<Char, CharTraits>();
-    }
-
     constexpr auto as_mask() const noexcept -> mask_type
     {
         return static_cast<mask_type>(m_value);
@@ -75,6 +69,12 @@ struct record_info
         if constexpr (std::is_same_v<Char, char>) return m_name;
         else if constexpr (std::is_same_v<Char, wchar_t>) return m_wname;
         else static_assert(!std::is_same_v<Char, Char>, "Not implemented");
+    }
+
+    template <typename Char, typename CharTraits>
+    constexpr auto &name(std::basic_ios<Char, CharTraits> const &) const noexcept
+    {
+        return this->name<Char, CharTraits>();
     }
 };
 

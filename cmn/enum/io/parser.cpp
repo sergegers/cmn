@@ -123,20 +123,20 @@ auto try_parse_enum
 (
       qi::symbols<Char, std::ptrdiff_t> const &item
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 ) noexcept -> result<It>
 {
     result res { begin, end };
 
-    if (has_feature(fmt_specs.po, print_t::class_prefix))
+    if (has_feature(fmt_opt.options, print_t::class_prefix))
     {
         res.m_parse_result = qi::phrase_parse
         (
           res.m_last
             ,  res.m_end
-            , qi::lit(fmt_specs.open) >> qi::lit(enum_name.class_prefix()) >> item >> qi::lit(fmt_specs.close)
+            , qi::lit(fmt_opt.open) >> qi::lit(enum_name.class_prefix()) >> item >> qi::lit(fmt_opt.close)
             , qi::space
             , res.m_items
         );
@@ -147,7 +147,7 @@ auto try_parse_enum
         (
               res.m_last
                     , res.m_end
-                    , qi::lit(fmt_specs.open) >> item >> qi::lit(fmt_specs.close)
+                    , qi::lit(fmt_opt.open) >> item >> qi::lit(fmt_opt.close)
                     , qi::space
                     , res.m_items
         );
@@ -167,7 +167,7 @@ auto try_parse_bitfield
 (
       qi::symbols<Char, std::ptrdiff_t> const &items_
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 ) noexcept -> result<It>
@@ -178,7 +178,7 @@ auto try_parse_bitfield
     using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
     using iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
-    if (has_feature(fmt_specs.po, print_t::class_prefix))
+    if (has_feature(fmt_opt.options, print_t::class_prefix))
     {
         struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
         {
@@ -190,13 +190,13 @@ auto try_parse_bitfield
                   enum_item_type const &item 
                 , string_type const &open
                 , string_type const &close
-                , string_type const &separator
+                , string_type const &delimiter
                 , string_type const &pfx 
             ): parser::base_type { items }
             {
                 using namespace qi;
 
-                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(separator)];
+                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(delimiter)];
                 items    = lit(open) >> value >> lit(close);
 
                 //BOOST_SPIRIT_DEBUG_NODES
@@ -206,7 +206,7 @@ auto try_parse_bitfield
             }
         }
 
-        const parser{ items_, fmt_specs.open, fmt_specs.close, fmt_specs.separator, enum_name.class_prefix() };
+        const parser{ items_, fmt_opt.open, fmt_opt.close, fmt_opt.delimiter, enum_name.class_prefix() };
         res.m_parse_result = qi::phrase_parse(res.m_last, res.m_end, parser, qi::space, res.m_items);
     }
     else
@@ -221,12 +221,12 @@ auto try_parse_bitfield
                   enum_item_type const &item 
                 , string_type const &open
                 , string_type const &close
-                , string_type const &separator
+                , string_type const &delimiter
             ): parser::base_type { items }
             {
                 using namespace qi;
 
-                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(separator)];
+                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(delimiter)];
                 items       = lit(open) >> value >> lit(close);
 
                 //BOOST_SPIRIT_DEBUG_NODES
@@ -237,7 +237,7 @@ auto try_parse_bitfield
             }
         }
 
-        const parser { items_, fmt_specs.open, fmt_specs.close, fmt_specs.separator };
+        const parser { items_, fmt_opt.open, fmt_opt.close, fmt_opt.delimiter };
         res.m_parse_result = qi::phrase_parse(res.m_last, res.m_end, parser, qi::space, res.m_items);
     }
 
@@ -260,13 +260,13 @@ auto try_parse
       int_<kind_t::enum_>
     , qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
   noexcept -> boost::optional<std::ptrdiff_t>
 {
-    return items_or_empty(try_parse_enum(items, enum_name, fmt_specs, begin, end));
+    return items_or_empty(try_parse_enum(items, enum_name, fmt_opt, begin, end));
 }
 // parse kind_t::bitfield
 template
@@ -280,13 +280,13 @@ auto try_parse
       int_<kind_t::bitfield>
     , qi::symbols<Char, std::ptrdiff_t> const &item
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
     noexcept -> boost::optional<std::ptrdiff_t>
 {
-    return items_or_empty(try_parse_bitfield(item, enum_name, fmt_specs, begin, end));
+    return items_or_empty(try_parse_bitfield(item, enum_name, fmt_opt, begin, end));
 }
 
 // parse kind_t::combo
@@ -301,24 +301,24 @@ auto try_parse
       int_<kind_t::combo>
     , qi::symbols<Char, std::ptrdiff_t> const &item
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
     noexcept -> boost::optional<std::ptrdiff_t>
 {
-    return items_or_empty(try_parse_bitfield(item, enum_name, fmt_specs, begin, end));
+    return items_or_empty(try_parse_bitfield(item, enum_name, fmt_opt, begin, end));
 }
 
-#define CMN_INSTANTIATE_TRY_PARSE(kind, char, iterator) \
+#define CMN_INSTANTIATE_TRY_PARSE(kind_, char_, iterator_) \
     template auto try_parse    \
     (   \
-          int_<BOOST_PP_CAT(kind_t::, kind)>   \
-        , boost::spirit::qi::symbols<char, std::ptrdiff_t> const &  \
-        , basic_qualified_name<char> const &    \
-        , basic_fmt_specs<char> const & \
-        , iterator const &   \
-        , iterator const &  \
+          int_<BOOST_PP_CAT(kind_t::, kind_)>   \
+        , boost::spirit::qi::symbols<char_, std::ptrdiff_t> const &  \
+        , basic_qualified_name<char_> const &    \
+        , sink_format_options<char_> const & \
+        , iterator_ const &   \
+        , iterator_ const &  \
     )   \
         noexcept -> boost::optional<std::ptrdiff_t>;
 
@@ -346,13 +346,13 @@ auto parse
       int_<kind_t::enum_>
     , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
     ->std::ptrdiff_t
 {
-    return items_or_throw<Char, CharTraits>(try_parse_enum(items, enum_name, fmt_specs, begin, end));
+    return items_or_throw<Char, CharTraits>(try_parse_enum(items, enum_name, fmt_opt, begin, end));
 }
 
 // parse kind_t::bitfield
@@ -367,13 +367,13 @@ auto parse
       int_<kind_t::bitfield>
     , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
     ->std::ptrdiff_t
 {
-    return items_or_throw<Char, CharTraits>(try_parse_bitfield(items, enum_name, fmt_specs, begin, end));
+    return items_or_throw<Char, CharTraits>(try_parse_bitfield(items, enum_name, fmt_opt, begin, end));
 }
 
 // parse kind_t::combo
@@ -388,25 +388,25 @@ auto parse
       int_<kind_t::combo>
     , qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , basic_fmt_specs<Char, CharTraits> const &fmt_specs
+    , sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
     ->std::ptrdiff_t
 {
-    return items_or_throw<Char, CharTraits>(try_parse_bitfield(items, enum_name, fmt_specs, begin, end));
+    return items_or_throw<Char, CharTraits>(try_parse_bitfield(items, enum_name, fmt_opt, begin, end));
 }
 
 //-----------------------------------------------------------------------------
-#define CMN_INSTANTIATE_PARSE(kind, char, iterator) \
+#define CMN_INSTANTIATE_PARSE(kind_, char_, iterator_) \
     template auto parse    \
     (   \
-          int_<BOOST_PP_CAT(kind_t::, kind)>   \
-        , boost::spirit::qi::symbols<char, std::ptrdiff_t> const &  \
-        , basic_qualified_name<char> const &    \
-        , basic_fmt_specs<char> const & \
-        , iterator const &   \
-        , iterator const &  \
+          int_<BOOST_PP_CAT(kind_t::, kind_)>   \
+        , boost::spirit::qi::symbols<char_, std::ptrdiff_t> const &  \
+        , basic_qualified_name<char_> const &    \
+        , sink_format_options<char_> const & \
+        , iterator_ const &   \
+        , iterator_ const &  \
     )   \
     -> std::ptrdiff_t;
 
