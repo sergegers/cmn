@@ -2,3 +2,4 @@
 
 #include <cmn/meta/traits/type.h>
 #include <cmn/meta/traits/function.h>
+#include <cmn/meta/traits/format.h>

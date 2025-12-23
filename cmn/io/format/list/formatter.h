@@ -8,6 +8,7 @@
 
 #include <boost/type_traits/promote.hpp>
 
+#include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
 #include <cmn/util/feature.h>
 
@@ -16,18 +17,19 @@
 namespace cmn::io
 {
 
-enum list_options_t
-{
-    lo_empty        = 0x0,
-    lo_brackers     = 0x1,
-    lo_separator    = 0x2
-};
-
-template <typename T>
-struct traits
-{
-    static constexpr boost::promote_t<list_options_t> fmt_options = lo_empty;
-};
+// TODO: remove
+//enum list_options_t
+//{
+//    lo_empty        = 0x0,
+//    lo_brackers     = 0x1,
+//    lo_separator    = 0x2
+//};
+//
+//template <typename T>
+//struct traits
+//{
+//    static constexpr boost::promote_t<list_options_t> fmt_options = lo_empty;
+//};
 
 //-----------------------------------------------------------------------------
 template <typename T>
@@ -36,7 +38,7 @@ struct list
     T m_t;
 
     template <c::explicitly_convertible_to<T> Arg>
-    constexpr list(Arg arg) noexcept: m_t{ static_cast<T>(arg) } {}
+    consteval list(Arg arg) noexcept: m_t{ static_cast<T>(arg) } {}
 };
 
 template <typename T>
@@ -44,7 +46,7 @@ struct list<T const &>
 {
     T const &m_t;
 
-    constexpr list(T const &arg) noexcept: m_t{ arg } {}
+    consteval list(T const &arg) noexcept: m_t{ arg } {}
 };
 
 template <typename T> list(T const &) noexcept -> list<T const &>;
@@ -74,7 +76,13 @@ public:
 
         using char_type = context_char_t<ParseContext>;
         using iterator_type = context_iterator_t<ParseContext>;
-        using traits_type = traits<underlying_formatting_type>;
+        using traits_type = sink_format_traits<underlying_formatting_type, Char>;
+
+#ifdef CMN_STATIC_TEST
+        static_assert(c::list_sink_format_options_of<traits_type, Char, std::char_traits<Char>>);
+#endif
+
+        using options_type = traits_type::options_type;
 
         constexpr auto scroll_to_sep = scroll_to_sep_<char_type>;
         constexpr auto scroll_to_close = scroll_to_close_<char_type>;
@@ -85,8 +93,8 @@ public:
             return cmn::has_feature(sr, sr_esc)? ++it: it;
         };
 
-        constexpr bool has_brackets = cmn::has_feature(traits_type::fmt_options, lo_brackers);
-        constexpr bool has_separator = cmn::has_feature(traits_type::fmt_options, lo_separator);
+        constexpr bool has_brackets = cmn::has_feature(traits_type::options, options_type::brackets);
+        constexpr bool has_separator = cmn::has_feature(traits_type::options, options_type::delimiter);
 
         if constexpr (!has_brackets)
         {
@@ -152,14 +160,5 @@ public:
         return m_underlying_formatter.format(t.m_t, ctx);
     }    
 };
-
-}
-
-namespace std
-{
-
-template <typename T, typename Char>
-    requires formattable<std::remove_cvref_t<T>, Char>
-struct formatter<cmn::io::list<T>, Char>: cmn::io::list_formatter<T, Char> {};
 
 }

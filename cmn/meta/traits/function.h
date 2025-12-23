@@ -11,8 +11,6 @@
 // boost.mp11
 #include <boost/mp11.hpp>
 
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Function Traits
@@ -47,13 +45,13 @@ BOOST_PP_REPEAT(CHT_PP_FUN_ARG_MAX_ARITY, CHT_PP_FUNC_ARG_TYPE, nil)
 #undef CHT_PP_FUNC_ARG_TYPE
 
 template <typename Func, std::size_t N_>
-using arg_type_c_t = typename arg_type_c<Func, N_>::type;
+using arg_type_c_t = arg_type_c<Func, N_>::type;
 
 template <typename Func, typename N> 
 struct arg_type : arg_type_c<Func, N::value> {};
 
 template <typename Func, typename N> requires std::is_function_v<Func>
-using arg_type_t = typename arg_type<Func, N>::type;
+using arg_type_t = arg_type<Func, N>::type;
 
 ///////////////////////////////////////////////////////////////////////////////
 template <typename Func> struct is_noexcept: std::false_type {};
@@ -80,7 +78,7 @@ struct add_noexcept<auto (Args...) noexcept -> Res>
 };
 
 template <typename Func> requires std::is_function_v<Func>
-using add_noexcept_t = typename add_noexcept<Func>::type;
+using add_noexcept_t = add_noexcept<Func>::type;
 
 //-----------------------------------------------------------------------------
 template <typename Func> struct remove_noexcept;
@@ -98,7 +96,7 @@ struct remove_noexcept<auto (Args...) -> Res>
 };
 
 template <typename Func> requires std::is_function_v<Func>
-using remove_noexcept_t = typename remove_noexcept<Func>::type;
+using remove_noexcept_t = remove_noexcept<Func>::type;
 
 //-----------------------------------------------------------------------------
 //
@@ -128,7 +126,7 @@ struct add_const<auto (Args...) const -> Res>
 };
 
 template <typename Func> requires std::is_function_v<Func>
-using add_const_t = typename add_const<Func>::type;
+using add_const_t = add_const<Func>::type;
 
 //-----------------------------------------------------------------------------
 template <typename Func> struct remove_const;
@@ -158,11 +156,11 @@ struct remove_const<auto (Args..., ...) const -> Res>
 };
 
 template <typename Func> requires std::is_function_v<Func>
-using remove_const_t = typename remove_const<Func>::type;
+using remove_const_t = remove_const<Func>::type;
 
 //-----------------------------------------------------------------------------
 //
-// NOTE: const, ellipsys types support
+// NOTE: const, ellipsis types support
 //
 template <typename Func> struct result;
 
@@ -191,6 +189,6 @@ struct result<auto (Args..., ...) const -> Res>
 };
 
 template <typename Func> requires std::is_function_v<Func>
-using result_t = typename result<Func>::type;
+using result_t = result<Func>::type;
 
 }

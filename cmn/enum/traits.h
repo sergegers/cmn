@@ -71,13 +71,13 @@ constexpr auto enum_info_v = []
     return adapt_enum_info(E{});
 }();
 
-template <c::adapted_enum E> inline constexpr kind_t kind_v = enum_info_v<E>.kind();
-template <c::adapted_enum E> inline constexpr interop_type_t<op_t> ops_v = enum_info_v<E>.m_ops;
-template <c::adapted_enum E> inline constexpr E begin_v = enum_info_v<E>.min_value();
-template <c::adapted_enum E> inline constexpr E last_v = enum_info_v<E>.max_value();
-template <c::adapted_enum E> inline constexpr E end_v = static_cast<E>(interop_cast(last_v<E>) + 1);
-template <c::adapted_enum E> inline constexpr auto groups_v = enum_info_v<E>.m_groups;
-template <c::adapted_enum E, std::size_t GroupId_> inline constexpr auto group_v = std::get<GroupId_>(groups_v<E>);
+template <c::adapted_enum E> constexpr kind_t kind_v = enum_info_v<E>.kind();
+template <c::adapted_enum E> constexpr interop_type_t<op_t> ops_v = enum_info_v<E>.m_ops;
+template <c::adapted_enum E> constexpr E begin_v = enum_info_v<E>.min_value();
+template <c::adapted_enum E> constexpr E last_v = enum_info_v<E>.max_value();
+template <c::adapted_enum E> constexpr E end_v = static_cast<E>(interop_cast(last_v<E>) + 1);
+template <c::adapted_enum E> constexpr auto groups_v = enum_info_v<E>.m_groups;
+template <c::adapted_enum E, std::size_t GroupId_> constexpr auto group_v = std::get<GroupId_>(groups_v<E>);
 
 template 
 <
@@ -87,9 +87,9 @@ template
 > 
 inline constexpr auto record_v = group_v<E, GroupId_>.m_records[RecId_];
 
-template <c::adapted_enum E> inline constexpr auto masks_v = enum_info_v<E>.m_masks;
-template <c::adapted_enum E> inline constexpr bool nullable_v = enum_info_v<E>.nullable();
-template <c::adapted_enum E> inline constexpr bool unique_v = enum_info_v<E>.unique();
+template <c::adapted_enum E> constexpr auto masks_v = enum_info_v<E>.m_masks;
+template <c::adapted_enum E> constexpr bool nullable_v = enum_info_v<E>.nullable();
+template <c::adapted_enum E> constexpr bool unique_v = enum_info_v<E>.unique();
 
 }
 

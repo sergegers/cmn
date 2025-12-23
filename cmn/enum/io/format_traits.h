@@ -33,7 +33,12 @@ struct sink_format_options
     using char_type = Char;
     using char_traits_type = CharTraits;
 
-    options_type options = print_t::class_prefix | print_t::tail;
+    options_type options = []
+    {
+        using enum print_t;
+        return brackets | delimiter | class_prefix | tail;
+    }();
+
     string_type open = sym::open_square_bracket.as_string<Char, CharTraits>();
     string_type close = sym::close_square_bracket.as_string<Char, CharTraits>();
     // separator between bitfield or combo elements during the output
@@ -59,15 +64,15 @@ struct format_traits<enum_::io::tag>
     // concept format_options
     //
     using options_type = enum_::io::print_t;
-    static constexpr options_type options = enum_::io::print_t::class_prefix | enum_::io::print_t::tail;
+    static constexpr options_type options = options_type::brackets | options_type::delimiter | options_type::class_prefix | 
+        options_type::tail;
     //
     //-----------------------------------------------------------------------------
     static constexpr auto mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...
 };
 
 template <c::adapted_enum E>
-struct format_traits<E>: format_traits<enum_::io::tag>
-{};
+struct format_traits<E>: format_traits<enum_::io::tag> {};
 
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -84,13 +89,14 @@ struct sink_format_traits<enum_::io::tag, Char, CharTraits>: format_traits<enum_
     //
     using char_type = Char;
     using char_traits_type = CharTraits;
-    //
-    //-----------------------------------------------------------------------------
 
     static constexpr auto open = sym::open_square_bracket.value<Char, CharTraits>();
     static constexpr auto close = sym::close_square_bracket.value<Char, CharTraits>();
     // separator between bitfield or combo elements during the output
     static constexpr auto delimiter = sym::ws.value<Char, CharTraits>();
+    //
+    //-----------------------------------------------------------------------------
+
     static constexpr auto scope_resolution = sym::scope_resolution.value<Char, CharTraits>();
 };
 

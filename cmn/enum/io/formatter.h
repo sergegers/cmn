@@ -7,8 +7,6 @@
 #include <utility>
 #include <ostream>
 
-#include <boost/type_traits/promote.hpp>
-
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/traits.h>
 
@@ -21,17 +19,6 @@
 #include <cmn/enum/io/manip.h>
 #include <cmn/range/io/manip.h>
 #include <cmn/enum/op.h>
-
-namespace cmn::io
-{
-
-template <c::adapted_enum E>
-struct traits<E>
-{
-    static constexpr boost::promote_t<list_options_t> fmt_options = lo_brackers | lo_separator;
-};
-
-}
 
 namespace std
 {
@@ -75,5 +62,11 @@ struct formatter<E, Char>:
         return ostr << m_open << m_separator << m_close;
     }
 };
+
+//-----------------------------------------------------------------------------
+template <typename ERef, typename Char>
+    requires cmn::c::adapted_enum<std::remove_cvref_t<ERef>>
+
+struct formatter<cmn::io::list<ERef>, Char>: cmn::io::list_formatter<ERef, Char> {};
 
 }

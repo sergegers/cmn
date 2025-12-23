@@ -27,9 +27,11 @@ namespace cmn::enum_::io
 enum class print_t
 {
       empty         = 0x0
-    , tail          = 0x1
-    , ns            = 0x2
-    , class_prefix  = 0x4
+    , brackets      = 0x1
+    , delimiter     = 0x2
+    , tail          = 0x4
+    , ns            = 0x8
+    , class_prefix  = 0xA
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -45,7 +47,7 @@ consteval auto adapt_enum_info(print_t)
     return enum_info
     {
         op_comparable | op_bitwise | op_interoperable,
-        group_::make<tail, ns, class_prefix>()
+        group_::make<brackets, delimiter, tail, ns, class_prefix>()
     };
 }
 

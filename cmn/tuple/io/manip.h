@@ -8,6 +8,8 @@
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/util.h>
 
+#include "format_traits.h"
+
 namespace cmn::tuple_::io
 {
 
@@ -25,7 +27,7 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_open_
-      , sym::open_parenthese.value<Char, CharTraits>()
+      , cmn::io::sink_format_traits<tag, Char, CharTraits>::open
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -53,7 +55,7 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
           struct basic_range_close_
-		, sym::close_parenthese.value<Char, CharTraits>()
+		, cmn::io::sink_format_traits<tag, Char, CharTraits>::close
         , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -69,34 +71,34 @@ inline constexpr cmn::io::slot_manip_forwarder<wclose_manip> wtclose {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// tuple separator manipulator
+// tuple delimiter manipulator
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Char, typename CharTraits = std::char_traits<Char>>
-using basic_separator_manip =
+using basic_delimiter_manip =
     cmn::io::basic_string_slot_manip
     <
-          struct basic_separator_
-		, (sym::comma + sym::ws).value<Char, CharTraits>()
+          struct basic_delimiter_
+		, cmn::io::sink_format_traits<tag, Char, CharTraits>::delimiter
         , sym::nothing.value<Char, CharTraits>()
     >
 ;
 
 template <typename Char, typename CharTraits = std::char_traits<Char>>
-constexpr cmn::io::slot_manip_forwarder<basic_separator_manip<Char, CharTraits>> basic_tuple_separator {};
+constexpr cmn::io::slot_manip_forwarder<basic_delimiter_manip<Char, CharTraits>> basic_tuple_delimiter {};
 
-using separator_manip = basic_separator_manip<char>;
-using wseparator_manip = basic_separator_manip<wchar_t>;
+using delimiter_manip = basic_delimiter_manip<char>;
+using wdelimiter_manip = basic_delimiter_manip<wchar_t>;
 
-inline constexpr cmn::io::slot_manip_forwarder<separator_manip> tsep {};
-inline constexpr cmn::io::slot_manip_forwarder<wseparator_manip> wtsep {};
+inline constexpr cmn::io::slot_manip_forwarder<delimiter_manip> tdelim {};
+inline constexpr cmn::io::slot_manip_forwarder<wdelimiter_manip> wtdelim {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Utilities
 //
-using tsaver = cmn::io::manip::iword_saver<open_manip, close_manip, separator_manip>;
-using wtsaver = cmn::io::manip::iword_saver<wopen_manip, wclose_manip, wseparator_manip>;
+using tsaver = cmn::io::manip::iword_saver<open_manip, close_manip, delimiter_manip>;
+using wtsaver = cmn::io::manip::iword_saver<wopen_manip, wclose_manip, wdelimiter_manip>;
 
 }
 
@@ -109,9 +111,9 @@ using tuple_::io::wtopen;
 using tuple_::io::basic_tuple_close;
 using tuple_::io::tclose;
 using tuple_::io::wtclose;
-using tuple_::io::basic_tuple_separator;
-using tuple_::io::tsep;
-using tuple_::io::wtsep;
+using tuple_::io::basic_tuple_delimiter;
+using tuple_::io::tdelim;
+using tuple_::io::wtdelim;
 using tuple_::io::tsaver;
 using tuple_::io::wtsaver;
 

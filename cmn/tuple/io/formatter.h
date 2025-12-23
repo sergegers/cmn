@@ -2,8 +2,6 @@
 
 #include <format>
 
-#include <boost/type_traits/promote.hpp>
-
 #if __has_include(<boost/fusion/concepts.hpp>)
 #   include <boost/fusion/concepts.hpp>
 #else
@@ -12,9 +10,20 @@
 
 #include <cmn/io/format.h>
 
-template <boost::c::fus_sequence S>
-struct cmn::io::traits<S>
+#include "format_traits.h"
+
+namespace std
 {
-    static constexpr boost::promote_t<list_options_t> fmt_options = lo_brackers | lo_separator;
+
+template <boost::c::fus_sequence Seq, typename Char>
+// TODO:
+//requires formattable<std::remove_cvref_t<R>, Char>
+struct formatter<cmn::io::list<Seq>, Char>: cmn::io::list_formatter<Seq, Char>
+{
+private:
+    using inherited = cmn::io::list_formatter<Seq, Char>;
+public:
+    using inherited::parse;
 };
 
+}

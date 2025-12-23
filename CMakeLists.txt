@@ -69,6 +69,7 @@ add_library (
 
  "cmn/meta/traits/function.h"
  "cmn/meta/traits/type.h"
+ "cmn/meta/traits/format.h"
  "cmn/meta/traits.h"
 
  "cmn/meta/macro.h"
@@ -106,24 +107,26 @@ add_library (
  "cmn/io/format/mix/mixins.h"
  "cmn/io/format/mix.h"
  "cmn/io/format/context_traits.h"
+ 
  "cmn/io/format/util.h"
  "cmn/io/debug.h"
  "cmn/io/manip.h"
 
- "cmn/io/format/list/formatter.h"
- "cmn/io/format/list/out.h"
-
- "cmn/io.h"
-
+ "cmn/range/io/format_traits.h"
  "cmn/range/io/formatter.h"
- "cmn/range/io/io.h"
  "cmn/range/io/manip.h"
+ "cmn/range/io/out.h"
+ "cmn/range/io/printer.h"
  "cmn/range/io.h"
  
  "cmn/tuple/tuple.h"
  "cmn/tuple/op.h"
- "cmn/tuple/io/manip.h"
+
+ "cmn/tuple/io/format_traits.h"
  "cmn/tuple/io/formatter.h"
+ "cmn/tuple/io/manip.h"
+ "cmn/tuple/io/out.h"
+ "cmn/tuple/io/printer.h"
  "cmn/tuple/io.h"
  
  "cmn/tuple/serialization.h"
@@ -190,7 +193,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-)
+  )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -211,6 +214,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test_cmn/enum/enum.cpp" 
   "test_cmn/enum/io.cpp"
   "test_cmn/enum/feature.cpp"
+  "test_cmn/enum/util.cpp"
   "test_cmn/strong_typedef.cpp" 
   "test_cmn/tuple/tuple.cpp"
   "test_cmn/tuple/va.cpp"

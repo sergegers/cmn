@@ -17,6 +17,8 @@
 
 #include <cmn/meta/concepts.h>
 #include <cmn/meta/traits.h>
+
+#include <cmn/meta/traits.h>
 #include <cmn/util/feature.h>
 #include <cmn/util/symbols.h>
 
@@ -46,17 +48,17 @@ constexpr auto out_record
 ) -> void
 {
     using enum print_t;
-    using char_type = FmtOpt::char_type;
-    using char_traits_type = FmtOpt::char_traits_type;
+    using char_type = cmn::io::char_type_t<FmtOpt>;
+    using char_traits_type = cmn::io::char_traits_type_t<FmtOpt>;
 
-    print_t options = fmt_opt.options;
+    print_t const options = fmt_opt.options;
     auto const &scope_resulution = fmt_opt.scope_resolution;
-    auto const & delimiter = fmt_opt.delimiter;
+    auto const &delim = fmt_opt.delimiter;
 
     auto const &name = rec.template name<char_type, char_traits_type>();
 
     if (!first)
-        std::ranges::copy(delimiter, out_it);
+        std::ranges::copy(delim, out_it);
     else
         first = false;
 
@@ -85,8 +87,8 @@ constexpr auto out_tail(std::integral auto remain, FmtOpt const &fmt_opt, bool f
 {
     if (has_feature(fmt_opt.options, print_t::tail) && !empty(remain))
     {
-        using char_type = FmtOpt::char_type;
-        using char_traits_type = FmtOpt::char_traits_type;
+        using char_type = cmn::io::char_type_t<FmtOpt>;
+        using char_traits_type = cmn::io::char_traits_type_t<FmtOpt>;
 
         if (!first)
             std::ranges::copy(fmt_opt.delimiter, out_it);
@@ -205,7 +207,7 @@ struct out_fn
         , c::list_sink_format_options auto const &fmt_opt
         , auto out_it
     ) 
-        const noexcept -> void
+        const -> void
     {
         detail::out_enum(en, fmt_opt, out_it);
     }
@@ -217,7 +219,7 @@ struct out_fn
         , c::list_sink_format_options auto const &fmt_opt
         , auto out_it
     )
-        const noexcept -> void
+        const -> void
     {
         detail::out_bitfield(en, fmt_opt, out_it);
     }
@@ -229,7 +231,7 @@ struct out_fn
         , c::list_sink_format_options auto const &fmt_opt
         , auto out_it
     )
-        const noexcept -> void
+        const -> void
     {
         detail::out_bitfield(en, fmt_opt, out_it);
     }

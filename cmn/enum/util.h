@@ -27,6 +27,12 @@
 namespace cmn::enum_
 {
 
+template <c::adapted_enum E>
+struct do_nothing
+{
+    constexpr auto operator()(record_info<E> const &, mask_type_t<E>) const {}
+};
+
 namespace group_
 {
 
@@ -40,13 +46,14 @@ template
 <
       c::adapted_enum E
     , std::size_t Sz_
+    , std::invocable<record_info<E> const &, mask_type_t<E>> Op = do_nothing<E>
     , c::invocable_r<bool, E, E> Cmp = std::equal_to<E>
 >
 constexpr auto find_if
 (
       group_info<E, Sz_> const &group
     , E en
-    , std::invocable<record_info<E> const &, mask_type_t<E>> auto op
+    , Op op = do_nothing<E>{}
     , Cmp cmp = std::equal_to<E>{}
     , mask_type_t<E> additional_mask = no_mask<E>
 ) -> E
@@ -85,13 +92,14 @@ template
 <
       boost::c::fus_sequence Groups
     , c::adapted_enum E
+    , std::invocable<record_info<E> const &, mask_type_t<E>> Op = do_nothing<E>
     , c::invocable_r<bool, E, E> Cmp = std::equal_to<E>
 >
 constexpr auto fold
 (
       Groups const &groups
     , E en
-    , std::invocable<record_info<E> const &, mask_type_t<E>> auto op
+    , Op op = do_nothing<E>{}
     , Cmp cmp = std::equal_to<E>{}
     , mask_type_t<E> addditional_mask = no_mask<E>
 ) noexcept

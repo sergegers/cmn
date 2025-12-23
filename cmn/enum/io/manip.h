@@ -103,7 +103,7 @@ using basic_bitfield_delimiter_manip =
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits = std::char_traits<Char> >
-constexpr cmn::io::slot_manip_forwarder<basic_bitfield_delimiter_manip<Char, CharTraits>> basic_bitfield_separator {};
+constexpr cmn::io::slot_manip_forwarder<basic_bitfield_delimiter_manip<Char, CharTraits>> basic_bitfield_delimiter {};
 
 using bitfield_delimiter_manip = basic_bitfield_delimiter_manip<char>;
 using wbitfield_delimiter_manip = basic_bitfield_delimiter_manip<wchar_t>;
@@ -148,7 +148,7 @@ using enum_::io::weopen;
 using enum_::io::basic_enum_close;
 using enum_::io::eclose;
 using enum_::io::weclose;
-using enum_::io::basic_bitfield_separator;
+using enum_::io::basic_bitfield_delimiter;
 using enum_::io::bfdelim;
 using enum_::io::wbfdelim;
 using enum_::io::eprint;

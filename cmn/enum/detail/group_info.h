@@ -37,7 +37,7 @@ private:
     {
         namespace rng = std::ranges;
 
-        // MSVC bug
+        // TODO: MSVC bug
         constexpr auto check_limit = 340;
 
         if 
@@ -63,7 +63,6 @@ private:
     }
 
 public:
-
     template <c::enum_ auto... Ens_>
     consteval group_info(int_<Ens_>... ens) noexcept(false):
         m_records{ record_type{ ens }... },
@@ -74,8 +73,8 @@ public:
     }
 
     template <typename... Records>
-    consteval group_info(Records &&... records)
-        requires (std::same_as<Records, record_type> && ...)
+    consteval group_info(Records &&...records) noexcept(false)
+        requires(std::same_as<Records, record_type> && ...)
     :
         m_records{ std::forward<Records>(records)... },
         m_mask{ calc_mask() }

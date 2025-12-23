@@ -50,6 +50,8 @@ concept list_sink_format_options =
     { fo.open };
     { fo.close };
     { fo.delimiter };
+    { T::options_type::brackets };
+    { T::options_type::delimiter };
 }
 ;
 

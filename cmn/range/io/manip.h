@@ -8,6 +8,8 @@
 #include <cmn/io/manip/slot/manip.h>
 #include <cmn/io/manip/slot/util.h>
 
+#include "format_traits.h"
+
 namespace cmn::range_::io
 {
 
@@ -25,7 +27,7 @@ using basic_open_manip =
     cmn::io::basic_string_slot_manip
     <
         struct basic_open_
-      , sym::open_angle_bracket.value<Char, CharTraits>()
+      , cmn::io::sink_format_traits<tag, Char, CharTraits>::open
       , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -54,7 +56,7 @@ using basic_close_manip =
     cmn::io::basic_string_slot_manip
     <
           struct basic_range_close_
-		, sym::close_angle_bracket.value<Char, CharTraits>()
+		, cmn::io::sink_format_traits<tag, Char, CharTraits>::close
         , sym::nothing.value<Char, CharTraits>()
     >
 ;
@@ -71,35 +73,82 @@ inline constexpr cmn::io::slot_manip_forwarder<wclose_manip> wrclose {};
 
 ////////////////////////////////////////////////////////////////////////////////
 //
-// range separator manipulator
+// range delimiter manipulator
 //
 ////////////////////////////////////////////////////////////////////////////////
 template <typename Char, typename CharTraits = std::char_traits<Char>>
-using basic_separator_manip =
+using basic_delimiter_manip =
     cmn::io::basic_string_slot_manip
     <
-          struct basic_separator_
-		, (sym::comma + sym::ws).value<Char, CharTraits>()
+          struct basic_delimiter_
+		, cmn::io::sink_format_traits<tag, Char, CharTraits>::delimiter
         , sym::nothing.value<Char, CharTraits>()
     >
 ;
 
 //-----------------------------------------------------------------------------
 template <typename Char, typename CharTraits = std::char_traits<Char>>
-constexpr cmn::io::slot_manip_forwarder<basic_separator_manip<Char, CharTraits>> basic_range_separator {};
+constexpr cmn::io::slot_manip_forwarder<basic_delimiter_manip<Char, CharTraits>> basic_range_delimiter {};
 
-using separator_manip = basic_separator_manip<char>;
-using wseparator_manip = basic_separator_manip<wchar_t>;
+using delimiter_manip = basic_delimiter_manip<char>;
+using wdelimiter_manip = basic_delimiter_manip<wchar_t>;
 
-inline constexpr cmn::io::slot_manip_forwarder<separator_manip> rsep {};
-inline constexpr cmn::io::slot_manip_forwarder<wseparator_manip> wrsep {};
+inline constexpr cmn::io::slot_manip_forwarder<delimiter_manip> rdelim {};
+inline constexpr cmn::io::slot_manip_forwarder<wdelimiter_manip> wrdelim {};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
 // Utilities
 //
-using rsaver = cmn::io::manip::iword_saver<open_manip, close_manip, separator_manip>;
-using wrsaver = cmn::io::manip::iword_saver<wopen_manip, wclose_manip, wseparator_manip>;
+using rsaver = cmn::io::manip::iword_saver<open_manip, close_manip, delimiter_manip>;
+using wrsaver = cmn::io::manip::iword_saver<wopen_manip, wclose_manip, wdelimiter_manip>;
+
+//-----------------------------------------------------------------------------
+//
+// <
+//      item_0
+//      item_1
+//      ...
+//      item_n
+// >
+//
+struct table_out_
+{
+    template <typename Char, typename CharTraits>
+    friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits>& ostr, table_out_)
+    {
+        using namespace sym;
+
+        return ostr <<
+            basic_range_open<Char, CharTraits>((open_angle_bracket + endl).value<Char, CharTraits>() <<
+                basic_range_close<Char, CharTraits>((endl + close_angle_bracket).value<Char, CharTraits>()) <<
+                basic_range_delimiter<Char, CharTraits>(endl.value<Char, CharTraits>()))
+        ;
+    }
+};
+
+inline constexpr table_out_ table_out{};
+
+//-----------------------------------------------------------------------------
+//
+//  <item_0, item_1, ... item_n>
+//
+struct compact_table_out_
+{
+    template <typename Char, typename CharTraits>
+    friend decltype(auto) operator << (std::basic_ostream<Char, CharTraits>& ostr, compact_table_out_)
+    {
+        using namespace sym;
+
+        return ostr <<
+            basic_range_open<Char, CharTraits>(open_angle_bracket.value<Char, CharTraits>()) <<
+            basic_range_close<Char, CharTraits>(close_angle_bracket.value<Char, CharTraits>()) <<
+            basic_range_delimiter<Char, CharTraits>((comma + ws).value<Char, CharTraits>())
+        ;
+    }
+};
+
+inline constexpr compact_table_out_ compact_table_out{};
 
 }
 
@@ -112,9 +161,9 @@ using range_::io::wropen;
 using range_::io::basic_range_close;
 using range_::io::rclose;
 using range_::io::wrclose;
-using range_::io::basic_range_separator;
-using range_::io::rsep;
-using range_::io::wrsep;
+using range_::io::basic_range_delimiter;
+using range_::io::rdelim;
+using range_::io::wrdelim;
 using range_::io::rsaver;
 using range_::io::wrsaver;
 
