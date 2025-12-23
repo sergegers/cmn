@@ -24,16 +24,24 @@ template
 >
 struct sink_format_options
 {
+    using string_type = std::basic_string<Char, CharTraits>;
+    //-----------------------------------------------------------------------------
+    //
+    // concept list_sink_format_options
+    //
+    using options_type = print_t;
     using char_type = Char;
     using char_traits_type = CharTraits;
-    using string_type = std::basic_string<Char, CharTraits>;
 
-    print_t options = print_t::class_prefix | print_t::tail;
-    std::uintptr_t mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...
+    options_type options = print_t::class_prefix | print_t::tail;
     string_type open = sym::open_square_bracket.as_string<Char, CharTraits>();
     string_type close = sym::close_square_bracket.as_string<Char, CharTraits>();
     // separator between bitfield or combo elements during the output
     string_type delimiter = sym::ws.as_string<Char, CharTraits>();
+    //
+    //-----------------------------------------------------------------------------
+
+    std::uintptr_t mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...
     string_type scope_resolution = sym::scope_resolution.as_string<Char, CharTraits>();
 };
 
@@ -46,7 +54,14 @@ namespace io
 template <>
 struct format_traits<enum_::io::tag>
 {
-    static constexpr enum_::io::print_t options = enum_::io::print_t::class_prefix | enum_::io::print_t::tail;
+    //-----------------------------------------------------------------------------
+    //
+    // concept format_options
+    //
+    using options_type = enum_::io::print_t;
+    static constexpr options_type options = enum_::io::print_t::class_prefix | enum_::io::print_t::tail;
+    //
+    //-----------------------------------------------------------------------------
     static constexpr auto mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...
 };
 
@@ -63,8 +78,14 @@ template
 >
 struct sink_format_traits<enum_::io::tag, Char, CharTraits>: format_traits<enum_::io::tag>
 {
+    //-----------------------------------------------------------------------------
+    //
+    // concept list_sink_format_options
+    //
     using char_type = Char;
     using char_traits_type = CharTraits;
+    //
+    //-----------------------------------------------------------------------------
 
     static constexpr auto open = sym::open_square_bracket.value<Char, CharTraits>();
     static constexpr auto close = sym::close_square_bracket.value<Char, CharTraits>();

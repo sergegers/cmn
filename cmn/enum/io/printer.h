@@ -62,10 +62,10 @@ struct printer<E, Kind_>
         sink_format_options const fmt_opt
         {
             .options = print_manip::value(ostr),
-            .mask = static_cast<std::uintptr_t>(bitfield_mask_manip_type::value(ostr)),
             .open = open_manip_type::value(ostr),
             .close = close_manip_type::value(ostr),
-            .delimiter = delimiter_manip_type::value(ostr)
+            .delimiter = delimiter_manip_type::value(ostr),
+            .mask = static_cast<std::uintptr_t>(bitfield_mask_manip_type::value(ostr))
         };
 
         return out(m_kind, m_val, fmt_opt, out_iterator_type{ ostr }), ostr;

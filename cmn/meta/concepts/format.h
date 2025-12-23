@@ -11,6 +11,7 @@ namespace cmn::c
 template <typename T>
 concept format_options = requires(T const &fo)
 {
+    typename T::options_type;
     { fo.options } -> adapted_enum_cvref;
 };
 
