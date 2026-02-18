@@ -2,7 +2,6 @@
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/test_tools.hpp>
 
 #include <cmn/enum/traits.h>
 #include <cmn/enum/io.h>
@@ -56,7 +55,10 @@ BOOST_AUTO_TEST_CASE(fold_)
     using enum cl_cmb_2_t;
 
     constexpr auto in = two | green;
-    BOOST_TEST(0 == fold(groups_v<cl_cmb_2_t>, in));
+
+    cl_cmb_2_items_t items{};
+    BOOST_TEST(0 == fold(groups_v<cl_cmb_2_t>, in, cl_cmb_2_processed{ items }));
+    BOOST_TEST(items == (cl_cmb_2_items_t{ two, green }), tt::per_element());
 }
 
 BOOST_AUTO_TEST_SUITE_END() // io
