@@ -26,12 +26,13 @@ namespace cmn::enum_::io
 
 enum class print_t
 {
-      empty         = 0x0
-    , brackets      = 0x1
-    , delimiter     = 0x2
-    , tail          = 0x4
-    , ns            = 0x8
-    , class_prefix  = 0xA
+      empty         = 0x00
+    , brackets      = 0x01
+    , delimiter     = 0x02
+    , tail          = 0x04
+    , class_prefix  = 0x08
+    , ns_           = 0x10
+    , ns            = ns_ | class_prefix
 };
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,13 +42,13 @@ enum class print_t
 ///////////////////////////////////////////////////////////////////////////////
 consteval auto adapt_enum_info(print_t)
 {
-    // TODO: + empty to magic constants
+    // TODO: + [empty, ns] to magic constants
 
     using enum print_t;
     return enum_info
     {
         op_comparable | op_bitwise | op_interoperable,
-        group_::make<brackets, delimiter, tail, ns, class_prefix>()
+        group_::make<brackets, delimiter, tail, class_prefix, ns_>()
     };
 }
 

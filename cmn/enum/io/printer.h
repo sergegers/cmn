@@ -59,7 +59,7 @@ struct printer<E, Kind_>
         using bitfield_mask_manip_type = bitfield_mask_manip<E>;
         using out_iterator_type = std::ostreambuf_iterator<Char, CharTraits>;
 
-        sink_format_options const fmt_opt
+        basic_sink_format_options const fmt_opt
         {
             .options = print_manip::value(ostr),
             .open = open_manip_type::value(ostr),

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <string>
 #include <iterator>
 
 #include <boost/optional/optional_fwd.hpp>
@@ -36,7 +35,7 @@ auto try_parse
       int_<kind_t::enum_>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -54,7 +53,7 @@ auto try_parse
       int_<kind_t::bitfield>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -72,7 +71,7 @@ auto try_parse
       int_<kind_t::combo>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -92,7 +91,7 @@ auto parse
       int_<kind_t::enum_>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -110,7 +109,7 @@ auto parse
       int_<kind_t::bitfield>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -128,7 +127,7 @@ auto parse
       int_<kind_t::combo>
     , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )

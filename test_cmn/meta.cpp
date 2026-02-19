@@ -172,7 +172,7 @@ static_assert(c::tuple_of<std::tuple<int, long, char>, int, long, char>);
 static_assert(!c::tuple_of<std::tuple<int, long, char> const, int, long, char>);
 
 static_assert(c::list_sink_format_options_of<io::sink_format_traits<enum_::io::tag, char>, char, std::char_traits<char>>);
-static_assert(c::list_sink_format_options_of<enum_::io::sink_format_options<char>, char, std::char_traits<char>>);
+static_assert(c::list_sink_format_options_of<enum_::io::basic_sink_format_options<char>, char, std::char_traits<char>>);
 static_assert(c::list_sink_formatted<enum_::io::tag, char, std::char_traits<char>>);
 
 #endif

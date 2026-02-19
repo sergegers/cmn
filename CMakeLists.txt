@@ -193,7 +193,7 @@ add_library (
 
  "cmn/error/exception.h"
  "cmn/error/exception.cpp"
-  )
+ )
 
  set_target_properties(cmn PROPERTIES DEBUG_POSTFIX "-d")
  set_target_properties(cmn PROPERTIES RELEASE_POSTFIX "-r")
@@ -215,6 +215,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test_cmn/enum/io.cpp"
   "test_cmn/enum/feature.cpp"
   "test_cmn/enum/util.cpp"
+  "test_cmn/enum/printer.cpp"
   "test_cmn/strong_typedef.cpp" 
   "test_cmn/tuple/tuple.cpp"
   "test_cmn/tuple/va.cpp"

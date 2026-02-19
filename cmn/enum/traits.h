@@ -2,6 +2,9 @@
 
 #include <tuple>
 #include <array>
+#include <string>
+#include <cstddef>
+#include <iosfwd>
 
 #include <cmn/fwd.h>
 #include <cmn/meta/concepts.h>
@@ -51,11 +54,22 @@ using detail::record_::make;
 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// name shortcuts
+//
+///////////////////////////////////////////////////////////////////////////////
+template <c::adapted_enum E, typename Char, typename CharTraits = std::char_traits<Char>>
+constexpr basic_qualified_name<Char, CharTraits> basic_name_v = basic_qualified_name<Char, CharTraits>{E{}};
+
+template <c::adapted_enum E> constexpr qualified_name name_v = basic_name_v<E, char, std::char_traits<char>>;
+template <c::adapted_enum E> constexpr wqualified_name wname_v = basic_name_v<E, wchar_t, std::char_traits<wchar_t>>;
+
 //-----------------------------------------------------------------------------
 template <c::enum_ E, typename Char, typename CharTraits>
-constexpr auto name(E, std::basic_ios<Char, CharTraits> const &) noexcept
+constexpr auto basic_name(E, std::basic_ios<Char, CharTraits> const &) noexcept
 {
-    return basic_qualified_name<Char, CharTraits>{ E{} };
+    return basic_name_v<E, Char, CharTraits>;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

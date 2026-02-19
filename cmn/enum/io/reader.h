@@ -121,7 +121,7 @@ template <typename E, typename Char, typename CharTraits>
 
     static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(kind);
 
-    sink_format_options const fmt_specs
+    basic_sink_format_options const fmt_specs
     {
         .options = print_manip::value(istr),
         .open = open_manip_type::value(istr),
@@ -133,7 +133,7 @@ template <typename E, typename Char, typename CharTraits>
     (
           kind
         , items
-        , name(en, istr)
+        , basic_name(en, istr)
         , fmt_specs
         , istream_iterator_type{ istr }
         , istream_iterator_type{}
@@ -214,7 +214,7 @@ struct reader<E, Kind_>
 
         static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
 
-        sink_format_options const fmt_opt
+        basic_sink_format_options const fmt_opt
         {
             .options = print_manip::value(istr),
             .open = open_manip_type::value(istr),
@@ -228,7 +228,7 @@ struct reader<E, Kind_>
             (
                   m_kind
                 , items
-                , name(E{}, istr)
+                , basic_name(E{}, istr)
                 , fmt_opt
                 , istream_iterator_type{ istr }
                 , istream_iterator_type{}

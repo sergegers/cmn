@@ -1,7 +1,8 @@
 #pragma once
 
 #include <limits>
-#include <cstdint>
+#include <cstddef>
+#include <string>
 
 #include <cmn/fwd.h>
 #include <cmn/util/symbols.h>
@@ -22,7 +23,7 @@ template
       typename Char
     , typename CharTraits = std::char_traits<Char>
 >
-struct sink_format_options
+struct basic_sink_format_options
 {
     using string_type = std::basic_string<Char, CharTraits>;
     //-----------------------------------------------------------------------------
@@ -49,6 +50,9 @@ struct sink_format_options
     std::uintptr_t mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...
     string_type scope_resolution = sym::scope_resolution.as_string<Char, CharTraits>();
 };
+
+using sink_format_options = basic_sink_format_options<char>;
+using wsink_format_options = basic_sink_format_options<wchar_t>;
 
 }
 

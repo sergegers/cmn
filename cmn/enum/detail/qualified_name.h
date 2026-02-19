@@ -87,7 +87,7 @@ private:
     //
 
     // ns0::...nsN::class_prefix::enum_member_name
-    consteval auto decompose(std::true_type is_scoped_enum, c::instance_of_bool auto decompose_member_name) -> void
+    consteval auto decompose(std::true_type /*is_scoped_enum*/, c::instance_of_bool auto decompose_member_name) -> void
     {
         constexpr std::basic_string_view qualifier = sym::scope_resolution.value<Char, CharTraits>();
 
@@ -119,7 +119,7 @@ private:
     }
 
     // ns0::...nsN::enum_member_name
-    consteval auto decompose(std::false_type is_scoped_enum, c::instance_of_bool auto decompose_member_name) -> void
+    consteval auto decompose(std::false_type /*is_scoped_enum*/, c::instance_of_bool auto decompose_member_name) -> void
     {
         constexpr std::basic_string_view qualifier = sym::scope_resolution.value<Char, CharTraits>();
 

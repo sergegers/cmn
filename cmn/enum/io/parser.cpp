@@ -123,7 +123,7 @@ auto try_parse_enum
 (
       qi::symbols<Char, std::ptrdiff_t> const &item
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 ) noexcept -> result<It>
@@ -167,7 +167,7 @@ auto try_parse_bitfield
 (
       qi::symbols<Char, std::ptrdiff_t> const &items_
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 ) noexcept -> result<It>
@@ -258,9 +258,9 @@ template
 auto try_parse
 (
       int_<kind_t::enum_>
-    , qi::symbols<Char, std::ptrdiff_t> const& items
+    , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -278,15 +278,15 @@ template
 auto try_parse
 (
       int_<kind_t::bitfield>
-    , qi::symbols<Char, std::ptrdiff_t> const &item
+    , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
     noexcept -> boost::optional<std::ptrdiff_t>
 {
-    return items_or_empty(try_parse_bitfield(item, enum_name, fmt_opt, begin, end));
+    return items_or_empty(try_parse_bitfield(items, enum_name, fmt_opt, begin, end));
 }
 
 // parse kind_t::combo
@@ -299,15 +299,15 @@ template
 auto try_parse
 (
       int_<kind_t::combo>
-    , qi::symbols<Char, std::ptrdiff_t> const &item
+    , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
     noexcept -> boost::optional<std::ptrdiff_t>
 {
-    return items_or_empty(try_parse_bitfield(item, enum_name, fmt_opt, begin, end));
+    return items_or_empty(try_parse_bitfield(items, enum_name, fmt_opt, begin, end));
 }
 
 #define CMN_INSTANTIATE_TRY_PARSE(kind_, char_, iterator_) \
@@ -316,7 +316,7 @@ auto try_parse
           int_<BOOST_PP_CAT(kind_t::, kind_)>   \
         , boost::spirit::qi::symbols<char_, std::ptrdiff_t> const &  \
         , basic_qualified_name<char_> const &    \
-        , sink_format_options<char_> const & \
+        , basic_sink_format_options<char_> const & \
         , iterator_ const &   \
         , iterator_ const &  \
     )   \
@@ -346,7 +346,7 @@ auto parse
       int_<kind_t::enum_>
     , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -367,7 +367,7 @@ auto parse
       int_<kind_t::bitfield>
     , qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -388,7 +388,7 @@ auto parse
       int_<kind_t::combo>
     , qi::symbols<Char, std::ptrdiff_t> const& items
     , basic_qualified_name<Char, CharTraits> const &enum_name
-    , sink_format_options<Char, CharTraits> const &fmt_opt
+    , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin
     , It const &end
 )
@@ -404,7 +404,7 @@ auto parse
           int_<BOOST_PP_CAT(kind_t::, kind_)>   \
         , boost::spirit::qi::symbols<char_, std::ptrdiff_t> const &  \
         , basic_qualified_name<char_> const &    \
-        , sink_format_options<char_> const & \
+        , basic_sink_format_options<char_> const & \
         , iterator_ const &   \
         , iterator_ const &  \
     )   \

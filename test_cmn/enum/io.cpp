@@ -270,10 +270,9 @@ BOOST_AUTO_TEST_CASE(class_prefix_)
         sstr << in;
         BOOST_TEST(sstr.str() == "[cl_cmb_2_t::two cl_cmb_2_t::green]"/*, tt::per_element()*/);
 
-    // TODO: enable
-        //cl_cmb_2_t out;
-        //sstr >> std::noskipws >> out;
-        //BOOST_TEST(out == in);
+        cl_cmb_2_t out;
+        sstr >> std::noskipws >> out;
+        BOOST_TEST(out == in);
     }
 
     // TODO: enable
