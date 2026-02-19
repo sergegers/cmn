@@ -52,6 +52,16 @@ struct valued_key_impl
             static_assert(!std::same_as<Char, Char>, "Not implemented");
     }
 
+    template 
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    >
+    static constexpr auto value(std::basic_ios<Char, CharTraits> const &) noexcept
+    {
+        return value<Char, CharTraits>();
+    }
+
     //-----------------------------------------------------------------------------
     template
     <
@@ -63,6 +73,16 @@ struct valued_key_impl
         return to_string(value<Char, CharTraits>());
     }
 
+    template
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    >
+    static constexpr auto as_string(std::basic_ios<Char, CharTraits> const &) noexcept -> std::basic_string<Char, CharTraits>
+    {
+        return as_string<Char, CharTraits>();
+    }
+
     //-----------------------------------------------------------------------------
     template
     <
@@ -72,6 +92,16 @@ struct valued_key_impl
     static constexpr auto c_str() noexcept -> Char const *
     {
         return value<Char, CharTraits>().c_str();
+    }
+
+    template
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    >
+    static constexpr auto c_str(std::basic_ios<Char, CharTraits> const &) noexcept -> Char const *
+    {
+        return c_str<Char, CharTraits>();
     }
 
     //-----------------------------------------------------------------------------
@@ -95,6 +125,22 @@ struct valued_key_impl
             return wvalue_[0];
         else
             static_assert(!std::same_as<Char, Char>, "Not implemented");
+    }
+
+    template 
+    <
+          typename Char
+        , typename CharTraits = std::char_traits<Char>
+    > 
+        requires 
+        (
+            size == 1
+            ||
+            size == 2 && Value_[1] == WValue_[1] == 0
+        )
+    static constexpr auto as_char(std::basic_ios<Char, CharTraits> const &) noexcept -> Char
+    {
+        return as_char<Char, CharTraits>();
     }
 
     //-----------------------------------------------------------------------------

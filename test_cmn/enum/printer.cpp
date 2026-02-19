@@ -19,8 +19,6 @@ BOOST_AUTO_TEST_CASE(out_record_)
     using enum cl_cmb_2_t;
     using enum print_t;
 
-    constexpr auto kkind = int_<kind_v<cl_cmb_2_t>>{};
-
     sink_format_options fmt_opt
     {
         .options = empty
@@ -45,7 +43,7 @@ BOOST_AUTO_TEST_CASE(out_record_)
     BOOST_TEST(buffer == "cmn::enum_::cl_cmb_2_t::two");
 }
 
-BOOST_AUTO_TEST_SUITE_END() // printer
+BOOST_AUTO_TEST_SUITE_END() // printer_
 BOOST_AUTO_TEST_SUITE_END() // io
 BOOST_AUTO_TEST_SUITE_END() // enum_
 BOOST_AUTO_TEST_SUITE_END() // cmn

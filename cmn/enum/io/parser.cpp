@@ -176,7 +176,7 @@ auto try_parse_bitfield
 
     using string_type = std::basic_string<Char, CharTraits>;
     using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
-    using iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
+    using iterator_type = It;
 
     if (has_feature(fmt_opt.options, print_t::class_prefix))
     {
@@ -206,7 +206,14 @@ auto try_parse_bitfield
             }
         }
 
-        const parser{ items_, fmt_opt.open, fmt_opt.close, fmt_opt.delimiter, enum_name.class_prefix() };
+        const parser
+        { 
+            items_, 
+            fmt_opt.open, 
+            fmt_opt.close, 
+            fmt_opt.delimiter, 
+            enum_name.class_prefix() 
+        };
         res.m_parse_result = qi::phrase_parse(res.m_last, res.m_end, parser, qi::space, res.m_items);
     }
     else
@@ -325,10 +332,12 @@ auto try_parse
 CMN_INSTANTIATE_TRY_PARSE(enum_, char, boost::spirit::istream_iterator)
 CMN_INSTANTIATE_TRY_PARSE(bitfield, char, boost::spirit::istream_iterator)
 CMN_INSTANTIATE_TRY_PARSE(combo, char, boost::spirit::istream_iterator)
+CMN_INSTANTIATE_TRY_PARSE(combo, char, std::string::iterator)
 
 CMN_INSTANTIATE_TRY_PARSE(enum_, wchar_t, boost::spirit::wistream_iterator)
 CMN_INSTANTIATE_TRY_PARSE(bitfield, wchar_t, boost::spirit::wistream_iterator)
 CMN_INSTANTIATE_TRY_PARSE(combo, wchar_t, boost::spirit::wistream_iterator)
+CMN_INSTANTIATE_TRY_PARSE(combo, char, std::wstring::iterator)
 
 #undef CMN_INSTANTIATE_TRY_PARSE
 
@@ -350,7 +359,7 @@ auto parse
     , It const &begin
     , It const &end
 )
-    ->std::ptrdiff_t
+    -> std::ptrdiff_t
 {
     return items_or_throw<Char, CharTraits>(try_parse_enum(items, enum_name, fmt_opt, begin, end));
 }
@@ -413,10 +422,12 @@ auto parse
 CMN_INSTANTIATE_PARSE(enum_, char, boost::spirit::istream_iterator)
 CMN_INSTANTIATE_PARSE(bitfield, char, boost::spirit::istream_iterator)
 CMN_INSTANTIATE_PARSE(combo, char, boost::spirit::istream_iterator)
+CMN_INSTANTIATE_PARSE(combo, char, std::string::iterator)
 
 CMN_INSTANTIATE_PARSE(enum_, wchar_t, boost::spirit::wistream_iterator)
 CMN_INSTANTIATE_PARSE(bitfield, wchar_t, boost::spirit::wistream_iterator)
 CMN_INSTANTIATE_PARSE(combo, wchar_t, boost::spirit::wistream_iterator)
+CMN_INSTANTIATE_PARSE(combo, wchar_t, std::wstring::iterator)
 
 #undef CMN_INSTANTIATE_PARSE
 

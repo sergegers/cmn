@@ -89,7 +89,7 @@ template
 auto parse
 (
       int_<kind_t::enum_>
-    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const& items
+    , boost::spirit::qi::symbols<Char, std::ptrdiff_t> const &items
     , basic_qualified_name<Char, CharTraits> const &enum_name
     , basic_sink_format_options<Char, CharTraits> const &fmt_opt
     , It const &begin

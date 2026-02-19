@@ -215,6 +215,7 @@ target_link_options(cmn PUBLIC /NATVIS:${cmn_NatvisPath})
   "test_cmn/enum/io.cpp"
   "test_cmn/enum/feature.cpp"
   "test_cmn/enum/util.cpp"
+  "test_cmn/enum/reader.cpp"
   "test_cmn/enum/printer.cpp"
   "test_cmn/strong_typedef.cpp" 
   "test_cmn/tuple/tuple.cpp"

@@ -60,7 +60,7 @@ public:
     using decoder_type = Decoder;
     using storage_type = Storage;
     using decode_type = DecodeType;
-    using keep_type = typename storage_type::keep_type;
+    using keep_type = storage_type::keep_type;
 private:
     static constexpr decoder_type       decoder = {};
 

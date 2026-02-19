@@ -17,6 +17,7 @@
 #include <cmn/meta/concepts.h>
 
 #include <cmn/util/feature.h>
+#include <cmn/util/symbols.h>
 
 #include <cmn/enum/traits.h>
 #include <cmn/enum/io/format_traits.h>
@@ -31,11 +32,13 @@ namespace cmn::enum_::io
 namespace detail
 {
 
+namespace qi = boost::spirit::qi;
+
 template <c::adapted_enum E, typename Char, typename CharTraits>
-constexpr auto prepare_enum_items(int_<kind_t::enum_>) -> boost::spirit::qi::symbols<Char, std::ptrdiff_t>
+[[nodiscard]] constexpr auto prepare_enum_items(int_<kind_t::enum_>) noexcept -> qi::symbols<Char, std::ptrdiff_t>
 {
     using string_type = std::basic_string<Char, CharTraits>;
-    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+    using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
 
     static_assert(std::tuple_size_v<decltype(groups_v<E>)> == 1);
 
@@ -53,10 +56,10 @@ constexpr auto prepare_enum_items(int_<kind_t::enum_>) -> boost::spirit::qi::sym
 }
 
 template <c::adapted_enum E, typename Char, typename CharTraits>
-constexpr auto prepare_enum_items(int_<kind_t::bitfield>) -> boost::spirit::qi::symbols<Char, std::ptrdiff_t>
+[[nodiscard]] constexpr auto prepare_enum_items(int_<kind_t::bitfield>) -> qi::symbols<Char, std::ptrdiff_t>
 {
     using string_type = std::basic_string<Char, CharTraits>;
-    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+    using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
 
     return boost::fusion::fold
     (
@@ -76,10 +79,10 @@ constexpr auto prepare_enum_items(int_<kind_t::bitfield>) -> boost::spirit::qi::
 }
 
 template <c::adapted_enum E, typename Char, typename CharTraits>
-constexpr auto prepare_enum_items(int_<kind_t::combo>) -> boost::spirit::qi::symbols<Char, std::ptrdiff_t>
+[[nodiscard]] constexpr auto prepare_enum_items(int_<kind_t::combo>) -> qi::symbols<Char, std::ptrdiff_t>
 {
     using string_type = std::basic_string<Char, CharTraits>;
-    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+    using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
 
     return boost::fusion::fold
     (
@@ -99,8 +102,28 @@ constexpr auto prepare_enum_items(int_<kind_t::combo>) -> boost::spirit::qi::sym
 }
 
 //-----------------------------------------------------------------------------
+template <typename Char, typename CharTraits>
+[[nodiscard]] auto get_sink_format_options(std::basic_ios<Char, CharTraits> &ios) ->  basic_sink_format_options<Char, CharTraits>
+{
+    using enum print_t;
+
+    using open_manip_type = basic_open_manip<Char, CharTraits>;
+    using close_manip_type = basic_close_manip<Char, CharTraits>;
+    using delimiter_manip_type = basic_bitfield_delimiter_manip<Char, CharTraits>;
+
+    auto const opt = print_manip::value(ios);
+    return basic_sink_format_options 
+    {
+        .options = opt,
+        .open = has_feature(opt, brackets)? open_manip_type::value(ios): sym::nothing.as_string(ios),
+        .close = has_feature(opt, brackets) ? close_manip_type::value(ios): sym::nothing.as_string(ios),
+        .delimiter = has_feature(opt, delimiter) ? delimiter_manip_type::value(ios) : sym::nothing.as_string(ios)
+    };
+}
+
+//-----------------------------------------------------------------------------
 template <typename E, typename Char, typename CharTraits>
-[[nodiscard]] auto try_read_
+[[nodiscard]] auto try_read
 (
     std::basic_istream<Char, CharTraits> &istr, 
     E en,
@@ -108,40 +131,27 @@ template <typename E, typename Char, typename CharTraits>
 ) noexcept
     -> boost::optional<E>
 {
-    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+    using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
     static_assert(std::tuple_size_v<decltype(groups_v<E>)> == 1);
 
     if (istr.rdstate() != std::ios_base::goodbit) return {};
 
-    using open_manip_type = basic_open_manip<Char, CharTraits>;
-    using close_manip_type = basic_close_manip<Char, CharTraits>;
-    using separator_manip_type = basic_bitfield_delimiter_manip<Char, CharTraits>;
-    using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
-
     static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(kind);
-
-    basic_sink_format_options const fmt_specs
-    {
-        .options = print_manip::value(istr),
-        .open = open_manip_type::value(istr),
-        .separator = separator_manip_type::value(istr),
-        .close = close_manip_type::value(istr),
-    };
 
     return try_parse
     (
           kind
         , items
         , basic_name(en, istr)
-        , fmt_specs
+        , get_sink_format_options(istr)
         , istream_iterator_type{ istr }
         , istream_iterator_type{}
     ).map([](std::ptrdiff_t res) { return static_cast<E>(res); });
 }
 
 template <typename E, typename Char, typename CharTraits>
-[[nodiscard]] auto try_read_
+[[nodiscard]] auto try_read
 (
     std::basic_istream<Char, CharTraits> &istr, 
     E,
@@ -149,7 +159,7 @@ template <typename E, typename Char, typename CharTraits>
 ) noexcept
     -> boost::optional<E>
 {
-    using enum_item_type = boost::spirit::qi::symbols<Char, std::ptrdiff_t>;
+    using enum_item_type = qi::symbols<Char, std::ptrdiff_t>;
 
     if (istr.rdstate() != std::ios_base::goodbit) return {};
 
@@ -167,7 +177,7 @@ template <typename E, typename Char, typename CharTraits>
 }
 
 template <typename E, typename Char, typename CharTraits>
-[[nodiscard]] auto try_read_
+[[nodiscard]] auto try_read
 (
     std::basic_istream<Char, CharTraits> &istr, 
     E,
@@ -207,20 +217,9 @@ struct reader<E, Kind_>
     template <typename Char, typename CharTraits>
     auto read(std::basic_istream<Char, CharTraits> &istr) -> decltype(istr)
     {
-        using open_manip_type = basic_open_manip<Char, CharTraits>;
-        using close_manip_type = basic_close_manip<Char, CharTraits>;
-        using delimiter_manip_type = basic_bitfield_delimiter_manip<Char, CharTraits>;
         using istream_iterator_type = boost::spirit::basic_istream_iterator<Char, CharTraits>;
 
         static auto const items = detail::prepare_enum_items<E, Char, CharTraits>(m_kind);
-
-        basic_sink_format_options const fmt_opt
-        {
-            .options = print_manip::value(istr),
-            .open = open_manip_type::value(istr),
-            .close = close_manip_type::value(istr),
-            .delimiter = delimiter_manip_type::value(istr),
-        };
 
         this->m_val = static_cast<E>
         (
@@ -229,7 +228,7 @@ struct reader<E, Kind_>
                   m_kind
                 , items
                 , basic_name(E{}, istr)
-                , fmt_opt
+                , detail::get_sink_format_options(istr)
                 , istream_iterator_type{ istr }
                 , istream_iterator_type{}
             )
@@ -243,7 +242,7 @@ struct reader<E, Kind_>
 template <c::adapted_enum E, typename Char, typename CharTraits>
 [[nodiscard]] auto try_read(std::basic_istream<Char, CharTraits> &istr) noexcept -> boost::optional<E>
 {
-    return detail::try_read_(istr, E{}, int_<kind_v<E>>{});
+    return detail::try_read(istr, E{}, int_<kind_v<E>>{});
 }
 
 }

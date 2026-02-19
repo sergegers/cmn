@@ -68,8 +68,8 @@ struct format_traits<enum_::io::tag>
     // concept format_options
     //
     using options_type = enum_::io::print_t;
-    static constexpr options_type options = options_type::brackets | options_type::delimiter | options_type::class_prefix | 
-        options_type::tail;
+    static constexpr options_type options = options_type::brackets | options_type::delimiter |
+        options_type::class_prefix | options_type::tail;
     //
     //-----------------------------------------------------------------------------
     static constexpr auto mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...

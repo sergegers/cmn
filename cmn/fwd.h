@@ -12,13 +12,34 @@ namespace io
 
 enum class int_fmt_t: short;
 
+///////////////////////////////////////////////////////////////////////////////
+//
+// IO traits
+//
+///////////////////////////////////////////////////////////////////////////////
+
 //-----------------------------------------------------------------------------
 //
-// traits
+// format_traits - must satisfy format_options concept
 //
+// How to override resulting format options:
+//
+// 1. For type family make format_options<type_family_tag> specialization.
+// Available family type tags: enum_::tag, range_::tag, tuple_::tag, strong_typedef_tag
+//
+// 2. Specialize format_options<type> for formatted type
+//
+// 3. Override format_options_manip<type> manipulator value
+//
+//-----------------------------------------------------------------------------
 template <typename TypeOrTag>
 struct format_traits;
 
+//-----------------------------------------------------------------------------
+//
+// sink_format_traits - must satisfy list_sink_format_options concept
+//
+//-----------------------------------------------------------------------------
 template 
 <
       typename TypeOrTag
