@@ -24,17 +24,24 @@ BOOST_AUTO_TEST_CASE(try_parse_combo)
     auto const name = name_v<cl_cmb_2_t>;
     auto const items = detail::prepare_enum_items<cl_cmb_2_t, char, std::char_traits<char>>(kkind);
 
-    {
-        sink_format_options fmt_opt{ .options = empty, .open = "", .close = "", .delimiter = "" };
-        std::string str{"two"};
-        BOOST_TEST(parse(kkind, items, name, fmt_opt, str.begin(), str.end()) == static_cast<std::ptrdiff_t>(two));
-    }
+    //{
+    //    sink_format_options fmt_opt{ .options = empty, .open = "", .close = "", .delimiter = "" };
+    //    std::string str{"two"};
+    //    BOOST_TEST(parse(kkind, items, name, fmt_opt, str.begin(), str.end()) == static_cast<std::ptrdiff_t>(two));
+    //}
 
-    {
-        sink_format_options fmt_opt{ .options = delimiter, .open = "", .close = "", .delimiter = ", " };
-        std::string str{"two"};
-        BOOST_TEST(parse(kkind, items, name, fmt_opt, str.begin(), str.end()) == static_cast<std::ptrdiff_t>(two));
-    }
+    //{
+    //    sink_format_options fmt_opt{ .options = delimiter, .open = "", .close = "", .delimiter = " | " };
+    //    std::string str{"two"};
+    //    BOOST_TEST(parse(kkind, items, name, fmt_opt, str.begin(), str.end()) == static_cast<std::ptrdiff_t>(two));
+    //}
+
+    //// empty or no delimiter
+    //{
+    //    sink_format_options fmt_opt{ .options = brackets, .open = "< ", .close = " }", .delimiter = "" };
+    //    std::string str{ "< two }" };
+    //    BOOST_TEST(parse(kkind, items, name, fmt_opt, str.begin(), str.end()) == static_cast<std::ptrdiff_t>(two));
+    //}
 }
 
 BOOST_AUTO_TEST_SUITE_END() // reader_

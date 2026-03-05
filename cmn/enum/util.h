@@ -254,7 +254,7 @@ constexpr auto contains(Enum en, Enums ...ens) noexcept -> bool
 
 ///////////////////////////////////////////////////////////////////////////////
 template <c::enum_ E>
-consteval auto default_ops(E, kind_t kind) -> interop_type_t<kind_t>
+consteval auto default_ops(E, kind_t kind) noexcept -> interop_type_t<kind_t>
 {
     using enum kind_t;
     if constexpr (c::scoped_enum<E>)

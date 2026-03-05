@@ -10,9 +10,9 @@
 #include <cmn/meta/traits.h>
 
 #include <cmn/enum/traits.h>
-#include <cmn/enum/io/format_traits.h>
 
 #include "print.h"
+#include "sink_format_options.h"
 
 namespace cmn::enum_::io
 {

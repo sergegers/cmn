@@ -46,4 +46,6 @@ SpacesInBraces: true
 SpacesInConditionalStatement: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
+ReferenceAlignment: Right
+NamespaceIndentation: 0
 ...

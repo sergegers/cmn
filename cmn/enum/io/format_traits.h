@@ -17,43 +17,6 @@ namespace enum_::io
 
 struct tag;
 
-
-template
-<
-      typename Char
-    , typename CharTraits = std::char_traits<Char>
->
-struct basic_sink_format_options
-{
-    using string_type = std::basic_string<Char, CharTraits>;
-    //-----------------------------------------------------------------------------
-    //
-    // concept list_sink_format_options
-    //
-    using options_type = print_t;
-    using char_type = Char;
-    using char_traits_type = CharTraits;
-
-    options_type options = []
-    {
-        using enum print_t;
-        return brackets | delimiter | class_prefix | tail;
-    }();
-
-    string_type open = sym::open_square_bracket.as_string<Char, CharTraits>();
-    string_type close = sym::close_square_bracket.as_string<Char, CharTraits>();
-    // separator between bitfield or combo elements during the output
-    string_type delimiter = sym::ws.as_string<Char, CharTraits>();
-    //
-    //-----------------------------------------------------------------------------
-
-    std::uintptr_t mask = std::numeric_limits<std::uintptr_t>::max(); // fill with 0b11111...
-    string_type scope_resolution = sym::scope_resolution.as_string<Char, CharTraits>();
-};
-
-using sink_format_options = basic_sink_format_options<char>;
-using wsink_format_options = basic_sink_format_options<wchar_t>;
-
 }
 
 ///////////////////////////////////////////////////////////////////////////////

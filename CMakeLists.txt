@@ -155,6 +155,8 @@ add_library (
  "cmn/enum/feature.h" 
  "cmn/enum/util.h"
  "cmn/enum/io/format_traits.h"
+ "cmn/enum/io/sink_format_options.h"
+ "cmn/enum/io/format_symbols.h"
  "cmn/enum/io/formatter.h"
  "cmn/enum/io/out.h"
  "cmn/enum/io/printer.h" 

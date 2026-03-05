@@ -40,25 +40,27 @@ namespace qi = boost::spirit::qi;
 template </*std::input_iterator*/typename It>
 struct result
 {
-    bool            m_parse_result;
+    bool            m_processed;
     It const        &m_begin;
     It              m_last;
     It const        &m_end;
     std::ptrdiff_t  m_items;
 
     result(It const &begin, It const &end):
-          m_parse_result{ false }
+          m_processed{ false }
         , m_begin{ begin }
         , m_last{ begin }
         , m_end{ end }
         , m_items{ 0 }
     {}
+
+    constexpr operator bool() const noexcept { return m_processed; }
 };
 
 template </*std::input_iterator*/typename It>
 constexpr auto items_or_empty(result<It> const &res) noexcept -> boost::optional<std::ptrdiff_t>
 {
-    return res.m_parse_result && res.m_last == res.m_end? 
+    return res.m_processed && res.m_last == res.m_end? 
         boost::optional<std::ptrdiff_t>{ res.m_items }:
         boost::none
     ;
@@ -81,13 +83,27 @@ auto items_or_throw(result<It> const &res)
         [](std::wstring const &wstr) { return boost::lexical_cast<std::string>(wstr); }
     };
 
-    if (!res.m_parse_result)
+    if (!res)
     {
         // begin, end aren't contiguous iterators, so they couldn't be used directly
         string_type text;
         std::copy(res.m_begin, res.m_end, std::back_inserter(text));
 
-        BOOST_THROW_EXCEPTION((io_error{ "Parsing failed for \xB2{0}\xB1", to_string(text) }));
+        string_type unparsed;
+        std::copy(res.m_last, res.m_end, std::back_inserter(unparsed));
+
+        BOOST_THROW_EXCEPTION
+        (
+            (
+                io_error
+                { 
+                    "Parsing failed for \xB2{0}\xB1\nPartial parse result: {1}\nStopped at: \xB2{2}\xB1", 
+                    to_string(text), 
+                    res.m_items,
+                    to_string(unparsed)
+                }
+            )
+        );
     }
 
     if (res.m_last != res.m_end)
@@ -132,7 +148,7 @@ auto try_parse_enum
 
     if (has_feature(fmt_opt.options, print_t::class_prefix))
     {
-        res.m_parse_result = qi::phrase_parse
+        res.m_processed = qi::phrase_parse
         (
           res.m_last
             ,  res.m_end
@@ -143,7 +159,7 @@ auto try_parse_enum
     }
     else
     {
-        res.m_parse_result = qi::phrase_parse
+        res.m_processed = qi::phrase_parse
         (
               res.m_last
                     , res.m_end
@@ -180,24 +196,24 @@ auto try_parse_bitfield
 
     if (has_feature(fmt_opt.options, print_t::class_prefix))
     {
-        struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
+        struct parser : qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
         {
             qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
             qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     items;
 
             parser
             (
-                  enum_item_type const &item 
+                enum_item_type const &item
                 , string_type const &open
                 , string_type const &close
                 , string_type const &delimiter
-                , string_type const &pfx 
-            ): parser::base_type { items }
+                , string_type const &pfx
+            ) : parser::base_type{ items }
             {
                 using namespace qi;
 
-                value   = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(delimiter)];
-                items    = lit(open) >> value >> lit(close);
+                value = lexeme[(lit(pfx) >> item[_val |= _1/*, std::cout << _val*/]) % lit(delimiter)];
+                items = lit(open) >> value >> lit(close);
 
                 //BOOST_SPIRIT_DEBUG_NODES
                 //(
@@ -207,45 +223,45 @@ auto try_parse_bitfield
         }
 
         const parser
-        { 
-            items_, 
-            fmt_opt.open, 
-            fmt_opt.close, 
-            fmt_opt.delimiter, 
-            enum_name.class_prefix() 
+        {
+            items_,
+            fmt_opt.open,
+            fmt_opt.close,
+            fmt_opt.delimiter,
+            enum_name.class_prefix()
         };
-        res.m_parse_result = qi::phrase_parse(res.m_last, res.m_end, parser, qi::space, res.m_items);
+        res.m_processed = qi::phrase_parse(res.m_last, res.m_end, parser, qi::space, res.m_items);
     }
     else
     {
-        struct parser: qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
-        {
-            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
-            qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     items;
-
-            parser
-            (
-                  enum_item_type const &item 
-                , string_type const &open
-                , string_type const &close
-                , string_type const &delimiter
-            ): parser::base_type { items }
+            struct parser : qi::grammar<iterator_type, std::ptrdiff_t(), qi::space_type>
             {
-                using namespace qi;
+                qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     value;
+                qi::rule<iterator_type, std::ptrdiff_t(), qi::space_type>     items;
 
-                value       = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(delimiter)];
-                items       = lit(open) >> value >> lit(close);
+                parser
+                (
+                    enum_item_type const &item
+                    , string_type const &open
+                    , string_type const &close
+                    , string_type const &delimiter
+                ) : parser::base_type{ items }
+                {
+                    using namespace qi;
 
-                //BOOST_SPIRIT_DEBUG_NODES
-                //(
-                //    (value)
-                //    (items)
-                //)
+                    value = lexeme[item[_val |= _1/*, std::cout << _val << "\n"*/] % lit(delimiter)];
+                    items = lit(open) >> value >> lit(close);
+
+                    //BOOST_SPIRIT_DEBUG_NODES
+                    //(
+                    //    (value)
+                    //    (items)
+                    //)
+                }
             }
-        }
 
-        const parser { items_, fmt_opt.open, fmt_opt.close, fmt_opt.delimiter };
-        res.m_parse_result = qi::phrase_parse(res.m_last, res.m_end, parser, qi::space, res.m_items);
+            const parser{ items_, fmt_opt.open, fmt_opt.close, fmt_opt.delimiter };
+            res.m_processed = qi::phrase_parse(res.m_last, res.m_end, parser, qi::space, res.m_items);
     }
 
     return res;

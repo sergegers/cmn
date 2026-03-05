@@ -111,14 +111,13 @@ template <typename Char, typename CharTraits>
     using close_manip_type = basic_close_manip<Char, CharTraits>;
     using delimiter_manip_type = basic_bitfield_delimiter_manip<Char, CharTraits>;
 
-    auto const opt = print_manip::value(ios);
-    return basic_sink_format_options 
-    {
-        .options = opt,
-        .open = has_feature(opt, brackets)? open_manip_type::value(ios): sym::nothing.as_string(ios),
-        .close = has_feature(opt, brackets) ? close_manip_type::value(ios): sym::nothing.as_string(ios),
-        .delimiter = has_feature(opt, delimiter) ? delimiter_manip_type::value(ios) : sym::nothing.as_string(ios)
-    };
+    return io::get_sink_format_options
+    (
+        print_manip::value(ios),
+        open_manip_type::value(ios),
+        close_manip_type::value(ios),
+        delimiter_manip_type::value(ios)
+    );
 }
 
 //-----------------------------------------------------------------------------

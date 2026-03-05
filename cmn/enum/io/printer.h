@@ -8,6 +8,7 @@
 #include "manip.h"
 #include "out.h"
 #include "format_traits.h"
+#include "sink_format_options.h"
 
 namespace cmn::enum_
 {

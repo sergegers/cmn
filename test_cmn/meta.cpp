@@ -24,7 +24,7 @@
 
 #include <cmn/util/fixed_string.h>
 #include <cmn/enum/io/format_traits.h>
-
+#include <cmn/enum/io/sink_format_options.h>
 
 BOOST_AUTO_TEST_SUITE(cmn)
 
